@@ -22,7 +22,7 @@ public class ExampleController {
 	
 	@GetMapping("/")
 	public String getIndex() {
-		return "login";
+		return "index";
 	}
 	
 	@GetMapping("/login")
@@ -58,6 +58,7 @@ public class ExampleController {
 		}
 	}
 	
+	//TODO: can't return urls for posts
 	@ResponseBody
 	@PostMapping("/login")
 	public String login(@RequestBody CentralLogin login, HttpSession session) {

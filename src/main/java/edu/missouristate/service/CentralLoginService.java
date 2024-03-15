@@ -43,7 +43,6 @@ public class CentralLoginService {
 		}
 	}
 	
-	//currently just sending username back. don't want to send pw, but would need a new dto
 	public LoginResponse login(CentralLogin login) {
 		LoginResponse response = new LoginResponse();
 		if (loginRepo.authenticate(login.getUsername(), login.getPassword())){

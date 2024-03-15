@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(45deg, #FFD700, #6ac1c5, #bda5ff, #EE82EE, #f48e21, #32CD32);
+    background-size: 300% 300%;
+    animation: color 12s ease-in-out infinite;
+}
+
+.btn {
+    border-radius: 30px;
+}
+
+.btn-outline-secondary {
+    padding: 12px 20px;
+}
+
+.btn-primary {
+    background-color: #3155e7;
+    padding: 20px 50px;
+}
+
+.navbar .btn-outline-secondary {
+    border: 1px solid #d3d4db;
+    color: #fff;
+    font-size: 16px;
+}
+
+.navbar {
+    padding: 4px 0;
+    color: #fff;
+    background: linear-gradient(rgba(39, 39, 39, 0.6), transparent);
+}
+
+.navbar-nav {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.navbar-nav .nav-link,
+.navbar-nav .nav-link.active {
+    color: #fff;
+
+}
+
+.nav-link {
+    margin-left: 35px;
+    font-size: 18px;
+    color: #fff;
+}
+
+.nav-link.active,
+.nav-link:focus {
+    border-bottom: 2px solid #fff;
+    color: #fff;
+}
+
+.nav-link:hover {
+    color: #d3d4db;
+}
+
+.container .row {
+    padding: 25px 0;
+}
+
+.container .row .text {
+    font-weight: 500;
+    font-size: 48px;
+    line-height: 80px;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    text-align: center;
+}
+
+.buttons {
+    padding-top: 69px;
+}
+
+.buttons .btn {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 24px;
+}
+
+#logo {
+    width: 150px;
+    height: 130px;
+}
+
+#socials {
+    height: 420px;
+    width: 300px;
+    border-radius: 15%;
+}
+
+@keyframes color {
+    0% {
+        background-position: 0 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0 50%;
+    }
+}
+
+
+@media screen and (max-width: 990px) {
+    #socials {
+        margin-top: 24px;
+    }
+}
