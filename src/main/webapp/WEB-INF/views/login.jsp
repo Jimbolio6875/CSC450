@@ -23,6 +23,7 @@
             </div>
 
             <div class="col-md-6 d-flex align-items-center justify-content-center">
+            	<p id="messageBox"></p>
                 <form id="login-form">
                     <div class="top">
                         <a href="/"><img src="<c:url value='/resources/Socials/logo.png'/>" class="img-fluid" id="loginlogo"></a>
@@ -62,6 +63,7 @@
 	const loginBtn = document.getElementById("submitLoginBtn");
 	const usernameInput = document.getElementById("usernameInput");
 	const passwordInput = document.getElementById("passwordInput");
+	const messageBox = document.getElementById("messageBox");
 	
 	loginBtn.addEventListener("click", function(e){
 		try {
@@ -69,8 +71,6 @@
 		      let data = {};
 		      data.username = usernameInput.value;
 		      data.password = passwordInput.value;
-		      
-		      //TODO: we might want to hash this? Or encrypt this? idk. Sending pw in plaintext is bad
 
 		      // Make AJAX call to the server along with a message
 		      fetch("<c:url value='/login' />", {
@@ -84,7 +84,16 @@
 		          let res = response.json();
 		          return res;
 		        }
-		      }).catch(function(error) {
+		      }).then(function(response) { 
+		    	  console.log(response);
+		    	  console.log(response.messageType);
+		        if (response.messageType === "danger"){
+		        	messageBox.innerText = response.message;
+		        }
+		        else{
+		        	window.location.replace("<c:url value='/landing' />");
+		        }
+			  }).catch(function(error) {
 		        
 		      });
 		    } catch (err) {

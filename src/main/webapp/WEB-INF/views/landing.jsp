@@ -8,8 +8,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
-	<h1 id="customerH1">Welcome ${sessionScope.username }</h1>
+	<h1 id="customerH1">Welcome ${sessionScope.firstName }</h1>
 	<p>Landing page</p>
+	<a id="signOut" href="<c:url value='/signOut'/>">Sign Out</a>
 </body>
 </html>
 

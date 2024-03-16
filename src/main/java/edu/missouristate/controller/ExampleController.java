@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 //TODO: Potentially remove this dependency
 import edu.missouristate.domain.CentralLogin;
+import edu.missouristate.dto.GenericResponse;
 import edu.missouristate.dto.LoginResponse;
 import edu.missouristate.service.CentralLoginService;
 
@@ -25,55 +26,79 @@ public class ExampleController {
 		return "index";
 	}
 	
+	
+	
 	@GetMapping("/login")
-	public String getLoginPage() {
-		return "login";
+	public String getLoginPage(HttpSession session) {
+		if(session.getAttribute("username") == null) {
+			return "login";
+		}
+		else {
+			return "landing";
+		}
 	}
 	
 	@GetMapping("/register")
-	public String getRegisterPage() {
-		return "register";
+	public String getRegisterPage(HttpSession session) {
+		if(session.getAttribute("username") == null || session.getAttribute("username").equals("")) {
+			return "register";
+		}
+		else {
+			return "landing";
+		}
 	}
 	
-	//TODO: remove
+	//TODO: secure, actually check userId
 	@GetMapping("/landing")
-	public String getLandingPage() {
-		return "landing";
+	public String getLandingPage(HttpSession session) {
+		if (session.getAttribute("username") != null || session.getAttribute("username").equals("")) {
+			return "landing";
+		}
+		else {
+			return "redirect:/login";
+		}
 	}
 	
 	//TODO: Use responses and dto's instead of loose objects being passed everywhere
 	@ResponseBody
 	@PostMapping("/register")
-	public String register(@RequestBody CentralLogin login, HttpSession session) {
+	public GenericResponse register(@RequestBody CentralLogin login, HttpSession session) {
 		boolean registered = centralLoginService.register(login);
-		
+		GenericResponse response = new GenericResponse();
 		if (registered) {
-			session.setAttribute("username", login.getUsername());
-			return "landing";
+			response.setMessage("Registration success");
+			response.setMessageType("success");
+			return response;
 		}
 		else {
-			session.setAttribute("message", "Username unavailable");
-			session.setAttribute("messageType", "danger");
-			return "redirect:/register";
+			response.setMessage("Registration failed. Please select a new username");
+			response.setMessageType("danger");
+			return response;
 		}
 	}
 	
-	//TODO: can't return urls for posts
 	@ResponseBody
 	@PostMapping("/login")
-	public String login(@RequestBody CentralLogin login, HttpSession session) {
+	public LoginResponse login(@RequestBody CentralLogin login, HttpSession session) {
 		LoginResponse loginResponse = centralLoginService.login(login);
 		if (loginResponse.isLoggedIn()) {
 			session.setAttribute("username", loginResponse.getUsername());
-			return "redirect:/landing";
+			session.setAttribute("firstName", loginResponse.getFirstName());
+			session.setAttribute("lastName", loginResponse.getLastName());
+			return loginResponse;
 		}
 		else {
-			session.setAttribute("username", "");
-			session.setAttribute("message", loginResponse.getErrorMessage());
-			session.setAttribute("messageType", loginResponse.getErrorType());
-			return "redirect:/login";
+			session.setAttribute("message", loginResponse.getMessage());
+			session.setAttribute("messageType", loginResponse.getMessageType());
+			return loginResponse;
 		}
 	}
 	
-
+	//TODO: Change this to POST
+	@GetMapping("/signOut")
+	public String signOut(HttpSession session) {
+		session.invalidate();
+		return "redirect:/";
+	}
+	
 }

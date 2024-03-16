@@ -11,6 +11,8 @@ import javax.persistence.Table;
 @Table(name = "central_login")
 public class CentralLogin {
 
+	
+
 	public CentralLogin() {
 
 	}
@@ -33,6 +35,12 @@ public class CentralLogin {
 	@Column(name="last_name", columnDefinition = "VARCHAR(32")
 	private String lastName;
 
+	@Override
+	public String toString() {
+		return "CentralLogin [centralLoginId=" + centralLoginId + ", username=" + username + ", password=" + password
+				+ ", firstName=" + firstName + ", lastName=" + lastName + "]";
+	}
+	
 	public String getFirstName() {
 		return firstName;
 	}

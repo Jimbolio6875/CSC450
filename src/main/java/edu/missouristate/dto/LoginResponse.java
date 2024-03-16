@@ -3,10 +3,28 @@ package edu.missouristate.dto;
 public class LoginResponse {
 
 	private boolean loggedIn;
-	private String errorMessage;
-	private String errorType;
+	private String message;
+	private String messageType;
 	private String username;
+	private String firstName;
+	private String lastName;
 	
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
 	public LoginResponse() {
 		super();
 	}
@@ -28,20 +46,20 @@ public class LoginResponse {
 		this.loggedIn = loggedIn;
 	}
 	
-	public String getErrorMessage() {
-		return errorMessage;
+	public String getMessage() {
+		return message;
 	}
 	
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
+	public void setMessage(String message) {
+		this.message = message;
 	}
 	
-	public String getErrorType() {
-		return errorType;
+	public String getMessageType() {
+		return messageType;
 	}
 	
-	public void setErrorType(String errorType) {
-		this.errorType = errorType;
+	public void setMessageType(String messageType) {
+		this.messageType = messageType;
 	}
 
 	

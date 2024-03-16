@@ -33,6 +33,8 @@ public class CentralLoginService {
 		return false;
 	}
 	
+	//TODO: validate password server side
+	@Transactional
 	public boolean register(CentralLogin login) {
 		if (usernameExists(login.getUsername())) {
 			return false;
@@ -44,17 +46,7 @@ public class CentralLoginService {
 	}
 	
 	public LoginResponse login(CentralLogin login) {
-		LoginResponse response = new LoginResponse();
-		if (loginRepo.authenticate(login.getUsername(), login.getPassword())){
-			response.setLoggedIn(true);
-			response.setUsername(login.getUsername());
-		}
-		else {
-			response.setLoggedIn(false);
-			response.setErrorMessage("Failed to authenticate");
-			response.setErrorType("danger");
-			response.setUsername("");
-		}
+		LoginResponse response = loginRepo.authenticate(login.getUsername(), login.getPassword());
 		return response;
 	}
 }

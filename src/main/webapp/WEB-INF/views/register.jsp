@@ -23,6 +23,7 @@
             </div>
 
             <div class="col-md-6 d-flex align-items-center justify-content-center">
+            	<p id="messageBox"></p>
                 <form id="register-form">
                     <div class="top">
                         <a href="/"><img src="<c:url value='/resources/Socials/logo.png'/>" class="img-fluid" id="loginlogo"></a>
@@ -30,32 +31,30 @@
                     </div>
                     <div class="two-forms">
                         <div class="mb-3">
-                            <input type="text" class="form-control" placeholder="First Name">
+                            <input type="text" id="firstNameInput" class="form-control" placeholder="First Name">
                         </div>
                         <div class="mb-3">
-                            <input type="text" class="form-control" placeholder="Last Name">
+                            <input type="text" id="lastNameInput" class="form-control" placeholder="Last Name">
                         </div>
                     </div>
                     <div class="mb-3">
                         <!--<label for="exampleInputEmail1" class="form-label">Email Address</label>-->
-                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-                            placeholder="Email Address">
+                        <div class="mb-3">
+                            <input type="text" id="usernameInput" class="form-control" placeholder="Username">
+                        </div>
                         <!--<div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>-->
                     </div>
                     <div class="mb-3">
                         <!--<label for="exampleInputPassword1" class="form-label">Password</label>-->
-                        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                        <input type="password" class="form-control" id="passwordInput" placeholder="Password">
                     </div>
                     <div class="two-col">
                         <div class="mb-3 form-check">
                             <input type="checkbox" id="login-check">
-                            <label class="login-check" for="exampleCheck1">Remember Me</label>
-                        </div>
-                        <div class="two">
-                            <label><a href="#">Terms & Conditions</a></label>
+                            <label class="login-check" for="login-check">Remember Me</label>
                         </div>
                     </div>
-                    <button type="submit" onclick="redirectToSocials(event)" class="submit">Register</button>
+                    <button type="submit" class="submit" id="submitBtn">Register</button>
                 </form>
             </div>
         </div>
@@ -63,6 +62,54 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
             crossorigin="anonymous"></script>
+<script>
+	
+	const loginBtn = document.getElementById("submitBtn");
+	const usernameInput = document.getElementById("usernameInput");
+	const passwordInput = document.getElementById("passwordInput");
+	const firstNameInput = document.getElementById("firstNameInput");
+	const lastNameInput = document.getElementById("lastNameInput");
+	const messageBox = document.getElementById("messageBox");
+	
+	loginBtn.addEventListener("click", function(e){
+		try {
+		      e.preventDefault(); // Prevent Form From Submitting "normally" (Internet Explorer)
+		      let data = {};
+		      data.username = usernameInput.value;
+		      data.password = passwordInput.value;
+		      data.firstName = firstNameInput.value;
+		      data.lastName = lastNameInput.value;
+
+		      // Make AJAX call to the server along with a message
+		      fetch("<c:url value='/register' />", {
+		        method: "POST",
+			body: JSON.stringify(data),
+		        headers: {
+		          "Content-Type": "application/json"
+		        }
+		      }).then(function(response) { 
+		        if (response.ok) {
+		          let res = response.json();
+		          return res;
+		        }
+		      }).then(function(response) { 
+		    	  console.log(response);
+		    	  console.log(response.messageType);
+		        if (response.messageType === "danger"){
+		        	messageBox.innerText = response.message;
+		        }
+		        else{
+		        	window.location.replace("<c:url value='/login' />");
+		        }
+			  }).catch(function(error) {
+		        
+		      });
+		    } catch (err) {
+		      console.log("error");
+		    }
+		  
+	});
+</script>
 </body>
 
 </html>

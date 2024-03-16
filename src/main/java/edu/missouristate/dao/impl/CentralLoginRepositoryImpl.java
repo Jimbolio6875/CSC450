@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import edu.missouristate.dao.custom.CentralLoginRepositoryCustom;
 import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.QCentralLogin;
+import edu.missouristate.dto.LoginResponse;
 
 public class CentralLoginRepositoryImpl extends QuerydslRepositorySupport implements CentralLoginRepositoryCustom{
 
@@ -25,17 +26,27 @@ public class CentralLoginRepositoryImpl extends QuerydslRepositorySupport implem
 	}
 	
 	//TODO: use password hashing, account  for variable results
-	public boolean authenticate(String username, String password) {
+	public LoginResponse authenticate(String username, String password) {
 		List<CentralLogin> results = new ArrayList<CentralLogin>();
+		LoginResponse response = new LoginResponse();
 		results = from(centralLoginTable)
 				.where(centralLoginTable.username.eq(username).and(centralLoginTable.password.eq(password)))
 				.fetch();
 		if (results.size() != 1) {
-			return false;
+			response.setLoggedIn(false);
+			response.setMessage("Failed to authenticate");
+			response.setMessageType("danger");
+			return response;
 		}
 		else {
-			return true;
+			CentralLogin login = results.get(0);
+			response.setLoggedIn(true);
+			response.setFirstName(login.getFirstName());
+			response.setLastName(login.getLastName());
+			response.setUsername(login.getUsername());
+			return response;
 		}
+		
 				
 	}
 }
