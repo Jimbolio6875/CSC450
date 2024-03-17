@@ -16,7 +16,7 @@ import edu.missouristate.dto.LoginResponse;
 import edu.missouristate.service.CentralLoginService;
 
 @Controller
-public class ExampleController {
+public class CentralLoginController {
 
 	@Autowired
 	CentralLoginService centralLoginService;
