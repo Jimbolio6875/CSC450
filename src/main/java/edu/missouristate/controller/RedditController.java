@@ -1,15 +1,6 @@
 package edu.missouristate.controller;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpSession;
-
+import edu.missouristate.service.SocialMediaAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +11,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import edu.missouristate.service.SocialMediaAccountService;
-
-
+import javax.servlet.http.HttpSession;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Controller
@@ -31,11 +27,11 @@ public class RedditController {
     private static final Logger log = LoggerFactory.getLogger(RedditController.class);
     String CLIENT_ID = "6aK_iXozHqB7AlJY3aF6ZA";
     String CLIENT_SECRET = "6bEXPVk7tYpAAFj4fbH9Vj-XSKzGag";
-    String REDIRECT_URI = "http://localhost:8080/reddit/callback";// This will hold the path to Python executable
+    String REDIRECT_URI = "http://localhost:8080/reddit/callback";
     @Autowired
     private SocialMediaAccountService socialMediaAccountService;
     @Value("${python.path}")
-    private String pythonPath; // This will hold the path to Python executable
+    private String pythonPath;
 
     @GetMapping("/reddit/auth")
     public ModelAndView redditAuth(HttpSession session) {
@@ -71,38 +67,67 @@ public class RedditController {
             return modelAndView;
         }
 
-        try {
-            String pythonScriptPath = "scripts/RedditPythonScripts/exchange_auth_code_for_access_token.py";
-            ProcessBuilder processBuilder = new ProcessBuilder(pythonPath, pythonScriptPath, CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, code);
-            log.debug("Executing Python script: {}", String.join(" ", processBuilder.command()));
+        // Max tries
+        final int maxRetries = 5;
 
-            Process process = processBuilder.start();
+        // Backoff milli sec
+        final long backoffMillis = 1000;
+        int retryCount = 0;
+        boolean success = false;
+        String scriptOutput = "";
+        String errorOutput = "";
 
-            String scriptOutput = new BufferedReader(new InputStreamReader(process.getInputStream()))
-                    .lines().collect(Collectors.joining(System.lineSeparator()));
-            String errorOutput = new BufferedReader(new InputStreamReader(process.getErrorStream()))
-                    .lines().collect(Collectors.joining(System.lineSeparator()));
+        while (!success && retryCount < maxRetries) {
+            try {
+                String pythonScriptPath = "scripts/RedditPythonScripts/exchange_auth_code_for_access_token.py";
+                ProcessBuilder processBuilder = new ProcessBuilder(pythonPath, pythonScriptPath, CLIENT_ID, CLIENT_SECRET, REDIRECT_URI, code);
+                log.debug("Executing Python script: {}", String.join(" ", processBuilder.command()));
 
-            int exitCode = process.waitFor();
-            log.info("Script Exit Code: " + exitCode);
-            log.info("Script Output: " + scriptOutput);
-            log.info("Error Output: " + errorOutput);
+                Process process = processBuilder.start();
+                scriptOutput = new BufferedReader(new InputStreamReader(process.getInputStream()))
+                        .lines().collect(Collectors.joining(System.lineSeparator()));
+                errorOutput = new BufferedReader(new InputStreamReader(process.getErrorStream()))
+                        .lines().collect(Collectors.joining(System.lineSeparator()));
 
-            // Extract and validate the access token
-            String accessToken = extractAccessToken(scriptOutput);
-            log.error("Outputted string<?> : " + accessToken);
-            if (accessToken.isEmpty()) {
-                throw new IllegalArgumentException("Extracted access token is empty.");
+                int exitCode = process.waitFor();
+                log.info("Script Exit Code: " + exitCode);
+                log.info("Script Output: " + scriptOutput);
+                log.info("Error Output: " + errorOutput);
+
+                if (scriptOutput.contains("ACCESS_TOKEN:")) {
+                    success = true;
+                } else {
+                    throw new IllegalArgumentException("Access token not found in script output");
+                }
+            } catch (Exception e) {
+                log.error("Attempt {} failed to exchange code for token", retryCount + 1, e);
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    try {
+                        Thread.sleep(backoffMillis * (long) Math.pow(2, retryCount));
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
-            session.setAttribute("REDDIT_ACCESS_TOKEN", accessToken);
-
-            modelAndView.setViewName("redirect:/reddit/submitRedditPost");
-        } catch (Exception e) {
-            log.error("Failed to exchange code for token", e);
-            modelAndView.setViewName("error");
-            modelAndView.addObject("message", "Failed to exchange code for token: " + e.getMessage());
         }
 
+        if (!success) {
+            modelAndView.setViewName("error");
+            modelAndView.addObject("message", "Failed to exchange code for token after " + maxRetries + " attempts.");
+            return modelAndView;
+        }
+
+        String accessToken = extractAccessToken(scriptOutput);
+        log.error("Outputted string<?> : " + accessToken);
+        if (accessToken.isEmpty()) {
+            modelAndView.setViewName("error");
+            modelAndView.addObject("message", "Extracted access token is empty.");
+            return modelAndView;
+        }
+        session.setAttribute("REDDIT_ACCESS_TOKEN", accessToken);
+
+        modelAndView.setViewName("redirect:/reddit/submitRedditPost");
         return modelAndView;
     }
 
@@ -122,7 +147,6 @@ public class RedditController {
                                    HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("reddit/postResult");
 
-        // Directly use session-stored accessToken
         String accessToken = (String) session.getAttribute("REDDIT_ACCESS_TOKEN");
         log.debug("Using Access Token from session: {}", accessToken);
 
@@ -133,9 +157,8 @@ public class RedditController {
             return modelAndView;
         }
 
-        Integer userId = 1; // Placeholder, adjust this according to your application's logic
+        Integer userId = 1;
 
-        // Save the SocialMediaAccount information when you have it
         socialMediaAccountService.saveSocialMediaAccount(userId, "Reddit", accessToken.trim());
 
 

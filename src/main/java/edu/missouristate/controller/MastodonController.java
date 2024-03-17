@@ -1,18 +1,9 @@
 package edu.missouristate.controller;
 
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-
-import javax.servlet.http.HttpSession;
-
+import edu.missouristate.service.SocialMediaAccountService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,14 +13,15 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
-import edu.missouristate.service.SocialMediaAccountService;
-
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 
 @Controller
 public class MastodonController {
 
-    // application id and secret. will have to find somewhere better to put these
     private static final String CLIENT_ID = "0DIHKu7BCcGb9wuPLXIa-y4E7I9-TefyM9X5Q0Xym7w";
     private static final String CLIENT_SECRET = "gT1Hyha5yI2ZHRk3BmUA3YkiuW2UFCC_e-JVDaM8rHE";
     private static final String REDIRECT_URI = "http://localhost:8080/callback";
@@ -52,8 +44,8 @@ public class MastodonController {
     @GetMapping("/callback")
     public String handleCallback(@RequestParam("code") String code, HttpSession session) {
         String accessToken = getAccessToken(code);
-        session.setAttribute("accessToken", accessToken); // Store the access token in the session
-        return "redirect:/post-message"; // Redirect to the page for submitting a post
+        session.setAttribute("accessToken", accessToken);
+        return "redirect:/post-message";
     }
 
 
@@ -72,26 +64,25 @@ public class MastodonController {
 
         HttpEntity<String> request = new HttpEntity<>(formData, headers);
 
-        System.out.println("Sending access token request with data: " + formData); // Debugging statement
+        System.out.println("Sending access token request with data: " + formData);
 
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(tokenEndpoint, request, String.class);
-            System.out.println("Received response: " + response.getBody()); // Debugging statement
+            System.out.println("Received response: " + response.getBody());
 
             JSONObject jsonResponse = new JSONObject(response.getBody());
             String accessToken = jsonResponse.getString("access_token");
-            System.out.println("Extracted access token: " + accessToken); // Debugging statement
+            System.out.println("Extracted access token: " + accessToken);
             return accessToken;
         } catch (Exception e) {
-            System.out.println("Error during token request: " + e.getMessage()); // Debugging statement
-            e.printStackTrace(); // Consider more sophisticated error handling for production
+            System.out.println("Error during token request: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
 
     @RequestMapping("/post-message")
     public String showPostMessageForm() {
-        // This method simply returns the view that contains the form for posting a message
         return "mastodon/post-message";
 
     }
@@ -99,21 +90,21 @@ public class MastodonController {
     @PostMapping("/submit-post")
     public ModelAndView submitPostToMastodon(@RequestParam("message") String message, HttpSession session) {
         ModelAndView modelAndView = new ModelAndView();
-        String accessToken = (String) session.getAttribute("accessToken"); // Retrieve the access token from the session
+        String accessToken = (String) session.getAttribute("accessToken");
 
         if (accessToken == null) {
-            modelAndView.setViewName("redirect:/"); // Redirect back to the home or login page if no access token
+            modelAndView.setViewName("redirect:/");
             modelAndView.addObject("error", "No access token available. Please authorize first.");
             return modelAndView;
         }
 
         try {
             postMessageToMastodon(message, accessToken);
-            modelAndView.setViewName("result"); // Assuming you have a "result.html" to show success
+            modelAndView.setViewName("result");
             modelAndView.addObject("message", "Message posted to Mastodon successfully!");
             socialMediaAccountService.saveSocialMediaAccount(3, "Mastodon", accessToken);
         } catch (Exception e) {
-            modelAndView.setViewName("error"); // Assuming you have an "error.html" to show errors
+            modelAndView.setViewName("error");
             modelAndView.addObject("error", "Failed to post message to Mastodon: " + e.getMessage());
         }
 
@@ -122,11 +113,11 @@ public class MastodonController {
 
 
     private void postMessageToMastodon(String message, String accessToken) throws IOException {
-        // Assuming you've adjusted this method to correctly use RestTemplate or similar
+
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.setBearerAuth(accessToken); // Use the access token for authorization
+        headers.setBearerAuth(accessToken);
 
         String postParams = "status=" + URLEncoder.encode(message, StandardCharsets.UTF_8);
 

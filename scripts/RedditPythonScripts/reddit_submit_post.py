@@ -15,18 +15,15 @@ def submit_post(access_token, subreddit, title, text):
     }
     url = "https://oauth.reddit.com/api/submit"
 
-    # Log the request details
     print(f"Making request to {url} with headers {headers} and payload {payload}", file=sys.stderr)
 
     response = requests.post(url, headers=headers, data=payload)
 
-    # Log the response details
     print(f"Response status code: {response.status_code}", file=sys.stderr)
     print(f"Response headers: {response.headers}", file=sys.stderr)
     print(f"Response body: {response.text}", file=sys.stderr)
 
     if response.status_code == 200:
-        # Assuming a successful request returns a 200 status code
         return "Post submitted successfully!"
     else:
         return f"Failed to submit post. Status code: {response.status_code}, Response: {response.text}"
