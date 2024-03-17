@@ -70,7 +70,7 @@
         };
 
         // Make AJAX call to the server along with a message
-        fetch(/*[[${@{/login}}]]*/, {
+        fetch(/*[[@{/login}]]*/, {
             method: "POST",
             body: JSON.stringify(data),
             headers: {

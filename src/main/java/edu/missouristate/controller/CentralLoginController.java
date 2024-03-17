@@ -51,10 +51,11 @@ public class CentralLoginController {
     //TODO: secure, actually check userId
     @GetMapping("/landing")
     public String getLandingPage(HttpSession session) {
-        if (session.getAttribute("username") != null || session.getAttribute("username").equals("")) {
-            return "landing";
-        } else {
+    	System.out.println(session == null);
+        if (session.getAttribute("username") == null || session.getAttribute("username").equals("")) {
             return "redirect:/login";
+        } else {
+        	return "landing";
         }
     }
 
