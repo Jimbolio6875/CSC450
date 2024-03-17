@@ -1,13 +1,45 @@
-<!DOCTYPE HTML>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8"/>
-    <title>Landing Page</title>
-    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <title>Twitter OAuth Flow</title>
+    <link href="/style.css" rel="stylesheet">
 </head>
 <body>
 <h1 id="customerH1" th:text="'Welcome ' + ${session.firstName}">Welcome</h1>
 <p>Landing page</p>
 <a id="signOut" th:href="@{/signOut}">Sign Out</a>
+
+<div class="outer-wrapper">
+    <div class="wrapper-social">
+        <ion-icon name="logo-twitter"></ion-icon>
+
+        <button><a class="btn btn-primary" th:href="@{/start-auth}">Connect</a></button>
+    </div>
+
+    <div class="wrapper-social" style="background-color: #ff4500">
+        <ion-icon name="logo-reddit"></ion-icon>
+
+        <button><a class="btn btn-primary" th:href="@{/reddit/auth}">Connect</a></button>
+    </div>
+
+    <div class="wrapper-social" style="background-color: mediumpurple">
+        <img alt="" height="50px"
+             src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Mastodon_logotype_%28simple%29_new_hue.svg/120px-Mastodon_logotype_%28simple%29_new_hue.svg.png">
+
+        <button><a class="btn btn-primary" th:href="@{/mastodon/auth}">Connect</a></button>
+    </div>
+
+    <div class="wrapper-social" style="background-color: #9AD0C2">
+        <img alt="" height="50px"
+             src="https://avatars.githubusercontent.com/u/366151?s=200&v=4">
+
+        <button><a class="btn btn-primary" th:href="@{/tumblr/start-oauth}">Connect</a></button>
+    </div>
+
+</div>
+
+
+<script src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" type="module"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
 </html>
