@@ -1,10 +1,6 @@
 package edu.missouristate.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "SocialMediaAccounts")
@@ -17,23 +13,19 @@ public class SocialMediaAccount {
     private String platformName;
     private String accessToken;
 
-    // Default constructor
     public SocialMediaAccount() {
     }
 
-    // Constructor with parameters
     public SocialMediaAccount(Integer userId, String platformName, String accessToken) {
         this.userId = userId;
         this.platformName = platformName;
         this.accessToken = accessToken;
     }
 
-    // Getters
     public Integer getAccountId() {
         return accountId;
     }
 
-    // Setters
     public void setAccountId(Integer accountId) {
         this.accountId = accountId;
     }

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Socials Page</title>
+    <link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/resources/css/socials.css}">
+    <link rel="icon" th:href="@{/Socials/mini.ico}" type="image/x-icon">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 text-center mb-4" id="text">
+            <a th:href="@{/}"><img class="img-fluid" id="loginlogo" th:src="@{/resources/Socials/logo.png}"></a>
+            <h1>Available Platforms on the Page!</h1>
+        </div>
+    </div>
+    <div class="container-fluid flex-wrap d-flex justify-content-center">
+        <div class="card mx-4 mt-4" style="width: 18rem;">
+            <img alt="..." class="card-img-top" th:src="@{/resources/Socials/twitter.jpg}">
+            <div class="card-body">
+                <h5 class="card-title">Twitter</h5>
+                <p class="card-text">Connect to your Twitter account and start tweeting away!</p>
+                <a class="btn btn-primary" th:href="@{/home}">Link Now</a>
+            </div>
+        </div>
+        <div class="card mx-4 mt-4" style="width: 18rem;">
+            <img alt="..." class="card-img-top" th:src="@{/resources/Socials/tumblr.jpg}">
+            <div class="card-body">
+                <h5 class="card-title">Tumblr</h5>
+                <p class="card-text">Connect to your Tumblr account and post on your personal blog!</p>
+                <a class="btn btn-primary" th:href="@{/home}">Link Now</a>
+            </div>
+        </div>
+        <div class="card mx-4 mt-4" style="width: 18rem;">
+            <img alt="..." class="card-img-top" th:src="@{/resources/Socials/reddit.png}">
+            <div class="card-body">
+                <h5 class="card-title">Reddit</h5>
+                <p class="card-text">Connect to your Reddit account and start a new conversation!</p>
+                <a class="btn btn-primary" th:href="@{/home}">Link Now</a>
+            </div>
+        </div>
+        <div class="card mx-4 mt-4" style="width: 18rem;">
+            <img alt="..." class="card-img-top" th:src="@{/resources/Socials/mastodon.png}">
+            <div class="card-body">
+                <h5 class="card-title">Mastodon</h5>
+                <p class="card-text">Connect to your Mastodon account and share what's on your mind! </p>
+                <a class="btn btn-primary" th:href="@{/home}">Link Now</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script crossorigin="anonymous"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

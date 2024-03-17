@@ -1,0 +1,13 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>Landing Page</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+</head>
+<body>
+<h1 id="customerH1" th:text="'Welcome ' + ${session.firstName}">Welcome</h1>
+<p>Landing page</p>
+<a id="signOut" th:href="@{/signOut}">Sign Out</a>
+</body>
+</html>
