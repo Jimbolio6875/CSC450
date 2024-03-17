@@ -23,7 +23,7 @@ public class CentralLoginController {
 	
 	@GetMapping("/")
 	public String getIndex() {
-		return "index";
+		return "home";
 	}
 	
 	
