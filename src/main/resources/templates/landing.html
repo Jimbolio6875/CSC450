@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Twitter OAuth Flow</title>
-    <link href="/style.css" rel="stylesheet">
+    <link href="/resources/css/style.css" rel="stylesheet">
 </head>
 <body>
 <h1 id="customerH1" th:text="'Welcome ' + ${session.firstName}">Welcome</h1>
 <p>Landing page</p>
-<a id="signOut" th:href="@{/signOut}">Sign Out</a>
+<a id="signOut" style="color: blue" th:href="@{/signOut}">Sign Out</a>
 
 <div class="outer-wrapper">
     <div class="wrapper-social">
