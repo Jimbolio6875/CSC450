@@ -2,7 +2,7 @@ import os
 import sys
 import tweepy
 
-# DON'T CHANGE
+# Set your consumer key and consumer secret
 CONSUMER_KEY = "2bcFOj1TY9xPBKkCvODGqbhsu"
 CONSUMER_SECRET = "Ij14PYzKTBhpeSQ2I1fy315q7dkgwP1w2RLFfv147RMDvcm0qg"
 
@@ -12,6 +12,7 @@ def get_oauth_handler():
 
 
 def authorize(PIN=None):
+    # Try to load tokens from environment variables
     access_token = os.getenv("TWITTER_ACCESS_TOKEN")
     access_token_secret = os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
 
@@ -32,6 +33,7 @@ def authorize(PIN=None):
 
         try:
             access_token, access_token_secret = auth.get_access_token(verifier)
+            # Optionally, set the environment variables for future use
             os.environ["TWITTER_ACCESS_TOKEN"] = access_token
             os.environ["TWITTER_ACCESS_TOKEN_SECRET"] = access_token_secret
             print("Access tokens received.")
