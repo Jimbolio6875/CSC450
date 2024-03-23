@@ -5,8 +5,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 public class TumblrController {
@@ -29,7 +33,7 @@ public class TumblrController {
     public String oauthCallback(@RequestParam("oauth_verifier") String oauthVerifier, Model model) throws Exception {
         String userInfo = tumblrService.getUserInfo(oauthVerifier);
         model.addAttribute("userInfo", userInfo);
-        return "tumblr/create-post";
+        return "redirect:/tumblr/create-post";
     }
 
     @PostMapping("/tumblr/post-to-tumblr")
@@ -39,9 +43,23 @@ public class TumblrController {
         return "tumblr/post-success";
     }
 
-    @GetMapping("/tumblr/create-post")
-    public String showPostCreationPage() {
-        return "/tumblr/create-post";
+//    @GetMapping("/tumblr/create-post")
+//    public String showPostCreationPage() {
+//        return "/tumblr/create-post";
+//    }
+
+    @RequestMapping("/tumblr/create-post")
+    public ModelAndView showPostCreationPage() {
+        ModelAndView modelAndView = new ModelAndView("tumblr/create-post");
+
+        try {
+            List<String> userPosts = tumblrService.getPosts();
+            modelAndView.addObject("posts", userPosts);
+        } catch (Exception e) {
+            modelAndView.addObject("error", "Failed to get posts" + e.getMessage());
+        }
+
+        return modelAndView;
     }
 
 }

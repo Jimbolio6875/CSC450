@@ -1,5 +1,7 @@
 package edu.missouristate;
 
+import com.github.scribejava.core.oauth.OAuthService;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +17,9 @@ import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth10aService;
 
 import edu.missouristate.service.SocialMediaAccountService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class TumblrServiceImpl implements TumblrService {
@@ -96,5 +101,31 @@ public class TumblrServiceImpl implements TumblrService {
         }
 
         socialMediaAccountService.saveSocialMediaAccount(4, "Tumblr", String.valueOf(requestToken));
+    }
+
+    @Override
+    public List<String> getPosts() {
+
+        List<String> postUrlList = new ArrayList<>();
+        String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts" + "?api_key=" + consumerKey;
+
+        try {
+            OAuthRequest request = new OAuthRequest(Verb.GET, url);
+            oauthService.signRequest(accessToken, request);
+            Response response = oauthService.execute(request);
+
+            JSONObject jsonResponse = new JSONObject(response.getBody());
+            JSONArray postArray = jsonResponse.getJSONObject("response").getJSONArray("posts");
+
+            for (int i = 0; i < postArray.length(); i++) {
+                JSONObject postObject = postArray.getJSONObject(i);
+                String postUrl = postObject.getString("post_url");
+                postUrlList.add(postUrl);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get user post urls: " + e.getMessage());
+        }
+
+        return postUrlList;
     }
 }

@@ -10,5 +10,9 @@
     <br>
     <button type="submit">Post to Tumblr</button>
 </form>
+<h2>Your Posts</h2>
+<div th:each="post : ${posts}">
+    <div th:utext="${post}">Post content</div>
+</div>
 </body>
 </html>
