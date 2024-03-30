@@ -1,5 +1,8 @@
 package edu.missouristate.controller;
 
+import edu.missouristate.dao.MastodonRepository;
+import edu.missouristate.domain.Mastodon;
+import edu.missouristate.service.MastodonService;
 import edu.missouristate.service.SocialMediaAccountService;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,6 +20,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -30,8 +34,13 @@ public class MastodonController {
     private static final String CLIENT_SECRET = "gT1Hyha5yI2ZHRk3BmUA3YkiuW2UFCC_e-JVDaM8rHE";
     private static final String REDIRECT_URI = "http://localhost:8080/callback";
     private static final String SCOPE = "read write";
+
     @Autowired
     private SocialMediaAccountService socialMediaAccountService;
+
+    @Autowired
+    private MastodonService mastodonService;
+
 //    private static final String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"; // will prob need to change
 
     @GetMapping("/mastodon/auth")
@@ -45,6 +54,7 @@ public class MastodonController {
         return new RedirectView(authUrl);
     }
 
+    // set session access token and redirect to post-message after authorization
     @GetMapping("/callback")
     public String handleCallback(@RequestParam("code") String code, HttpSession session) {
         String accessToken = getAccessToken(code);
@@ -67,6 +77,7 @@ public class MastodonController {
 //    }
 
 
+    // set client_id/secret/auth to get token
     private String getAccessToken(String authorizationCode) {
         RestTemplate restTemplate = new RestTemplate();
         String tokenEndpoint = "https://mastodon.social/oauth/token";
@@ -82,18 +93,19 @@ public class MastodonController {
 
         HttpEntity<String> request = new HttpEntity<>(formData, headers);
 
-        System.out.println("Sending access token request with data: " + formData);
+        System.out.println(formData);
 
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(tokenEndpoint, request, String.class);
-            System.out.println("Received response: " + response.getBody());
+            System.out.println(response.getBody());
 
             JSONObject jsonResponse = new JSONObject(response.getBody());
             String accessToken = jsonResponse.getString("access_token");
-            System.out.println("Extracted access token: " + accessToken);
+            System.out.println("access token: " + accessToken);
             return accessToken;
+
         } catch (Exception e) {
-            System.out.println("Error during token request: " + e.getMessage());
+            System.out.println("Error during request: " + e.getMessage());
             e.printStackTrace();
             return null;
         }
@@ -105,6 +117,7 @@ public class MastodonController {
 //
 //    }
 
+    // load posting form and show post history
     @RequestMapping("/post-message")
     public ModelAndView showPostMessageForm(HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("mastodon/post-message");
@@ -114,8 +127,10 @@ public class MastodonController {
             try {
                 String userId = getUserId(accessToken);
                 List<String> userPosts = getUserPosts(userId, accessToken);
+                List<Integer> userPostFavourites = getUserPostFavourites(userId, accessToken);
 
                 modelAndView.addObject("posts", userPosts);
+                modelAndView.addObject("postFavourites", userPostFavourites);
             } catch (Exception e) {
                 modelAndView.addObject("error", "Failed to get posts: " + e.getMessage());
             }
@@ -126,6 +141,7 @@ public class MastodonController {
         return modelAndView;
     }
 
+    // submit post to mastodon
     @PostMapping("/submit-post")
     public ModelAndView submitPostToMastodon(@RequestParam("message") String message, HttpSession session) {
         ModelAndView modelAndView = new ModelAndView();
@@ -151,6 +167,7 @@ public class MastodonController {
     }
 
 
+    //
     private void postMessageToMastodon(String message, String accessToken) throws IOException {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -163,12 +180,32 @@ public class MastodonController {
         HttpEntity<String> request = new HttpEntity<>(postParams, headers);
 
         ResponseEntity<String> response = restTemplate.postForEntity("https://mastodon.social/api/v1/statuses", request, String.class);
+        System.out.println(response.getBody());
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JSONObject postObject = new JSONObject(response.getBody());
+            String id = postObject.getString("id");
+            String content = postObject.getString("content");
+            String url = postObject.getString("url");
+            Integer favourites = postObject.getInt("favourites_count");
+
+            Mastodon post = new Mastodon();
+            post.setPostId(id);
+            post.setContent(content);
+            post.setPostUrl(url);
+            post.setFavouriteCount(favourites);
+
+            mastodonService.savePost(post);
+
+            System.out.println(id.concat(" ").concat(content).concat(" ").concat(url).concat(" ").concat(String.valueOf(favourites)));
+        }
 
         if (response.getStatusCode() != HttpStatus.OK) {
             throw new RuntimeException("Failed to post to Mastodon, response code: " + response.getStatusCode());
         }
     }
 
+    // get json status of user and get post content
     private List<String> getUserPosts(String userId, String accessToken) {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -187,6 +224,9 @@ public class MastodonController {
             List<String> postsList = new ArrayList<>();
 
             for (int i = 0; i < postsArray.length(); i++) {
+
+                System.out.println(postsArray.getJSONObject(i));
+
                 JSONObject postObject = postsArray.getJSONObject(i);
                 String postContent = postObject.getString("content");
                 postsList.add(postContent);
@@ -198,6 +238,39 @@ public class MastodonController {
         }
     }
 
+    // get json status of user and get post favourites
+    private List<Integer> getUserPostFavourites(String userId, String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setBearerAuth(accessToken);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                "https://mastodon.social/api/v1/accounts/" + userId + "/statuses",
+                HttpMethod.GET, entity, String.class
+        );
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JSONArray postsArray = new JSONArray(response.getBody());
+            List<Integer> postFavouritesCountList = new ArrayList<>();
+
+            for (int i = 0; i < postsArray.length(); i++) {
+
+                System.out.println(postsArray.getJSONObject(i));
+
+                JSONObject postObject = postsArray.getJSONObject(i);
+                int postContent = postObject.getInt("favourites_count");
+                postFavouritesCountList.add(postContent);
+            }
+
+            return postFavouritesCountList;
+        } else {
+            throw new RuntimeException("Failed to get user posts: " + response.getStatusCode());
+        }
+    }
+
+    // gets user id
     private String getUserId(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
