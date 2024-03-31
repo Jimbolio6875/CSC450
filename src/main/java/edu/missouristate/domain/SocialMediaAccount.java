@@ -3,7 +3,7 @@ package edu.missouristate.domain;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "SocialMediaAccounts")
+@Table(name = "social_media_accounts")
 public class SocialMediaAccount {
 
     @Id

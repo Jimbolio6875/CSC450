@@ -9,5 +9,5 @@ public interface MastodonRepositoryCustom {
 //
 //    List<Integer> getPostFavourites();
 
-    List<Mastodon> getPosts();
+    List<Mastodon> getPostsByUserId(String userId);
 }

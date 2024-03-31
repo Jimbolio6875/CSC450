@@ -18,8 +18,9 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
     }
 
     @Override
-    public List<Mastodon> getPosts() {
+    public List<Mastodon> getPostsByUserId(String userId) {
         return from(mastodonTable)
+                .where(mastodonTable.userId.eq(userId))
                 .limit(50)
                 .fetch();
     }

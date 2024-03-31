@@ -17,6 +17,9 @@ public class Mastodon implements Serializable {
     @Column(name = "post_id", columnDefinition = "VARCHAR(255)")
     private String postId;
 
+    @Column(name = "user_id", columnDefinition = "VARCHAR(255)")
+    private String userId;
+
     @Column(name = "content", columnDefinition = "VARCHAR(255)")
     private String content;
 
@@ -32,6 +35,14 @@ public class Mastodon implements Serializable {
 
     public void setPostId(String postId) {
         this.postId = postId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getContent() {
@@ -61,7 +72,8 @@ public class Mastodon implements Serializable {
     @Override
     public String toString() {
         return "Mastodon{" +
-                "postId=" + postId +
+                "postId='" + postId + '\'' +
+                ", userId='" + userId + '\'' +
                 ", content='" + content + '\'' +
                 ", postUrl='" + postUrl + '\'' +
                 ", favouriteCount=" + favouriteCount +

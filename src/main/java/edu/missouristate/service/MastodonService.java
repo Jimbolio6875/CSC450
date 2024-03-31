@@ -7,5 +7,5 @@ import java.util.List;
 public interface MastodonService {
     void savePost(Mastodon post);
 
-    List<Mastodon> getPosts();
+    List<Mastodon> getPostsByUserId(String userId);
 }

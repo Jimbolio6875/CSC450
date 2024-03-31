@@ -20,8 +20,8 @@ public class MastodonServiceImpl implements MastodonService {
     }
 
     @Override
-    public List<Mastodon> getPosts() {
-        return mastodonRepository.getPosts();
+    public List<Mastodon> getPostsByUserId(String userId) {
+        return mastodonRepository.getPostsByUserId(userId);
     }
 
 

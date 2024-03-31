@@ -22,5 +22,3 @@ CREATE TABLE social_media_accounts
     platform_name VARCHAR(255) NOT NULL,
     user_id       TEXT         NOT NULL
 );
-
-CREATE TABLE

@@ -129,12 +129,13 @@ public class MastodonController {
         if (accessToken != null) {
             try {
                 String userId = getUserId(accessToken);
+                System.out.println("user id from access token: " + userId);
 //                List<String> userPosts = getUserPosts(userId, accessToken);
 //                List<String> userPosts = mastodonService.getPostContent();
 //                List<Integer> userPostFavourites = getUserPostFavourites(userId, accessToken);
 //                List<Integer> userPostFavourites = mastodonService.getPostFavourites();
 
-                List<Mastodon> post = mastodonService.getPosts();
+                List<Mastodon> post = mastodonService.getPostsByUserId(userId);
                 Collections.reverse(post);
 //                modelAndView.addObject("posts", userPosts);
 //                modelAndView.addObject("postFavourites", userPostFavourites);
@@ -194,13 +195,20 @@ public class MastodonController {
         if (response.getStatusCode() == HttpStatus.OK) {
 
             JSONObject postObject = new JSONObject(response.getBody());
+            JSONObject userObject = postObject.getJSONObject("account");
+
+//            System.out.println(postObject);
             String id = postObject.getString("id");
+            String userId = userObject.getString("id");
             String content = postObject.getString("content");
             String url = postObject.getString("url");
             Integer favourites = postObject.getInt("favourites_count");
 
+//            System.out.println(userObject.getString("id"));
+
             Mastodon post = new Mastodon();
             post.setPostId(id);
+            post.setUserId(userId);
             post.setContent(content);
             post.setPostUrl(url);
             post.setFavouriteCount(favourites);
