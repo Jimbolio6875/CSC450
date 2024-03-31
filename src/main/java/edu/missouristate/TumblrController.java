@@ -57,8 +57,9 @@ public class TumblrController {
         ModelAndView modelAndView = new ModelAndView("tumblr/create-post");
 
         try {
+            tumblrService.updatePosts();
             List<Tumblr> userPosts = tumblrService.getPostsByBlog();
-            Collections.reverse(userPosts);
+//            Collections.reverse(userPosts);
             modelAndView.addObject("posts", userPosts);
         } catch (Exception e) {
             modelAndView.addObject("error", "Failed to get posts" + e.getMessage());

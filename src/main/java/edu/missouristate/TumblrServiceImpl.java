@@ -20,8 +20,15 @@ import com.github.scribejava.core.oauth.OAuth10aService;
 
 import edu.missouristate.service.SocialMediaAccountService;
 
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class TumblrServiceImpl implements TumblrService {
@@ -89,6 +96,26 @@ public class TumblrServiceImpl implements TumblrService {
         }
     }
 
+    private Date getPostDate(String postId) throws IOException, ExecutionException, InterruptedException {
+
+        String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts?api_key=" + consumerKey + "&id=" + postId;
+
+        OAuthRequest request = new OAuthRequest(Verb.GET, url);
+        request.addBodyParameter("type", "text");
+//        request.addBodyParameter("body", postContent);
+        oauthService.signRequest(accessToken, request);
+
+        Response response = oauthService.execute(request);
+        JSONObject jsonResponse = new JSONObject(response.getBody());
+        String dateString = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(0).getString("date");
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z", Locale.ENGLISH);
+
+        ZonedDateTime dateTime = ZonedDateTime.parse(dateString, formatter);
+
+        return Date.from(dateTime.toInstant());
+    }
+
     @Override
     public void postToBlog(String postContent) throws Exception {
 
@@ -104,12 +131,20 @@ public class TumblrServiceImpl implements TumblrService {
 
         Response response = oauthService.execute(request);
         JSONObject jsonResponse = new JSONObject(response.getBody());
+
         String postId = jsonResponse.getJSONObject("response").getString("id_string");
+
+        Date date = getPostDate(postId);
+        Timestamp timestampDate = new Timestamp(date.getTime());
+
+        System.out.println(timestampDate);
 
         post.setPostId(postId);
         post.setContent(postContent);
         post.setBlogIdentifier(blogIdentifier);
         post.setPostUrl("https://www.tumblr.com/blog/view/" + blogIdentifier + "/" + postId);
+        post.setNoteCount(0);
+        post.setDate(timestampDate);
 
         tumblrRepository.save(post);
 
@@ -125,12 +160,11 @@ public class TumblrServiceImpl implements TumblrService {
 
         List<Tumblr> posts = new ArrayList<>();
 
-//        List<String> postUrlList = new ArrayList<>();
-//        String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts" + "?api_key=" + consumerKey;
-
         try {
 
              posts = tumblrRepository.getPostsByBlogIdentifier(blogIdentifier);
+
+             // this might be useful later
 //            OAuthRequest request = new OAuthRequest(Verb.GET, url);
 //            oauthService.signRequest(accessToken, request);
 //            Response response = oauthService.execute(request);
@@ -150,5 +184,62 @@ public class TumblrServiceImpl implements TumblrService {
         }
 
         return posts;
+    }
+
+    @Override
+    public void updatePosts() throws IOException, ExecutionException, InterruptedException {
+
+        Tumblr post = new Tumblr();
+
+        String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts?api_key=" + consumerKey;
+
+        String postId;
+        String content;
+        String postUrl;
+        int notesCount;
+        String timestamp;
+        Timestamp timestamp1;
+
+        OAuthRequest request = new OAuthRequest(Verb.GET, url);
+        request.addBodyParameter("type", "text");
+//        request.addBodyParameter("body", postContent);
+        oauthService.signRequest(accessToken, request);
+
+        Response response = oauthService.execute(request);
+        JSONObject jsonResponse = new JSONObject(response.getBody());
+
+        System.out.println(jsonResponse);
+
+        int postNum = jsonResponse.getJSONObject("response").getJSONArray("posts").length();
+
+            for (int i = 0; i < postNum; i++) {
+
+                postId = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getString("id_string");
+                content = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getString("body");
+                postUrl = "https://www.tumblr.com/blog/view/" + blogIdentifier + "/" + postId;
+                notesCount = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getInt("note_count");
+                timestamp = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getString("date");
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z", Locale.ENGLISH);
+
+                ZonedDateTime dateTime = ZonedDateTime.parse(timestamp, formatter);
+
+                timestamp1 = new Timestamp(Date.from(dateTime.toInstant()).getTime());
+
+
+
+                post.setPostId(postId);
+                post.setBlogIdentifier(blogIdentifier);
+                post.setContent(content);
+                post.setPostUrl(postUrl);
+                post.setNoteCount(notesCount);
+                post.setDate(timestamp1);
+
+                tumblrRepository.save(post);
+
+                System.out.println(postId);
+                System.out.println(notesCount);
+
+            }
     }
 }

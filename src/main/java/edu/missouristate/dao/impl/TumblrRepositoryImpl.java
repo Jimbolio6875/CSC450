@@ -21,7 +21,8 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
     public List<Tumblr> getPostsByBlogIdentifier(String blog) {
         return from(tumblrTable)
                 .where(tumblrTable.blogIdentifier.eq(blog))
-                .limit(50)
+                .limit(20)
+                .orderBy(tumblrTable.date.desc())
                 .fetch();
     }
 }

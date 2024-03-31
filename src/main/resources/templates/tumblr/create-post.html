@@ -24,6 +24,10 @@
             <strong>URL:</strong>
             <a th:href="${post.postUrl}" th:text="${post.postUrl}"></a>
         </div>
+        <div style="margin-top: 10px;">
+            <strong>Notes:</strong>
+            <span th:text="${post.noteCount}"></span>
+        </div>
         <hr>
     </li>
 </ul>
