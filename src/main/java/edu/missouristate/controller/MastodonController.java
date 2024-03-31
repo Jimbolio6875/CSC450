@@ -44,6 +44,8 @@ public class MastodonController {
 
 //    private static final String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"; // will prob need to change
 
+    // prob should move a lot of this into the service but it can wait for now
+
     @GetMapping("/mastodon/auth")
     public RedirectView startMastodonAuth() {
         String authUrl = "https://mastodon.social/oauth/authorize" +
@@ -214,69 +216,71 @@ public class MastodonController {
     }
 
     // get json status of user and get post content
-    private List<String> getUserPosts(String userId, String accessToken) {
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-
-        headers.setBearerAuth(accessToken);
-        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(
-                "https://mastodon.social/api/v1/accounts/" + userId + "/statuses",
-                HttpMethod.GET, entity, String.class
-        );
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            JSONArray postsArray = new JSONArray(response.getBody());
-            List<String> postsList = new ArrayList<>();
-
-            for (int i = 0; i < postsArray.length(); i++) {
-
-                System.out.println(postsArray.getJSONObject(i));
-
-                JSONObject postObject = postsArray.getJSONObject(i);
-                String postContent = postObject.getString("content");
-                postsList.add(postContent);
-            }
-
-            return postsList;
-        } else {
-            throw new RuntimeException("Failed to get user posts: " + response.getStatusCode());
-        }
-    }
+    // this might be useless now but im keeping it just in case
+//    private List<String> getUserPosts(String userId, String accessToken) {
+//
+//        RestTemplate restTemplate = new RestTemplate();
+//        HttpHeaders headers = new HttpHeaders();
+//
+//        headers.setBearerAuth(accessToken);
+//        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+//
+//        ResponseEntity<String> response = restTemplate.exchange(
+//                "https://mastodon.social/api/v1/accounts/" + userId + "/statuses",
+//                HttpMethod.GET, entity, String.class
+//        );
+//
+//        if (response.getStatusCode() == HttpStatus.OK) {
+//            JSONArray postsArray = new JSONArray(response.getBody());
+//            List<String> postsList = new ArrayList<>();
+//
+//            for (int i = 0; i < postsArray.length(); i++) {
+//
+//                System.out.println(postsArray.getJSONObject(i));
+//
+//                JSONObject postObject = postsArray.getJSONObject(i);
+//                String postContent = postObject.getString("content");
+//                postsList.add(postContent);
+//            }
+//
+//            return postsList;
+//        } else {
+//            throw new RuntimeException("Failed to get user posts: " + response.getStatusCode());
+//        }
+//    }
 
     // get json status of user and get post favourites
-    private List<Integer> getUserPostFavourites(String userId, String accessToken) {
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-
-        headers.setBearerAuth(accessToken);
-        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(
-                "https://mastodon.social/api/v1/accounts/" + userId + "/statuses",
-                HttpMethod.GET, entity, String.class
-        );
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            JSONArray postsArray = new JSONArray(response.getBody());
-            List<Integer> postFavouritesCountList = new ArrayList<>();
-
-            for (int i = 0; i < postsArray.length(); i++) {
-
-                System.out.println(postsArray.getJSONObject(i));
-
-                JSONObject postObject = postsArray.getJSONObject(i);
-                int postContent = postObject.getInt("favourites_count");
-                postFavouritesCountList.add(postContent);
-            }
-
-            return postFavouritesCountList;
-        } else {
-            throw new RuntimeException("Failed to get user posts: " + response.getStatusCode());
-        }
-    }
+    // also prob useless
+//    private List<Integer> getUserPostFavourites(String userId, String accessToken) {
+//        RestTemplate restTemplate = new RestTemplate();
+//        HttpHeaders headers = new HttpHeaders();
+//
+//        headers.setBearerAuth(accessToken);
+//        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+//
+//        ResponseEntity<String> response = restTemplate.exchange(
+//                "https://mastodon.social/api/v1/accounts/" + userId + "/statuses",
+//                HttpMethod.GET, entity, String.class
+//        );
+//
+//        if (response.getStatusCode() == HttpStatus.OK) {
+//            JSONArray postsArray = new JSONArray(response.getBody());
+//            List<Integer> postFavouritesCountList = new ArrayList<>();
+//
+//            for (int i = 0; i < postsArray.length(); i++) {
+//
+//                System.out.println(postsArray.getJSONObject(i));
+//
+//                JSONObject postObject = postsArray.getJSONObject(i);
+//                int postContent = postObject.getInt("favourites_count");
+//                postFavouritesCountList.add(postContent);
+//            }
+//
+//            return postFavouritesCountList;
+//        } else {
+//            throw new RuntimeException("Failed to get user posts: " + response.getStatusCode());
+//        }
+//    }
 
     // gets user id
     private String getUserId(String accessToken) {
