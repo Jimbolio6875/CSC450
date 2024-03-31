@@ -12,11 +12,37 @@
     <button type="submit">Post Message</button>
 </form>
 <h2>Your Posts</h2>
-<div th:each="post : ${posts}">
-    <div th:utext="${post}">Post content</div>
-</div>
-<div th:each="favourites : ${postFavourites}">
-    <div th:utext="${favourites}">Post favourites</div>
-</div>
+<!--<div th:each="post : ${posts}">-->
+<!--    <div th:utext="${post}">Post content</div>-->
+<!--</div>-->
+<!--<ul>-->
+<!--    <li th:each="post : ${posts}">-->
+<!--        Content: <span th:utext="${post.content}"></span>-->
+<!--        Favourites: <span th:text="${post.favouriteCount}"></span>-->
+<!--        <br>-->
+<!--        URL: <a th:href="${post.postUrl}" th:text="${post.postUrl}"></a>-->
+<!--    </li>-->
+<!--</ul>-->
+<ul style="list-style: none;">
+    <li th:each="post : ${posts}" style="margin-bottom: 20px;">
+        <div>
+            <strong style="display: inline-block; margin-right: 5px;">Content:</strong>
+            <span th:utext="${post.content}" style="display: inline-block; max-width: 80%;"></span>
+        </div>
+        <div>
+            <strong>Favourites:</strong>
+            <span th:text="${post.favouriteCount}"></span>
+        </div>
+        <div style="margin-top: 10px;">
+            <strong>URL:</strong>
+            <a th:href="${post.postUrl}" th:text="${post.postUrl}"></a>
+        </div>
+        <hr>
+    </li>
+</ul>
+
+<!--<div th:each="favourites : ${postFavourites}">-->
+<!--    <div th:utext="${favourites}">Post favourites</div>-->
+<!--</div>-->
 </body>
 </html>

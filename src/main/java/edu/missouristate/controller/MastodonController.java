@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -126,11 +127,17 @@ public class MastodonController {
         if (accessToken != null) {
             try {
                 String userId = getUserId(accessToken);
-                List<String> userPosts = getUserPosts(userId, accessToken);
-                List<Integer> userPostFavourites = getUserPostFavourites(userId, accessToken);
+//                List<String> userPosts = getUserPosts(userId, accessToken);
+//                List<String> userPosts = mastodonService.getPostContent();
+//                List<Integer> userPostFavourites = getUserPostFavourites(userId, accessToken);
+//                List<Integer> userPostFavourites = mastodonService.getPostFavourites();
 
-                modelAndView.addObject("posts", userPosts);
-                modelAndView.addObject("postFavourites", userPostFavourites);
+                List<Mastodon> post = mastodonService.getPosts();
+                Collections.reverse(post);
+//                modelAndView.addObject("posts", userPosts);
+//                modelAndView.addObject("postFavourites", userPostFavourites);
+
+                modelAndView.addObject("posts", post);
             } catch (Exception e) {
                 modelAndView.addObject("error", "Failed to get posts: " + e.getMessage());
             }
@@ -167,7 +174,7 @@ public class MastodonController {
     }
 
 
-    //
+    // post message and add message attributes to database
     private void postMessageToMastodon(String message, String accessToken) throws IOException {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -183,6 +190,7 @@ public class MastodonController {
         System.out.println(response.getBody());
 
         if (response.getStatusCode() == HttpStatus.OK) {
+
             JSONObject postObject = new JSONObject(response.getBody());
             String id = postObject.getString("id");
             String content = postObject.getString("content");
@@ -197,7 +205,7 @@ public class MastodonController {
 
             mastodonService.savePost(post);
 
-            System.out.println(id.concat(" ").concat(content).concat(" ").concat(url).concat(" ").concat(String.valueOf(favourites)));
+//            System.out.println(id.concat(" ").concat(content).concat(" ").concat(url).concat(" ").concat(String.valueOf(favourites)));
         }
 
         if (response.getStatusCode() != HttpStatus.OK) {

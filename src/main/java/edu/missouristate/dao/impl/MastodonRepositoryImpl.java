@@ -6,6 +6,8 @@ import edu.missouristate.domain.QMastodon;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements MastodonRepositoryCustom {
 
@@ -14,6 +16,32 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
     public MastodonRepositoryImpl() {
         super(Mastodon.class);
     }
+
+    @Override
+    public List<Mastodon> getPosts() {
+        return from(mastodonTable)
+                .limit(50)
+                .fetch();
+    }
+
+
+//    @Override
+//    public List<String> getPostContent() {
+//        return from(mastodonTable)
+//                .select(mastodonTable.content)
+//                .limit(50)
+//                .fetch();
+//    }
+//
+//    @Override
+//    public List<Integer> getPostFavourites() {
+//        return from(mastodonTable)
+//                .select(mastodonTable.favouriteCount)
+//                .limit(50)
+//                .fetch();
+//    }
+
+
 
 
 }
