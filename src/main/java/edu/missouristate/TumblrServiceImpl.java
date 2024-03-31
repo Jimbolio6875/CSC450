@@ -1,6 +1,8 @@
 package edu.missouristate;
 
 import com.github.scribejava.core.oauth.OAuthService;
+import edu.missouristate.dao.TumblrRepository;
+import edu.missouristate.domain.Tumblr;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,9 @@ public class TumblrServiceImpl implements TumblrService {
 
     @Autowired
     private SocialMediaAccountService socialMediaAccountService;
+
+    @Autowired
+    private TumblrRepository tumblrRepository;
 
     private OAuth10aService oauthService;
     private OAuth1RequestToken requestToken;
@@ -87,8 +92,10 @@ public class TumblrServiceImpl implements TumblrService {
     @Override
     public void postToBlog(String postContent) throws Exception {
 
+        Tumblr post = new Tumblr();
+
         String postUrl = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/post";
-        System.out.println(postUrl);
+//        System.out.println(postUrl);
 
         OAuthRequest request = new OAuthRequest(Verb.POST, postUrl);
         request.addBodyParameter("type", "text");
@@ -96,6 +103,16 @@ public class TumblrServiceImpl implements TumblrService {
         oauthService.signRequest(accessToken, request);
 
         Response response = oauthService.execute(request);
+        JSONObject jsonResponse = new JSONObject(response.getBody());
+        String postId = jsonResponse.getJSONObject("response").getString("id_string");
+
+        post.setPostId(postId);
+        post.setContent(postContent);
+        post.setBlogIdentifier(blogIdentifier);
+        post.setPostUrl("https://www.tumblr.com/blog/view/" + blogIdentifier + "/" + postId);
+
+        tumblrRepository.save(post);
+
         if (response.getCode() != 201) {
             throw new RuntimeException("Failed to post to Tumblr: " + response.getBody());
         }
@@ -104,28 +121,34 @@ public class TumblrServiceImpl implements TumblrService {
     }
 
     @Override
-    public List<String> getPosts() {
+    public List<Tumblr> getPostsByBlog() {
 
-        List<String> postUrlList = new ArrayList<>();
-        String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts" + "?api_key=" + consumerKey;
+        List<Tumblr> posts = new ArrayList<>();
+
+//        List<String> postUrlList = new ArrayList<>();
+//        String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts" + "?api_key=" + consumerKey;
 
         try {
-            OAuthRequest request = new OAuthRequest(Verb.GET, url);
-            oauthService.signRequest(accessToken, request);
-            Response response = oauthService.execute(request);
 
-            JSONObject jsonResponse = new JSONObject(response.getBody());
-            JSONArray postArray = jsonResponse.getJSONObject("response").getJSONArray("posts");
+             posts = tumblrRepository.getPostsByBlogIdentifier(blogIdentifier);
+//            OAuthRequest request = new OAuthRequest(Verb.GET, url);
+//            oauthService.signRequest(accessToken, request);
+//            Response response = oauthService.execute(request);
 
-            for (int i = 0; i < postArray.length(); i++) {
-                JSONObject postObject = postArray.getJSONObject(i);
-                String postUrl = postObject.getString("post_url");
-                postUrlList.add(postUrl);
-            }
+//            JSONObject jsonResponse = new JSONObject(response.getBody());
+//            JSONArray postArray = jsonResponse.getJSONObject("response").getJSONArray("posts");
+
+//            for (int i = 0; i < postArray.length(); i++) {
+//                JSONObject postObject = postArray.getJSONObject(i);
+//                String postUrl = postObject.getString("post_url");
+//                postUrlList.add(postUrl);
+//            }
+
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to get user post urls: " + e.getMessage());
         }
 
-        return postUrlList;
+        return posts;
     }
 }

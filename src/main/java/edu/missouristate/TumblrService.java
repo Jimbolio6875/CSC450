@@ -1,5 +1,7 @@
 package edu.missouristate;
 
+import edu.missouristate.domain.Tumblr;
+
 import java.util.List;
 
 public interface TumblrService {
@@ -9,5 +11,5 @@ public interface TumblrService {
 
     void postToBlog(String postContent) throws Exception;
 
-    List<String> getPosts();
+    List<Tumblr> getPostsByBlog();
 }

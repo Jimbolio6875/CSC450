@@ -11,8 +11,21 @@
     <button type="submit">Post to Tumblr</button>
 </form>
 <h2>Your Posts</h2>
-<div th:each="post : ${posts}">
-    <div th:utext="${post}">Post content</div>
-</div>
+<!--<div th:each="post : ${posts}">-->
+<!--    <div th:utext="${post}">Post content</div>-->
+<!--</div>-->
+<ul style="list-style: none;">
+    <li th:each="post : ${posts}" style="margin-bottom: 20px;">
+        <div>
+            <strong style="display: inline-block; margin-right: 5px;">Content:</strong>
+            <span th:utext="${post.content}" style="display: inline-block; max-width: 80%;"></span>
+        </div>
+        <div style="margin-top: 10px;">
+            <strong>URL:</strong>
+            <a th:href="${post.postUrl}" th:text="${post.postUrl}"></a>
+        </div>
+        <hr>
+    </li>
+</ul>
 </body>
 </html>
