@@ -1,9 +1,8 @@
-package edu.missouristate;
+package edu.missouristate.service.impl;
 
-import com.github.scribejava.core.oauth.OAuthService;
 import edu.missouristate.dao.TumblrRepository;
 import edu.missouristate.domain.Tumblr;
-import org.json.JSONArray;
+import edu.missouristate.service.TumblrService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -235,10 +234,7 @@ public class TumblrServiceImpl implements TumblrService {
                 post.setNoteCount(notesCount);
                 post.setDate(timestamp1);
 
-                tumblrRepository.save(post);
-
-                System.out.println(postId);
-                System.out.println(notesCount);
+                tumblrRepository.updatePost(post);
 
             }
     }

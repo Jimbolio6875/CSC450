@@ -1,4 +1,4 @@
-package edu.missouristate;
+package edu.missouristate.service;
 
 import edu.missouristate.domain.Tumblr;
 

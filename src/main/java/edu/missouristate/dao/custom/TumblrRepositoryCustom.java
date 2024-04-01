@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface TumblrRepositoryCustom {
     List<Tumblr> getPostsByBlogIdentifier(String blog);
+
+    void updatePost(Tumblr post);
 }

@@ -5,6 +5,7 @@ import edu.missouristate.domain.QTumblr;
 import edu.missouristate.domain.Tumblr;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,4 +26,16 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
                 .orderBy(tumblrTable.date.desc())
                 .fetch();
     }
+
+    @Transactional
+    @Override
+    public void updatePost(Tumblr post) {
+        update(tumblrTable)
+                .where(tumblrTable.postId.eq(post.getPostId()))
+                .set(tumblrTable.content, post.getContent())
+                .set(tumblrTable.noteCount, post.getNoteCount())
+                .execute();
+    }
+
+
 }
