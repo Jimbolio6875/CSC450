@@ -49,13 +49,8 @@ body {
     color: #fff;
 }
 
-.nav-link.active,
-.nav-link:focus {
-    border-bottom: 2px solid #fff;
-    color: #fff;
-}
-
-.nav-link:hover {
+.nav-link:hover,
+.nav-link.active:hover {
     color: #d3d4db;
 }
 
@@ -106,7 +101,6 @@ body {
         background-position: 0 50%;
     }
 }
-
 
 @media screen and (max-width: 990px) {
     #socials {
