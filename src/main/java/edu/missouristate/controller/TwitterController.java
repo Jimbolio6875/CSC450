@@ -1,6 +1,10 @@
-package edu.missouristate;
+package edu.missouristate.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.missouristate.domain.Twitter;
 import edu.missouristate.service.SocialMediaAccountService;
+import edu.missouristate.service.TwitterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 
@@ -22,6 +27,10 @@ import java.util.stream.Collectors;
 public class TwitterController {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterController.class);
+
+    @Autowired
+    TwitterService twitterService;
+
     @Autowired
     private SocialMediaAccountService socialMediaAccountService;
     @Value("${python.path}")
@@ -47,7 +56,24 @@ public class TwitterController {
 
             socialMediaAccountService.saveSocialMediaAccount(2, "Twitter", accessToken);
 
+            ObjectMapper objectMapper = new ObjectMapper();
+
             if (exitCode == 0) {
+
+                String json = scriptOutput.substring(scriptOutput.indexOf("{")).replace('\'', '\"');
+                JsonNode rootNode = objectMapper.readTree(json);
+                Long postId = rootNode.path("id").asLong();
+                String textTweet = rootNode.path("text").asText();
+
+                Twitter newTweet = new Twitter();
+
+                newTweet.setCreationDate(LocalDateTime.now());
+                newTweet.setTweetId(postId);
+                newTweet.setTweetText(textTweet);
+
+                twitterService.saveTweet(newTweet);
+
+
                 log.debug("Tweet posted successfully. Script output: {}", scriptOutput);
                 modelAndView.setViewName("result");
                 modelAndView.addObject("message", "Tweet posted successfully!");

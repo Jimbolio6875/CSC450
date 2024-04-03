@@ -1,6 +1,8 @@
 package edu.missouristate.controller;
 
-import edu.missouristate.service.SocialMediaAccountService;
+import edu.missouristate.domain.RedditPosts;
+import edu.missouristate.domain.Twitter;
+import edu.missouristate.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +15,16 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 
@@ -25,6 +32,18 @@ import java.util.stream.Collectors;
 public class RedditController {
 
     private static final Logger log = LoggerFactory.getLogger(RedditController.class);
+
+
+    @Autowired
+    MastodonService mastodonService;
+
+    @Autowired
+    TumblrService tumblrService;
+
+    @Autowired
+    RedditPostsService redditPostsService;
+    @Autowired
+    TwitterService twitterService;
     String CLIENT_ID = "6aK_iXozHqB7AlJY3aF6ZA";
     String CLIENT_SECRET = "6bEXPVk7tYpAAFj4fbH9Vj-XSKzGag";
     String REDIRECT_URI = "http://localhost:8080/reddit/callback";
@@ -147,6 +166,7 @@ public class RedditController {
                                    HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("reddit/postResult");
 
+        // Directly use session-stored accessToken
         String accessToken = (String) session.getAttribute("REDDIT_ACCESS_TOKEN");
         log.debug("Using Access Token from session: {}", accessToken);
 
@@ -157,9 +177,10 @@ public class RedditController {
             return modelAndView;
         }
 
-        Integer userId = 1;
+        Integer userId = 1; // Placeholder, adjust this according to your application's logic
 
-        socialMediaAccountService.saveSocialMediaAccount(userId, "Reddit", accessToken.trim());
+        // Save the SocialMediaAccount information when you have it
+//        socialMediaAccountService.saveSocialMediaAccount(userId, "Reddit", accessToken.trim());
 
 
         try {
@@ -170,8 +191,23 @@ public class RedditController {
             String result = new BufferedReader(new InputStreamReader(process.getInputStream()))
                     .lines().collect(Collectors.joining("\n"));
 
+            System.out.println("->>" + result);
+
+
             log.debug("Result from post submission: {}", result);
             modelAndView.addObject("result", result);
+            System.out.println("!->>" + result);
+            String jsonExtract = extractJsonPart(result);
+            String fullname = extractPostIdFromJson(jsonExtract);
+
+            System.out.println("STOP");
+
+            redditPostsService.fetchAndSaveRedditPost(fullname).subscribe(
+                    post -> log.info("Reddit post saved: {}", post),
+                    error -> log.error("Error fetching and saving Reddit post {}", fullname, error)
+            );
+
+
         } catch (Exception e) {
             log.error("Failed to submit post", e);
             modelAndView.setViewName("error");
@@ -196,6 +232,59 @@ public class RedditController {
         }
 
         return modelAndView;
+    }
+
+    @GetMapping("/post-history")
+    public ModelAndView getPostHistory() throws IOException, ExecutionException, InterruptedException {
+        ModelAndView modelAndView = new ModelAndView("post-history");
+
+
+//        tumblrService.updatePosts();
+//        List<Tumblr> userPosts = tumblrService.getPostsByBlog();
+
+
+        List<String> redditPostIds = redditPostsService.getAllRedditPostIds();
+
+
+        List<RedditPosts> redditPosts = redditPostsService.fetchRedditPostDetails(redditPostIds);
+
+
+        List<Twitter> tweets = twitterService.getAllTweets();
+
+
+        modelAndView.addObject("redditPosts", redditPosts);
+        modelAndView.addObject("tweets", tweets);
+//        modelAndView.addObject("posts", userPosts);
+
+        return modelAndView;
+    }
+
+
+    public String extractJsonPart(String fullResponse) {
+        String jsonPart = "";
+
+        String identifier = "Response body:";
+        int startIndex = fullResponse.indexOf(identifier);
+
+        if (startIndex != -1) {
+            jsonPart = fullResponse.substring(startIndex + identifier.length()).trim();
+        }
+
+        return jsonPart;
+    }
+
+
+    private String extractPostIdFromJson(String jsonResponse) {
+        String regexPattern = "comments/([a-zA-Z0-9]+)";
+        Pattern pattern = Pattern.compile(regexPattern);
+
+        Matcher matcher = pattern.matcher(jsonResponse);
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        } else {
+            return "No ID found";
+        }
     }
 
 

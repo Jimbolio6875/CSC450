@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Post History</title>
+</head>
+<body>
+<h1>Post History</h1>
+
+<div class="outer-div">
+    <!-- Twitter Posts Section -->
+    <div style=" background-color: #3ABEFF;display: flex; align-items: center; flex-direction: column; gap: 12px; width: 50%">
+        <ion-icon name="logo-twitter"></ion-icon>
+        <div th:each="tweet : ${tweets}">
+            <div th:text="${tweet.tweetText}">Post content here</div>
+            <div th:text="${tweet.creationDate}">Post date here</div>
+        </div>
+    </div>
+
+    <!-- Reddit Posts Section -->
+    <div style="background-color: #F9B5AC; display: flex; align-items: center; flex-direction: column; gap: 12px; width: 50%; padding: 24px">
+        <ion-icon name="logo-reddit"></ion-icon>
+        <div th:each="redditPost : ${redditPosts}">
+            <p th:text=" 'Header: ' + ${redditPost.title}">Post title here</p>
+            <p th:text=" 'Content: ' + ${redditPost.content}">Post content here</p>
+            <p th:text=" 'Created: ' + ${redditPost.creationDate}">Post date here</p>
+            <p th:text=" 'Author: ' + ${redditPost.author}">Author here</p>
+            <p th:text=" 'Subbreddit: ' + ${redditPost.subreddit}">Subreddit here</p>
+            <p th:text=" 'Number of comments: ' + ${redditPost.numComments}">Number of comments</p>
+
+
+            <p th:text=" 'Up votes: ' + ${redditPost.upVotes}"></p>
+
+
+            <p th:text=" 'Down votes: ' + ${redditPost.downVotes}"></p>
+
+
+            <a target="_blank" th:href="@{${redditPost.url}}">Link to post</a>
+            <hr>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; flex-direction: column; padding: 12px; background-color: lightyellow">
+        <h1 style="text-align: center">Tumblr</h1>
+        <li style="margin-bottom: 20px;" th:each="post : ${posts}">
+            <div>
+                <strong style="display: inline-block; margin-right: 5px;">Content:</strong>
+                <span style="display: inline-block; max-width: 80%;" th:utext="${post.content}"></span>
+            </div>
+            <div style="margin-top: 10px;">
+                <strong>URL:</strong>
+                <a th:href="${post.postUrl}" th:text="${post.postUrl}"></a>
+            </div>
+            <div style="margin-top: 10px;">
+                <strong>Notes:</strong>
+                <span th:text="${post.noteCount}"></span>
+            </div>
+            <hr>
+        </li>
+    </div>
+
+    <div style="display: flex; justify-content: center; flex-direction: column; padding: 12px; background-color: lightyellow">
+        <h1 style="text-align: center">Mastodon</h1>
+        <li style="margin-bottom: 20px;" th:each="post : ${posts}">
+            <div>
+                <strong style="display: inline-block; margin-right: 5px;">Content:</strong>
+                <span style="display: inline-block; max-width: 80%;" th:utext="${post.content}"></span>
+            </div>
+            <div style="margin-top: 10px;">
+                <strong>URL:</strong>
+                <a th:href="${post.postUrl}" th:text="${post.postUrl}"></a>
+            </div>
+            <div style="margin-top: 10px;">
+                <strong>Notes:</strong>
+                <span th:text="${post.noteCount}"></span>
+            </div>
+            <hr>
+        </li>
+    </div>
+</div>
+<a href="/login">Back to Home</a>
+
+<style>
+    ion-icon {
+        font-size: 48px;
+        color: #1DA1F2; /* Twitter color */
+    }
+
+    ion-icon[name="logo-reddit"] {
+        color: #FF4500; /* Reddit color */
+    }
+
+    .outer-div {
+        display: flex;
+    }
+</style>
+
+
+<script src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" type="module"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</body>
+</html>
