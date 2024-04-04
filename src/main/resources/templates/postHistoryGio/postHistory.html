@@ -8,9 +8,9 @@
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <!-- Bootsrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- CSS -->
-    <link rel="stylesheet" href="posts.css">
+    <link rel="stylesheet" href="postHistory.css">
     <link rel="icon" href="Socials/mini.ico" type="image/x-icon">
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
@@ -21,144 +21,147 @@
 </head>
 
 <body>
-    <div class="container-fluid">
-        <div class="row flex-nowrap">
-            <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white"
-                style="border-right: 2px solid #000; width: 200px">
-                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-                    <a href="index.html"
-                        class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-black text-decoration-none title">
-                        <img src="Socials/logo.png" alt="#" id="logo">
-                    </a>
-                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
-                        id="menu">
-                        <li class="nav-item">
-                            <a href="posts.html" class="nav-link align-middle px-0 text-black">
-                                <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="postHistory.html" class="nav-link px-0 align-middle text-black">
-                                <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Post
+<div class="container-fluid">
+    <div class="row flex-nowrap">
+        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white"
+             style="border-right: 2px solid #000; width: 200px">
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+                <a href="index.html"
+                   class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-black text-decoration-none title">
+                    <img src="Socials/logo.png" alt="#" id="logo">
+                </a>
+                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
+                    id="menu">
+                    <li class="nav-item">
+                        <a href="posts.html" class="nav-link align-middle px-0 text-black">
+                            <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="postHistory.html" class="nav-link px-0 align-middle text-black">
+                            <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Post
                                     History</span></a>
-                        </li>
-                        <div class="dropdown">
-                            <a href="#"
-                                class="d-flex align-items-center text-black text-decoration-none dropdown-toggle"
-                                id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="Socials/user.png" width="25" height="25" class="rounded-circle">
-                                <span class="d-none d-sm-inline mx-1">User</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-white text-small shadow"
-                                aria-labelledby="dropdownUser1">
-                                <li><a class="dropdown-item" href="#">Sign out</a></li>
-                            </ul>
-                        </div>
-                    </ul>
-                    <hr>
-                </div>
+                    </li>
+                    <div class="dropdown">
+                        <a href="#"
+                           class="d-flex align-items-center text-black text-decoration-none dropdown-toggle"
+                           id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <!--<img src="Socials/user.png" width="25" height="25" class="rounded-circle">-->
+                            <i class="fs-4 bi-people"></i>
+                            <span class="d-none d-sm-inline mx-1">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-white text-small shadow"
+                            aria-labelledby="dropdownUser1">
+                            <li><a class="dropdown-item" href="#">Sign out</a></li>
+                        </ul>
+                    </div>
+                </ul>
             </div>
-            <div class="col py-3">
-                <h3>Post History</h3>
+        </div>
+        <div class="col py-3">
+            <h3>Post History</h3>
+            <div class="container">
+                <div class="posts-text">
+                    <p>Select any social media platform below to view all the posts you've made!</p>
+                </div>
                 <div class="container">
-                    <div class="posts-text">
-                        <p>Select any social media platform below to view all the posts you've made!</p>
+                    <div class="row socials-list">
+                        <div class="col-6 col-md-3">
+                            <img src="Socials/twitter.jpg">
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <img src="Socials/tumblr.jpg">
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <img src="Socials/reddit.png">
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <img src="Socials/mastodon.png">
+                        </div>
                     </div>
-                    <div class="container">
-                        <div class="row socials-list">
-                            <div class="col-6 col-md-3">
-                                <img src="Socials/twitter.jpg">
+                </div>
+                <!--<p>text</p>-->
+            </div>
+            <div class="container">
+                <div class="posts-text">
+                    <p>Looks like you've made quite the amount of posts!</p>
+                </div>
+                <div class="container">
+                    <div class="row posts-list">
+                        <div class="post-container">
+                            <!--<p>Reddit Posts</p>-->
+                            <p>Post 1</p>
+                            <div class="top">
+                                <img src="Gifs/header.webp" width="25" height="25">
+                                <p>Header: </p>
+                                <img src="Gifs/subreddit.webp" width="25" height="25">
+                                <p>Subbreddit: </p>
                             </div>
-                            <div class="col-6 col-md-3">
-                                <img src="Socials/tumblr.jpg">
+                            <div class="main">
+                                <img src="Gifs/author.webp" width="25" height="25">
+                                <p>Author: </p>
+                                <img src="Gifs/clock.webp" width="25" height="25">
+                                <p>Created: </p>
                             </div>
-                            <div class="col-6 col-md-3">
-                                <img src="Socials/reddit.png">
+                            <div class="post-content">
+                                <p>Your post content will be here!</p>
                             </div>
-                            <div class="col-6 col-md-3">
-                                <img src="Socials/mastodon.png">
+                            <div class="interactions">
+
+                                <img src="Gifs/comment.webp" width="25" height="25">
+                                <p>Number of comments: </p>
+
+
+                                <img src="Gifs/like.webp" width="25" height="25">
+                                <p>Up Votes: </p>
+
+
+                                <img src="Gifs/dislike.webp" width="25" height="25">
+                                <p>Down Votes: </p>
+
+                            </div>
+                            <div class="original-post">
+                                <a class="original-post" href="#">Original Post</a>
                             </div>
                         </div>
                     </div>
-                    <!--<p>text</p>-->
                 </div>
                 <div class="container">
-                    <div class="posts-text">
-                        <p>Looks like you've made quite the amount of posts!</p>
-                    </div>
-                    <div class="container">
-                        <div class="row posts-list">
-                            <div class="post-container">
-                                <!--<p>Reddit Posts</p>-->
-                                <p>Post 1</p>
-                                <div class="top">
-                                    <img src="Gifs/header.webp" width="25" height="25">
-                                    <p>Header: </p>
-                                    <img src="Gifs/subreddit.webp" width="25" height="25">
-                                    <p>Subbreddit: </p>
-                                </div>
-                                <div class="main">
-                                    <img src="Gifs/author.webp" width="25" height="25">
-                                    <p>Author: </p>
-                                    <img src="Gifs/clock.webp" width="25" height="25">
-                                    <p>Created: </p>
-                                </div>
-                                <div class="post-content">
-                                    <p>Your post content will be here!</p>
-                                </div>
-                                <div class="interactions">
-
-                                    <img src="Gifs/comment.webp" width="25" height="25">
-                                    <p>Number of comments: </p>
-
-
-                                    <img src="Gifs/like.webp" width="25" height="25">
-                                    <p>Up Votes: </p>
-
-
-                                    <img src="Gifs/dislike.webp" width="25" height="25">
-                                    <p>Down Votes: </p>
-
-                                </div>
-                                <div class="original-post">
-                                    <a class="original-post" href="#">Original Post</a>
-                                </div>
+                    <div class="row posts-list">
+                        <div class="post-container">
+                            <!--<p>Reddit Posts</p>-->
+                            <p>Post 2</p>
+                            <div class="top">
+                                <img src="Gifs/header.webp" width="25" height="25">
+                                <p>Header: </p>
+                                <img src="Gifs/subreddit.webp" width="25" height="25">
+                                <p>Subbreddit: </p>
                             </div>
-                            <div class="post-container">
-                                <!--<p>Reddit Posts</p>-->
-                                <p>Post 2</p>
-                                <div class="top">
-                                    <img src="Gifs/header.webp" width="25" height="25">
-                                    <p>Header: </p>
-                                    <img src="Gifs/subreddit.webp" width="25" height="25">
-                                    <p>Subbreddit: </p>
-                                </div>
-                                <div class="main">
-                                    <img src="Gifs/author.webp" width="25" height="25">
-                                    <p>Author: </p>
-                                    <img src="Gifs/clock.webp" width="25" height="25">
-                                    <p>Created: </p>
-                                </div>
-                                <div class="post-content">
-                                    <p>Your post content will be here!</p>
-                                </div>
-                                <div class="interactions">
+                            <div class="main">
+                                <img src="Gifs/author.webp" width="25" height="25">
+                                <p>Author: </p>
+                                <img src="Gifs/clock.webp" width="25" height="25">
+                                <p>Created: </p>
+                            </div>
+                            <div class="post-content">
+                                <p>Your post content will be here!</p>
+                            </div>
+                            <div class="interactions">
 
-                                    <img src="Gifs/comment.webp" width="25" height="25">
-                                    <p>Number of comments: </p>
+                                <img src="Gifs/comment.webp" width="25" height="25">
+                                <p>Number of comments: </p>
 
 
-                                    <img src="Gifs/like.webp" width="25" height="25">
-                                    <p>Up Votes: </p>
+                                <img src="Gifs/like.webp" width="25" height="25">
+                                <p>Up Votes: </p>
 
 
-                                    <img src="Gifs/dislike.webp" width="25" height="25">
-                                    <p>Down Votes: </p>
+                                <img src="Gifs/dislike.webp" width="25" height="25">
+                                <p>Down Votes: </p>
 
-                                </div>
-                                <div class="original-post">
-                                    <a class="original-post" href="#">Original Post</a>
-                                </div>
+                            </div>
+                            <div class="original-post">
+                                <a class="original-post" href="#">Original Post</a>
                             </div>
                         </div>
                     </div>
@@ -166,13 +169,13 @@
             </div>
         </div>
     </div>
-    </div>
+</div>
 </body>
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-    crossorigin="anonymous"></script>
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
 </body>
 
 </html>

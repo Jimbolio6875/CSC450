@@ -44,24 +44,40 @@ h3 {
     transform: scale(1.05)
 }
 
-
 .posts-text {
     padding-top: 17px;
     text-align: center;
 }
 
-
-form {
-    font-size: 20px;
-    padding-bottom: 18px;
-    padding-top: 18px;
-    padding-right: 18px;
-    padding-left: 18px;
-    /*text-align: center;*/
+.row .posts-list {
+    background-color: aliceblue;
+    border-radius: 20px;
 }
 
-.container .written-post {
-    margin-top: 100px;
+.interactions,
+.main {
+    text-align: center;
+}
+
+.top p,
+.main p,
+.interactions p {
+    padding-top: 15px;
+    display: inline-block;
+    margin-right: 25px;
+}
+
+.post-content {
+    text-align: center;
+    background-color: antiquewhite;
+    border-radius: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.original-post {
+    text-align: right;
+    color: black;
 }
 
 
