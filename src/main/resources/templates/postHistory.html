@@ -27,18 +27,18 @@
              style="border-right: 2px solid #000; width: 200px">
             <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
                 <a class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-black text-decoration-none title"
-                   href="index.html">
+                   th:href="@{/}">
                     <img alt="#" id="logo" src="/resources/Socials/logo.png">
                 </a>
                 <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
                     id="menu">
                     <li class="nav-item">
-                        <a class="nav-link align-middle px-0 text-black" href="posts.html">
+                        <a class="nav-link align-middle px-0 text-black" th:href="@{/posts}">
                             <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
                         </a>
                     </li>
                     <li>
-                        <a class="nav-link px-0 align-middle text-black" href="postHistory.html">
+                        <a class="nav-link px-0 align-middle text-black" th:href="@{/postHistory}">
                             <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Post
                                     History</span></a>
                     </li>
@@ -52,7 +52,7 @@
                         </a>
                         <ul aria-labelledby="dropdownUser1"
                             class="dropdown-menu dropdown-menu-white text-small shadow">
-                            <li><a class="dropdown-item" href="#">Sign out</a></li>
+                            <li><a class="dropdown-item" th:href="@{/signOut}">Sign out</a></li>
                         </ul>
                     </div>
                 </ul>
