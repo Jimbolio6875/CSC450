@@ -174,6 +174,11 @@ public class MastodonServiceImpl implements MastodonService {
         return posts;
     }
 
+    @Override
+    public List<Mastodon> getAllPosts() {
+        return (List<Mastodon>) mastodonRepository.findAll();
+    }
+
     private Mastodon transformToMastodonPost(JSONObject postObject) {
         Mastodon post = new Mastodon();
         post.setPostId(postObject.getString("id"));
