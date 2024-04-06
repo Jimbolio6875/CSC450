@@ -3,6 +3,7 @@ package edu.missouristate.service.impl;
 import edu.missouristate.dao.MastodonRepository;
 import edu.missouristate.domain.Mastodon;
 import edu.missouristate.service.MastodonService;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,24 +11,22 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class MastodonServiceImpl implements MastodonService {
 
-    @Autowired
-    MastodonRepository mastodonRepository;
-
-    @Value("${mastodon.clientId}")
-    private String CLIENT_ID;
-
-    @Value("${mastodon.clientSecret}")
-    private String CLIENT_SECRET;
     private static final String REDIRECT_URI = "http://localhost:8080/callback";
     private static final String SCOPE = "read write";
+    @Autowired
+    MastodonRepository mastodonRepository;
+    @Value("${mastodon.clientId}")
+    private String CLIENT_ID;
+    @Value("${mastodon.clientSecret}")
+    private String CLIENT_SECRET;
 
     @Override
     // set client_id/secret/auth to get token
@@ -143,6 +142,47 @@ public class MastodonServiceImpl implements MastodonService {
         }
 
         return null;
+    }
+
+    @Override
+    public List<Mastodon> fetchMastodonPostsByUserId(String userId, String accessToken) {
+        RestTemplate restTemplate = new RestTemplate();
+        List<Mastodon> posts = new ArrayList<>();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        // Assuming Mastodon's API provides a way to fetch posts by user ID
+        String url = "https://mastodon.social/api/v1/accounts/" + userId + "/statuses";
+
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JSONArray postsArray = new JSONArray(response.getBody());
+            for (int i = 0; i < postsArray.length(); i++) {
+                JSONObject postObject = postsArray.getJSONObject(i);
+                Mastodon post = transformToMastodonPost(postObject);
+                posts.add(post);
+                // Optionally, save each post to the database here
+                savePost(post);
+            }
+        } else {
+            throw new RuntimeException("Failed to fetch Mastodon posts for user ID: " + userId);
+        }
+
+        return posts;
+    }
+
+    private Mastodon transformToMastodonPost(JSONObject postObject) {
+        Mastodon post = new Mastodon();
+        post.setPostId(postObject.getString("id"));
+        post.setContent(postObject.getString("content"));
+        post.setPostUrl(postObject.getString("url"));
+        post.setFavouriteCount(postObject.getInt("favourites_count"));
+
+        // Transform other fields as necessary
+        return post;
     }
 
     @Override

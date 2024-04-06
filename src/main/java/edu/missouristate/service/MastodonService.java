@@ -17,4 +17,7 @@ public interface MastodonService {
     void savePost(Mastodon post);
 
     List<Mastodon> getPostsByUserId(String userId);
+
+    public List<Mastodon> fetchMastodonPostsByUserId(String userId, String accessToken);
+
 }

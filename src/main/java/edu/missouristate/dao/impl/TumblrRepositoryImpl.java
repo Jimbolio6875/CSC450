@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Transactional
 @Repository
 public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements TumblrRepositoryCustom {
 
@@ -37,5 +38,27 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
                 .execute();
     }
 
+    @Override
+    public List<String> getAllTumblrIds() {
+        return from(tumblrTable).select(tumblrTable.postId).fetch();
+    }
 
+
+    @Override
+    public List<Tumblr> tumblrPosts(List<String> tumblrIds) {
+        return from(tumblrTable).where(tumblrTable.postId.in(tumblrIds)).fetch();
+    }
+
+//    public TumblrAccessToken getTumblrAccessToken(String blogIdentifier) {
+//
+//        Tumblr account = from(tumblrTable)
+//                .where(tumblrTable.blogIdentifier.eq(blogIdentifier))
+//                .fetchOne();
+//
+//        if (account == null) {
+//            throw new IllegalStateException("Access token not found for blogIdentifier: " + blogIdentifier);
+//        }
+//
+//        return new TumblrAccessToken(account.getAccessToken(), account.getAccessTokenSecret());
+//    }
 }

@@ -1,24 +1,19 @@
 package edu.missouristate.service.impl;
 
+import com.github.scribejava.apis.TumblrApi;
+import com.github.scribejava.core.builder.ServiceBuilder;
+import com.github.scribejava.core.model.*;
+import com.github.scribejava.core.oauth.OAuth10aService;
 import edu.missouristate.dao.TumblrRepository;
 import edu.missouristate.domain.Tumblr;
+import edu.missouristate.service.SocialMediaAccountService;
 import edu.missouristate.service.TumblrService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.github.scribejava.apis.TumblrApi;
-import com.github.scribejava.core.builder.ServiceBuilder;
-import com.github.scribejava.core.model.OAuth1AccessToken;
-import com.github.scribejava.core.model.OAuth1RequestToken;
-import com.github.scribejava.core.model.OAuthRequest;
-import com.github.scribejava.core.model.Response;
-import com.github.scribejava.core.model.Verb;
-import com.github.scribejava.core.oauth.OAuth10aService;
-
-import edu.missouristate.service.SocialMediaAccountService;
-
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
@@ -52,12 +47,17 @@ public class TumblrServiceImpl implements TumblrService {
     @Value("${tumblr.callbackUrl}")
     private String callbackUrl;
 
-    @Override
-    public String getAuthorizationUrl() {
+    @PostConstruct
+    private void init() {
         oauthService = new ServiceBuilder(consumerKey)
                 .apiSecret(consumerSecret)
                 .callback(callbackUrl)
                 .build(TumblrApi.instance());
+    }
+
+
+    @Override
+    public String getAuthorizationUrl() {
         try {
             requestToken = oauthService.getRequestToken();
             return oauthService.getAuthorizationUrl(requestToken);
@@ -66,6 +66,7 @@ public class TumblrServiceImpl implements TumblrService {
             return null;
         }
     }
+
 
     @Override
     public String getUserInfo(String oauthVerifier) {
@@ -128,6 +129,7 @@ public class TumblrServiceImpl implements TumblrService {
         request.addBodyParameter("body", postContent);
         oauthService.signRequest(accessToken, request);
 
+
         Response response = oauthService.execute(request);
         JSONObject jsonResponse = new JSONObject(response.getBody());
 
@@ -144,6 +146,11 @@ public class TumblrServiceImpl implements TumblrService {
         post.setPostUrl("https://www.tumblr.com/blog/view/" + blogIdentifier + "/" + postId);
         post.setNoteCount(0);
         post.setDate(timestampDate);
+        String tokenValue = accessToken.getToken();
+        String tokenSecret = accessToken.getTokenSecret();
+
+//        post.setAccessToken(tokenValue);
+//        post.setAccessTokenSecret(tokenSecret);
 
         tumblrRepository.save(post);
 
@@ -161,9 +168,9 @@ public class TumblrServiceImpl implements TumblrService {
 
         try {
 
-             posts = tumblrRepository.getPostsByBlogIdentifier(blogIdentifier);
+            posts = tumblrRepository.getPostsByBlogIdentifier(blogIdentifier);
 
-             // this might be useful later
+            // this might be useful later
 //            OAuthRequest request = new OAuthRequest(Verb.GET, url);
 //            oauthService.signRequest(accessToken, request);
 //            Response response = oauthService.execute(request);
@@ -188,6 +195,20 @@ public class TumblrServiceImpl implements TumblrService {
     @Override
     public void updatePosts() throws IOException, ExecutionException, InterruptedException {
 
+//        TumblrAccessToken tumblrAccessTokenDetails = tumblrRepository.getTumblrAccessToken(blogIdentifier);
+//
+//        if (tumblrAccessTokenDetails == null ||
+//                tumblrAccessTokenDetails.getAccessToken() == null ||
+//                tumblrAccessTokenDetails.getAccessTokenSecret() == null) {
+//            throw new IllegalStateException("Stored access token or secret is missing.");
+//        }
+//
+//        OAuth1AccessToken accessToken = new OAuth1AccessToken(
+//                tumblrAccessTokenDetails.getAccessToken(),
+//                tumblrAccessTokenDetails.getAccessTokenSecret()
+//        );
+
+
         Tumblr post = new Tumblr();
 
         String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts?api_key=" + consumerKey;
@@ -211,31 +232,39 @@ public class TumblrServiceImpl implements TumblrService {
 
         int postNum = jsonResponse.getJSONObject("response").getJSONArray("posts").length();
 
-            for (int i = 0; i < postNum; i++) {
+        for (int i = 0; i < postNum; i++) {
 
-                postId = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getString("id_string");
-                content = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getString("body");
-                postUrl = "https://www.tumblr.com/blog/view/" + blogIdentifier + "/" + postId;
-                notesCount = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getInt("note_count");
-                timestamp = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getString("date");
+            postId = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getString("id_string");
+            content = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getString("body");
+            postUrl = "https://www.tumblr.com/blog/view/" + blogIdentifier + "/" + postId;
+            notesCount = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getInt("note_count");
+            timestamp = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(i).getString("date");
 
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z", Locale.ENGLISH);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z", Locale.ENGLISH);
 
-                ZonedDateTime dateTime = ZonedDateTime.parse(timestamp, formatter);
+            ZonedDateTime dateTime = ZonedDateTime.parse(timestamp, formatter);
 
-                timestamp1 = new Timestamp(Date.from(dateTime.toInstant()).getTime());
+            timestamp1 = new Timestamp(Date.from(dateTime.toInstant()).getTime());
 
+            post.setPostId(postId);
+            post.setBlogIdentifier(blogIdentifier);
+            post.setContent(content);
+            post.setPostUrl(postUrl);
+            post.setNoteCount(notesCount);
+            post.setDate(timestamp1);
 
+            tumblrRepository.updatePost(post);
 
-                post.setPostId(postId);
-                post.setBlogIdentifier(blogIdentifier);
-                post.setContent(content);
-                post.setPostUrl(postUrl);
-                post.setNoteCount(notesCount);
-                post.setDate(timestamp1);
+        }
+    }
 
-                tumblrRepository.updatePost(post);
+    @Override
+    public List<String> getAllTubmlrIds() {
+        return tumblrRepository.getAllTumblrIds();
+    }
 
-            }
+    @Override
+    public List<Tumblr> tumblrPosts(List<String> tublrIds) {
+        return tumblrRepository.tumblrPosts(tublrIds);
     }
 }

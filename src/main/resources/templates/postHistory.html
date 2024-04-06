@@ -3,15 +3,15 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>Socials Page</title>
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link href="favicon.ico" rel="shortcut icon" type="image/x-icon">
     <!-- Bootsrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" rel="stylesheet">
     <!-- CSS -->
-    <link rel="stylesheet" href="postHistory.css">
-    <link rel="icon" href="Socials/mini.ico" type="image/x-icon">
+    <link href="/resources/css/postHistory.css" rel="stylesheet">
+    <link href="Socials/mini.ico" rel="icon" type="image/x-icon">
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
 
@@ -26,32 +26,32 @@
         <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white"
              style="border-right: 2px solid #000; width: 200px">
             <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-                <a href="index.html"
-                   class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-black text-decoration-none title">
-                    <img src="Socials/logo.png" alt="#" id="logo">
+                <a class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-black text-decoration-none title"
+                   href="index.html">
+                    <img alt="#" id="logo" src="/resources/Socials/logo.png">
                 </a>
                 <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
                     id="menu">
                     <li class="nav-item">
-                        <a href="posts.html" class="nav-link align-middle px-0 text-black">
+                        <a class="nav-link align-middle px-0 text-black" href="posts.html">
                             <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
                         </a>
                     </li>
                     <li>
-                        <a href="postHistory.html" class="nav-link px-0 align-middle text-black">
+                        <a class="nav-link px-0 align-middle text-black" href="postHistory.html">
                             <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Post
                                     History</span></a>
                     </li>
                     <div class="dropdown">
-                        <a href="#"
+                        <a aria-expanded="false"
                            class="d-flex align-items-center text-black text-decoration-none dropdown-toggle"
-                           id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                           data-bs-toggle="dropdown" href="#" id="dropdownUser1">
                             <!--<img src="Socials/user.png" width="25" height="25" class="rounded-circle">-->
                             <i class="fs-4 bi-people"></i>
                             <span class="d-none d-sm-inline mx-1">User</span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-white text-small shadow"
-                            aria-labelledby="dropdownUser1">
+                        <ul aria-labelledby="dropdownUser1"
+                            class="dropdown-menu dropdown-menu-white text-small shadow">
                             <li><a class="dropdown-item" href="#">Sign out</a></li>
                         </ul>
                     </div>
@@ -67,16 +67,16 @@
                 <div class="container">
                     <div class="row socials-list">
                         <div class="col-6 col-md-3">
-                            <img src="Socials/twitter.jpg">
+                            <img src="/resources/Socials/twitter.jpg">
                         </div>
                         <div class="col-6 col-md-3">
-                            <img src="Socials/tumblr.jpg">
+                            <img src="/resources/Socials/tumblr.jpg">
                         </div>
                         <div class="col-6 col-md-3">
-                            <img src="Socials/reddit.png">
+                            <img src="/resources/Socials/reddit.png">
                         </div>
                         <div class="col-6 col-md-3">
-                            <img src="Socials/mastodon.png">
+                            <img src="/resources/Socials/mastodon.png">
                         </div>
                     </div>
                 </div>
@@ -88,83 +88,95 @@
                 </div>
                 <div class="container">
                     <div class="row posts-list">
-                        <div class="post-container">
-
-                            <p>Reddit</p>
+                        <div th:each="redditPost : ${redditPosts}" class="post-container first-reddit">
+                            <div style="display: flex; justify-content: space-between; flex-direction: row-reverse; align-items: center">
+                                <div>
+                                    <ion-icon name="logo-reddit"></ion-icon>
+                                </div>
+                                <div>
+                                    <p> Reddit</p>
+                                </div>
+                            </div>
                             <div class="top">
-                                <img src="Gifs/header.webp" width="25" height="25">
-                                <p>Header: </p>
-                                <img src="Gifs/subreddit.webp" width="25" height="25">
-                                <p>Subbreddit: </p>
+                                <img height="25" src="/resources/Gifs/header.webp" width="25">
+                                <p th:text="'Header: ' + ${redditPost.title}"></p>
+                                <img height="25" src="/resources/Gifs/subreddit.webp" width="25">
+                                <p th:text="'Subreddit: ' + ${redditPost.subreddit}"></p>
                             </div>
                             <div class="main">
-                                <img src="Gifs/author.webp" width="25" height="25">
-                                <p>Author: </p>
-                                <img src="Gifs/clock.webp" width="25" height="25">
-                                <p>Created: </p>
+                                <img height="25" src="/resources/Gifs/author.webp" width="25">
+                                <p th:text="'Author: ' + ${redditPost.author}"></p>
+                                <img height="25" src="/resources/Gifs/clock.webp" width="25">
+                                <p th:text="'Created: ' + ${redditPost.creationDate}"></p>
                             </div>
                             <div class="post-content">
-                                <p>Your post content will be here!</p>
+                                <p th:text="${redditPost.content}">Your post content will be here!</p>
                             </div>
                             <div class="interactions">
+                                <img height="25" src="/resources/Gifs/comment.webp" width="25">
+                                <p th:text="'Number of comments: ' + ${redditPost.numComments}"></p>
 
-                                <img src="Gifs/comment.webp" width="25" height="25">
-                                <p>Number of comments: </p>
+                                <img height="25" src="/resources/Gifs/like.webp" width="25">
+                                <p th:text="'Up Votes: ' + ${redditPost.upVotes}"></p>
 
-
-                                <img src="Gifs/like.webp" width="25" height="25">
-                                <p>Up Votes: </p>
-
-
-                                <img src="Gifs/dislike.webp" width="25" height="25">
-                                <p>Down Votes: </p>
-
+                                <img height="25" src="/resources/Gifs/dislike.webp" width="25">
+                                <p th:text="'Down Votes: ' + ${redditPost.downVotes}"></p>
                             </div>
                             <div class="original-post">
-                                <a class="original-post" href="#">Original Post</a>
+                                <a th:href="${redditPost.url}" class="original-post" target="_blank">Original Post</a>
                             </div>
+                            <hr>
                         </div>
                     </div>
                 </div>
-                <div class="container">
-                    <div class="row posts-list">
-                        <div class="post-container">
 
-                            <p>Twitter</p>
-                            <div class="main">
-                                <img src="Gifs/clock.webp" width="25" height="25">
-                                <p>Created: </p>
+
+            </div>
+            <div class="container">
+                <div class="row posts-list">
+                    <div th:each="tweet : ${tweets}" class="post-container first-tweet">
+                        <div style="display: flex; justify-content: space-between; flex-direction: row-reverse; align-items: center">
+                            <div>
+                                <ion-icon name="logo-twitter"></ion-icon>
                             </div>
-                            <div class="post-content">
-                                <p>Your post content will be here!</p>
+                            <div>
+                                <p style="margin-left: 9px">Twitter</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-                <div class="container">
-                    <div class="row posts-list">
-                        <div class="post-container">
-
-                            <p>Tumblr</p>
-                            <div class="main">
-                                <img src="Gifs/clock.webp" width="25" height="25">
-                                <p>Created: </p>
-                            </div>
-                            <div class="post-content">
-                                <p>Your post content will be here!</p>
-                            </div>
-                            <div class="interactions">
-
-                                <img src="Gifs/comment.webp" width="25" height="25">
-                                <p>Note Count: </p>
-
-                            </div>
-                            <div class="original-post">
-                                <a class="original-post" href="#">Original Post</a>
-                            </div>
+                        <div class="main">
+                            <img height="25" src="/resources/Gifs/clock.webp" width="25">
+                            <p th:text="'Created: ' + ${tweet.creationDate}"></p>
                         </div>
+                        <div class="post-content">
+                            <p th:text="${tweet.tweetText}">Your post content will be here!</p>
+                        </div>
+                        <hr>
                     </div>
                 </div>
+            </div>
+<!--            <div class="container">-->
+<!--                <div class="row posts-list">-->
+<!--                    &lt;!&ndash; Iterating over each post &ndash;&gt;-->
+<!--                    <div th:each="post : ${posts}" class="col-md-4 post-container">-->
+<!--                        <p>Tumblr</p>-->
+<!--                        <div class="main">-->
+<!--                            &lt;!&ndash; Assuming you have or will convert the post's creation time into a format that can be used as an image alt text &ndash;&gt;-->
+<!--                            <img height="25" src="/resources/Gifs/clock.webp" width="25" alt="Post Creation Time">-->
+<!--                            <p th:text="'Created: ' + ${#temporals.format(post.date, 'yyyy-MM-dd HH:mm')}">Created: </p>-->
+<!--                        </div>-->
+<!--                        <div class="post-content">-->
+<!--                            <p th:utext="${post.content}">Your post content will be here!</p>-->
+<!--                        </div>-->
+<!--                        <div class="interactions">-->
+<!--                            <img height="25" src="/resources/Gifs/comment.webp" width="25" alt="Note Count">-->
+<!--                            <p th:text="'Note Count: ' + ${post.noteCount}">Note Count: </p>-->
+<!--                        </div>-->
+<!--                        <div class="original-post">-->
+<!--                            <a th:href="${post.postUrl}" th:text="${post.postUrl}">Original Post</a>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
                 <div class="container">
                     <div class="row posts-list">
                         <div class="post-container">
@@ -175,7 +187,7 @@
                             </div>
                             <div class="interactions">
 
-                                <img src="Gifs/favorite.webp" width="25" height="25">
+                                <img height="25" src="/resources/Gifs/favorite.webp" width="25">
                                 <p>Favorite count: </p>
 
                             </div>
@@ -190,11 +202,32 @@
     </div>
 </div>
 
+<style>
+    .first-tweet:first-child {
+        margin-top: 28px;
+    }
+
+    .first-reddit:first-child {
+        margin-top: 28px;
+    }
+
+    ion-icon[name="logo-reddit"] {
+        color: orangered;
+        font-size: 32px;
+    }
+
+    ion-icon[name="logo-twitter"] {
+        color: #1da1f3;
+        font-size: 32px;
+    }
+</style>
 
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+<script crossorigin="anonymous"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" type="module"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
 
 </html>

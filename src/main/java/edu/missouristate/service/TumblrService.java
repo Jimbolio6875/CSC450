@@ -16,4 +16,8 @@ public interface TumblrService {
     List<Tumblr> getPostsByBlog();
 
     void updatePosts() throws IOException, ExecutionException, InterruptedException;
+
+    List<String> getAllTubmlrIds();
+
+    List<Tumblr> tumblrPosts(List<String> tublrIds);
 }
