@@ -40,7 +40,15 @@
         <ion-icon name="time-outline"></ion-icon>
         <button><a class="btn btn-primary" th:href="@{/post-history}">Post History</a></button>
     </div>
-
+</div>
+<div>
+    <h1>Post a Message to Mastodon</h1>
+    <form method="post" th:action="@{/submit-post}">
+        <label>
+            <textarea name="message" placeholder="Your message..." required></textarea>
+        </label>
+        <button type="submit">Post Message</button>
+    </form>
 </div>
 
 
