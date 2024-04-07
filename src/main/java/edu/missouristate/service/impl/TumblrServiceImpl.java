@@ -300,4 +300,9 @@ public class TumblrServiceImpl implements TumblrService {
         }
 
     }
+
+    @Override
+    public List<Tumblr> getAllPosts() {
+        return (List<Tumblr>) tumblrRepository.findAll();
+    }
 }

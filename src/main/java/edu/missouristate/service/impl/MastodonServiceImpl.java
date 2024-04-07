@@ -189,5 +189,10 @@ public class MastodonServiceImpl implements MastodonService {
         }
     }
 
+    @Override
+    public List<Mastodon> getAllPosts() {
+        return (List<Mastodon>) mastodonRepository.findAll();
+    }
+
 
 }

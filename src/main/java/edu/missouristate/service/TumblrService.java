@@ -21,4 +21,6 @@ public interface TumblrService {
     Tuple getLatestUser();
 
     void updateOrCreateTumblrPost(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message);
+
+    List<Tumblr> getAllPosts();
 }
