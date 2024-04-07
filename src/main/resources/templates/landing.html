@@ -60,7 +60,7 @@
             </div>
         </div>
         <div class="col py-3">
-            <h3>Welcome "Username"! </h3>
+            <h3 th:text="'Welcome ' + ${session.username}"> Welcome </h3>
             <div class="container">
                 <div class="posts-text">
                     <p>Click on any social media icon below and connect to your account!</p>
