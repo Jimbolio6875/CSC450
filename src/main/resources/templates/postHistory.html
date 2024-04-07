@@ -209,6 +209,9 @@
                         <div class="post-content">
                             <p th:utext="${post.content}">Your post content will be here!</p>
                         </div>
+                        <div class="original-post">
+                            <a th:href="${post.postUrl}" class="original-post" target="_blank">Original Post</a>
+                        </div>
                         <hr>
                     </div>
                 </div>
@@ -226,13 +229,19 @@
                                 <p style="margin-left: 9px">Tumblr</p>
                             </div>
                         </div>
-<!--                        <div class="interactions">-->
-<!--                            <img height="25" src="/resources/Gifs/like.webp" width="25">-->
-<!--                            &lt;!&ndash;/*@thymesVar id="favouriteCount" type="java.lang.Integer"*/&ndash;&gt;-->
-<!--                            <p th:text="'Note Count: ' + ${post.noteCount}"></p>-->
-<!--                        </div>-->
+                        <div class="main">
+                            <img height="25" src="/resources/Gifs/clock.webp" width="25">
+                            <p th:text="'Created: ' + ${post.date}"></p>
+                        </div>
                         <div class="post-content">
                             <p th:utext="${post.content}">Your post content will be here!</p>
+                        </div>
+                        <div class="interactions">
+                            <img height="25" src="/resources/Gifs/like.webp" width="25">
+                            <p th:text="'Note Count: ' + ${post.noteCount}"></p>
+                        </div>
+                        <div class="original-post">
+                            <a th:href="${post.postUrl}" class="original-post" target="_blank">Original Post</a>
                         </div>
                         <hr>
                     </div>

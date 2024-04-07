@@ -1,6 +1,7 @@
 package edu.missouristate.service.impl;
 
 import edu.missouristate.dao.MastodonRepository;
+import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.Mastodon;
 import edu.missouristate.service.MastodonService;
 import org.json.JSONArray;
@@ -127,11 +128,13 @@ public class MastodonServiceImpl implements MastodonService {
 //            System.out.println(userObject.getString("id"));
 
             Mastodon post = new Mastodon();
+
             post.setPostId(id);
             post.setUserId(userId);
             post.setContent(content);
             post.setPostUrl(url);
             post.setFavouriteCount(favourites);
+//            post.setCentralLogin(centralLogin);
 
             return post;
 //            System.out.println(id.concat(" ").concat(content).concat(" ").concat(url).concat(" ").concat(String.valueOf(favourites)));
@@ -143,6 +146,8 @@ public class MastodonServiceImpl implements MastodonService {
 
         return null;
     }
+
+
 
     @Override
     public List<Mastodon> fetchMastodonPostsByUserId(String userId, String accessToken) {
@@ -179,8 +184,14 @@ public class MastodonServiceImpl implements MastodonService {
         return (List<Mastodon>) mastodonRepository.findAll();
     }
 
+    @Override
+    public void updatePosts() {
+
+    }
+
     private Mastodon transformToMastodonPost(JSONObject postObject) {
         Mastodon post = new Mastodon();
+
         post.setPostId(postObject.getString("id"));
         post.setContent(postObject.getString("content"));
         post.setPostUrl(postObject.getString("url"));

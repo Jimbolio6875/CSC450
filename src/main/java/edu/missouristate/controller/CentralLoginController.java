@@ -1,9 +1,11 @@
 package edu.missouristate.controller;
 
 import edu.missouristate.domain.CentralLogin;
+import edu.missouristate.domain.Mastodon;
 import edu.missouristate.dto.GenericResponse;
 import edu.missouristate.dto.LoginResponse;
 import edu.missouristate.service.CentralLoginService;
+import edu.missouristate.service.MastodonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +20,7 @@ public class CentralLoginController {
 
     @Autowired
     CentralLoginService centralLoginService;
+
 
     @GetMapping(value = {"/", "/home"})
     public String getIndex() {
