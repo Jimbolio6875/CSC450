@@ -267,4 +267,9 @@ public class TumblrServiceImpl implements TumblrService {
     public List<Tumblr> tumblrPosts(List<String> tublrIds) {
         return tumblrRepository.tumblrPosts(tublrIds);
     }
+
+    @Override
+    public List<Tumblr> getAllPosts() {
+        return (List<Tumblr>) tumblrRepository.findAll();
+    }
 }

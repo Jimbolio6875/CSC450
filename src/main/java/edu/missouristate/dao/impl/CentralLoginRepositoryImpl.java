@@ -3,6 +3,7 @@ package edu.missouristate.dao.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.missouristate.domain.Mastodon;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import edu.missouristate.dao.custom.CentralLoginRepositoryCustom;
@@ -40,6 +41,7 @@ public class CentralLoginRepositoryImpl extends QuerydslRepositorySupport implem
 		}
 		else {
 			CentralLogin login = results.get(0);
+
 			response.setLoggedIn(true);
 			response.setFirstName(login.getFirstName());
 			response.setLastName(login.getLastName());

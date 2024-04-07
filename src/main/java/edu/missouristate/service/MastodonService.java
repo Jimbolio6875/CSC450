@@ -20,4 +20,8 @@ public interface MastodonService {
 
     public List<Mastodon> fetchMastodonPostsByUserId(String userId, String accessToken);
 
+    List<Mastodon> getAllPosts();
+
+    void updatePosts();
+
 }

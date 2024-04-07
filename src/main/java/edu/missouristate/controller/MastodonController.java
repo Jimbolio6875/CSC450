@@ -76,6 +76,7 @@ public class MastodonController {
     @RequestMapping("/post-message")
     public ModelAndView showPostMessageForm(HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("mastodon/post-message");
+//        ModelAndView modelAndView1 = new ModelAndView("postHistory");
         String accessToken = (String) session.getAttribute("accessToken");
 
         if (accessToken != null) {

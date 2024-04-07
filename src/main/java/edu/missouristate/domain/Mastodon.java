@@ -1,9 +1,8 @@
 package edu.missouristate.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigInteger;
 
@@ -14,6 +13,10 @@ public class Mastodon implements Serializable {
     public Mastodon() {};
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", columnDefinition = "SERIAL")
+    private Integer id;
+
     @Column(name = "post_id", columnDefinition = "VARCHAR(255)")
     private String postId;
 
@@ -28,6 +31,14 @@ public class Mastodon implements Serializable {
 
     @Column(name = "favourite_count", columnDefinition = "INTEGER")
     private Integer favouriteCount;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getPostId() {
         return postId;

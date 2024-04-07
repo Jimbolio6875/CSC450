@@ -23,6 +23,41 @@
 <body>
 <div class="container-fluid">
     <div class="row flex-nowrap">
+<!--        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white"-->
+<!--             style="border-right: 2px solid #000; width: 200px">-->
+<!--            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">-->
+<!--                <a class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-black text-decoration-none title"-->
+<!--                   href="index.html">-->
+<!--                    <img alt="#" id="logo" src="/resources/Socials/logo.png">-->
+<!--                </a>-->
+<!--                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"-->
+<!--                    id="menu">-->
+<!--                    <li class="nav-item">-->
+<!--                        <a class="nav-link align-middle px-0 text-black" href="posts.html">-->
+<!--                            <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                    <li>-->
+<!--                        <a class="nav-link px-0 align-middle text-black" href="postHistory.html">-->
+<!--                            <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Post-->
+<!--                                    History</span></a>-->
+<!--                    </li>-->
+<!--                    <div class="dropdown">-->
+<!--                        <a aria-expanded="false"-->
+<!--                           class="d-flex align-items-center text-black text-decoration-none dropdown-toggle"-->
+<!--                           data-bs-toggle="dropdown" href="#" id="dropdownUser1">-->
+<!--                            &lt;!&ndash;<img src="Socials/user.png" width="25" height="25" class="rounded-circle">&ndash;&gt;-->
+<!--                            <i class="fs-4 bi-people"></i>-->
+<!--                            <span class="d-none d-sm-inline mx-1">User</span>-->
+<!--                        </a>-->
+<!--                        <ul aria-labelledby="dropdownUser1"-->
+<!--                            class="dropdown-menu dropdown-menu-white text-small shadow">-->
+<!--                            <li><a class="dropdown-item" href="#">Sign out</a></li>-->
+<!--                        </ul>-->
+<!--                    </div>-->
+<!--                </ul>-->
+<!--            </div>-->
+<!--        </div>-->
         <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white"
              style="border-right: 2px solid #000; width: 200px">
             <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
@@ -33,7 +68,7 @@
                 <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
                     id="menu">
                     <li class="nav-item">
-                        <a class="nav-link align-middle px-0 text-black" th:href="@{/posts}">
+                        <a th:href="@{/landing}" class="nav-link align-middle px-0 text-black">
                             <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
                         </a>
                     </li>
@@ -129,8 +164,6 @@
                         </div>
                     </div>
                 </div>
-
-
             </div>
             <div class="container">
                 <div class="row posts-list">
@@ -149,6 +182,65 @@
                         </div>
                         <div class="post-content">
                             <p th:text="${tweet.tweetText}">Your post content will be here!</p>
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+            </div>
+
+            <!--            mastodon not updating when refreshing page so i took out favourites count for now           -->
+            <div class="container">
+                <div class="row posts-list">
+                    <div th:each="post : ${mastodonPosts}" class="post-container first-tweet">
+                        <div style="display: flex; justify-content: space-between; flex-direction: row-reverse; align-items: center">
+                            <div>
+                                <ion-icon name="logo-mastodon"></ion-icon>
+                            </div>
+                            <div>
+                                <p style="margin-left: 9px">Mastodon</p>
+                            </div>
+                        </div>
+<!--                        <div class="interactions">-->
+<!--                            <img height="25" src="/resources/Gifs/like.webp" width="25">-->
+<!--                            &lt;!&ndash;/*@thymesVar id="favouriteCount" type="java.lang.Integer"*/&ndash;&gt;-->
+<!--                            <p th:text="'Favourite Count: ' + ${post.favouriteCount}"></p>-->
+<!--                        </div>-->
+                        <div class="post-content">
+                            <p th:utext="${post.content}">Your post content will be here!</p>
+                        </div>
+                        <div class="original-post">
+                            <a th:href="${post.postUrl}" class="original-post" target="_blank">Original Post</a>
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+            </div>
+
+            <!--             took out note count for same reason i took out mastodon favourites count                -->
+            <div class="container">
+                <div class="row posts-list">
+                    <div th:each="post : ${tumblrPosts}" class="post-container first-tweet">
+                        <div style="display: flex; justify-content: space-between; flex-direction: row-reverse; align-items: center">
+                            <div>
+                                <ion-icon name="logo-tumblr"></ion-icon>
+                            </div>
+                            <div>
+                                <p style="margin-left: 9px">Tumblr</p>
+                            </div>
+                        </div>
+                        <div class="main">
+                            <img height="25" src="/resources/Gifs/clock.webp" width="25">
+                            <p th:text="'Created: ' + ${post.date}"></p>
+                        </div>
+                        <div class="post-content">
+                            <p th:utext="${post.content}">Your post content will be here!</p>
+                        </div>
+                        <div class="interactions">
+                            <img height="25" src="/resources/Gifs/like.webp" width="25">
+                            <p th:text="'Note Count: ' + ${post.noteCount}"></p>
+                        </div>
+                        <div class="original-post">
+                            <a th:href="${post.postUrl}" class="original-post" target="_blank">Original Post</a>
                         </div>
                         <hr>
                     </div>
@@ -177,26 +269,26 @@
 <!--                    </div>-->
 <!--                </div>-->
 <!--            </div>-->
-                <div class="container">
-                    <div class="row posts-list">
-                        <div class="post-container">
+<!--                <div class="container">-->
+<!--                    <div class="row posts-list">-->
+<!--                        <div class="post-container">-->
 
-                            <p>Mastodon</p>
-                            <div class="post-content">
-                                <p>Your post content will be here!</p>
-                            </div>
-                            <div class="interactions">
+<!--                            <p>Mastodon</p>-->
+<!--                            <div class="post-content">-->
+<!--                                <p>Your post content will be here!</p>-->
+<!--                            </div>-->
+<!--                            <div class="interactions">-->
 
-                                <img height="25" src="/resources/Gifs/favorite.webp" width="25">
-                                <p>Favorite count: </p>
+<!--                                <img height="25" src="/resources/Gifs/favorite.webp" width="25">-->
+<!--                                <p>Favorite count: </p>-->
 
-                            </div>
-                            <div class="original-post">
-                                <a class="original-post" href="#">Original Post</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!--                            </div>-->
+<!--                            <div class="original-post">-->
+<!--                                <a class="original-post" href="#">Original Post</a>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
         </div>
     </div>

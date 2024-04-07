@@ -15,6 +15,8 @@ CREATE TABLE `central_login` (
   PRIMARY KEY (`central_login_id`)
 );
 
+SELECT * FROM central_login;
+
 CREATE TABLE social_media_accounts
 (
     account_id    INT AUTO_INCREMENT PRIMARY KEY,

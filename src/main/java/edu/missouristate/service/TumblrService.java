@@ -20,4 +20,6 @@ public interface TumblrService {
     List<String> getAllTubmlrIds();
 
     List<Tumblr> tumblrPosts(List<String> tublrIds);
+
+    List<Tumblr> getAllPosts();
 }
