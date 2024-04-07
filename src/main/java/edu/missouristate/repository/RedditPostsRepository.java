@@ -13,4 +13,5 @@ public interface RedditPostsRepository extends CrudRepository<RedditPosts, Integ
     @Query("SELECT rp.postId FROM RedditPosts rp")
     List<String> findAllPostIds();
 
+    RedditPosts findByPostId(String postId);
 }

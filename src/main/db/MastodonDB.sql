@@ -4,11 +4,14 @@ DROP TABLE IF EXISTS mastodon;
 
 CREATE TABLE mastodon
 (
-    post_id VARCHAR(255) NOT NULL,
-    user_id VARCHAR(255) NOT NULL,
-    content VARCHAR(255) NOT NULL,
-    post_url VARCHAR(255) NOT NULL,
-    favourite_count INTEGER NOT NULL
+    id              SERIAL PRIMARY KEY,
+    post_id         VARCHAR(255),
+    user_id         VARCHAR(255),
+    content         VARCHAR(255),
+    post_url        VARCHAR(255),
+    favourite_count INTEGER,
+    access_token    VARCHAR(1000) NOT NULL
 );
 
-SELECT * FROM mastodon;
+SELECT *
+FROM mastodon;

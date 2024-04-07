@@ -3,8 +3,9 @@ DROP TABLE IF EXISTS twitter;
 
 CREATE TABLE twitter
 (
-    id            SERIAL PRIMARY KEY,
-    tweet_id      BIGINT NOT NULL,
-    tweet_text    TEXT   NOT NULL,
-    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id                  SERIAL PRIMARY KEY,
+    tweet_text          TEXT,
+    creation_date       TIMESTAMP,
+    access_token        VARCHAR(320) NOT NULL,
+    access_token_secret VARCHAR(320) NOT NULL
 );

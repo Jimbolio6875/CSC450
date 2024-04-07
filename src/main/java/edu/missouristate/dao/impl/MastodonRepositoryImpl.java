@@ -1,5 +1,6 @@
 package edu.missouristate.dao.impl;
 
+import com.querydsl.core.Tuple;
 import edu.missouristate.dao.custom.MastodonRepositoryCustom;
 import edu.missouristate.domain.Mastodon;
 import edu.missouristate.domain.QMastodon;
@@ -25,6 +26,31 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
                 .fetch();
     }
 
+    @Override
+    public Tuple getLatestAccessToken() {
+        return from(mastodonTable).select(mastodonTable.accessToken, mastodonTable.id.max())
+                .groupBy(mastodonTable.accessToken).fetchOne();
+    }
+
+    @Override
+    public void updateWherePostIdIsNull(String accessToken, String id, String userId, String content, String url, Integer favourites) {
+        update(mastodonTable).where(mastodonTable.postId.isNull())
+                .set(mastodonTable.accessToken, accessToken)
+                .set(mastodonTable.postId, id)
+                .set(mastodonTable.userId, userId)
+                .set(mastodonTable.content, content)
+                .set(mastodonTable.postUrl, url)
+                .set(mastodonTable.favouriteCount, favourites)
+                .execute();
+
+    }
+
+    @Override
+    public Mastodon findExistingPostByTokenAndNoText(String accessToken) {
+        return from(mastodonTable)
+                .where(mastodonTable.accessToken.eq(accessToken).and(mastodonTable.content.isNull())).fetchOne();
+    }
+
 
 //    @Override
 //    public List<String> getPostContent() {
@@ -41,8 +67,6 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 //                .limit(50)
 //                .fetch();
 //    }
-
-
 
 
 }

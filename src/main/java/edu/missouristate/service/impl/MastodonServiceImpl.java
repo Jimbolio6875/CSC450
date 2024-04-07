@@ -1,5 +1,6 @@
 package edu.missouristate.service.impl;
 
+import com.querydsl.core.Tuple;
 import edu.missouristate.dao.MastodonRepository;
 import edu.missouristate.domain.Mastodon;
 import edu.missouristate.service.MastodonService;
@@ -8,26 +9,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+@Transactional
 @Service
 public class MastodonServiceImpl implements MastodonService {
 
-    @Autowired
-    MastodonRepository mastodonRepository;
-
-    @Value("${mastodon.clientId}")
-    private String CLIENT_ID;
-
-    @Value("${mastodon.clientSecret}")
-    private String CLIENT_SECRET;
     private static final String REDIRECT_URI = "http://localhost:8080/callback";
     private static final String SCOPE = "read write";
+    @Autowired
+    MastodonRepository mastodonRepository;
+    @Value("${mastodon.clientId}")
+    private String CLIENT_ID;
+    @Value("${mastodon.clientSecret}")
+    private String CLIENT_SECRET;
 
     @Override
     // set client_id/secret/auth to get token
@@ -55,6 +55,12 @@ public class MastodonServiceImpl implements MastodonService {
             JSONObject jsonResponse = new JSONObject(response.getBody());
             String accessToken = jsonResponse.getString("access_token");
             System.out.println("access token: " + accessToken);
+
+
+            Mastodon mastodon = new Mastodon();
+            mastodon.setAccessToken(accessToken);
+            mastodonRepository.save(mastodon);
+
             return accessToken;
 
         } catch (Exception e) {
@@ -127,12 +133,15 @@ public class MastodonServiceImpl implements MastodonService {
 
 //            System.out.println(userObject.getString("id"));
 
+            mastodonRepository.updateWherePostIdIsNull(accessToken, id, userId, content, url, favourites);
+
             Mastodon post = new Mastodon();
             post.setPostId(id);
             post.setUserId(userId);
             post.setContent(content);
             post.setPostUrl(url);
             post.setFavouriteCount(favourites);
+
 
             return post;
 //            System.out.println(id.concat(" ").concat(content).concat(" ").concat(url).concat(" ").concat(String.valueOf(favourites)));
@@ -153,6 +162,31 @@ public class MastodonServiceImpl implements MastodonService {
     @Override
     public List<Mastodon> getPostsByUserId(String userId) {
         return mastodonRepository.getPostsByUserId(userId);
+    }
+
+    @Override
+    public Tuple getLatestAccessToken() {
+        return mastodonRepository.getLatestAccessToken();
+    }
+
+    @Override
+    public Mastodon findExistingPostByTokenAndNoText(String accessToken) {
+        return mastodonRepository.findExistingPostByTokenAndNoText(accessToken);
+    }
+
+    @Override
+    public void updateOrCreateMastodonPost(String mastroAccessToken, String message) {
+        Mastodon existingPost = mastodonRepository.findExistingPostByTokenAndNoText(mastroAccessToken);
+
+        if (existingPost != null) {
+            existingPost.setContent(message);
+            mastodonRepository.save(existingPost);
+        } else {
+            Mastodon newPost = new Mastodon();
+            newPost.setAccessToken(mastroAccessToken);
+            newPost.setContent(message);
+            mastodonRepository.save(newPost);
+        }
     }
 
 

@@ -144,9 +144,14 @@ public class RedditController {
             modelAndView.addObject("message", "Extracted access token is empty.");
             return modelAndView;
         }
+
+        RedditPosts redditPosts = new RedditPosts();
+        redditPosts.setAccessToken(accessToken);
+        redditPostsService.saveRedditPost(redditPosts);
+
         session.setAttribute("REDDIT_ACCESS_TOKEN", accessToken);
 
-        modelAndView.setViewName("redirect:/reddit/submitRedditPost");
+        modelAndView.setViewName("redirect:/login");
         return modelAndView;
     }
 
@@ -222,6 +227,7 @@ public class RedditController {
     public ModelAndView showSubmitRedditPost(HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("reddit/submitRedditPost");
         String accessToken = (String) session.getAttribute("REDDIT_ACCESS_TOKEN");
+
 
         log.debug("Retrieved Access Token from session: {}", accessToken);
 

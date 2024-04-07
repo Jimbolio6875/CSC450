@@ -1,5 +1,6 @@
 package edu.missouristate.service;
 
+import com.querydsl.core.Tuple;
 import edu.missouristate.domain.Tumblr;
 
 import java.io.IOException;
@@ -11,9 +12,13 @@ public interface TumblrService {
 
     String getUserInfo(String oauthVerifier) throws Exception;
 
-    void postToBlog(String postContent) throws Exception;
+    String postToBlog(String postContent) throws Exception;
 
     List<Tumblr> getPostsByBlog();
 
     void updatePosts() throws IOException, ExecutionException, InterruptedException;
+
+    Tuple getLatestUser();
+
+    void updateOrCreateTumblrPost(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message);
 }

@@ -68,8 +68,10 @@ public class TwitterController {
                 Twitter newTweet = new Twitter();
 
                 newTweet.setCreationDate(LocalDateTime.now());
-                newTweet.setTweetId(postId);
+//                newTweet.setTweetId(postId);
                 newTweet.setTweetText(textTweet);
+                newTweet.setAccessToken(accessToken);
+                newTweet.setAccessTokenSecret(accessTokenSecret);
 
                 twitterService.saveTweet(newTweet);
 
@@ -99,13 +101,14 @@ public class TwitterController {
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
+            System.out.println("STOP");
             String tokens = new BufferedReader(new InputStreamReader(process.getInputStream())).readLine();
 
             String[] parts = tokens.split(",");
             session.setAttribute("access_token", parts[0]);
             session.setAttribute("access_token_secret", parts[1]);
 
-            return "redirect:/post-tweet"; //<-- Redirect to the tweet posting form
+            return "redirect:/"; //<-- Redirect to the tweet posting form
         } catch (IOException e) {
             e.printStackTrace();
             return "error";
@@ -124,6 +127,8 @@ public class TwitterController {
     @GetMapping("/oauth-callback")
     public String oauthCallback(@RequestParam("oauth_token") String oauthToken, @RequestParam("oauth_verifier") String oauthVerifier, HttpSession session) {
         try {
+
+
             System.out.println("Entering oauthCallback method.");
             System.out.println("OAuth Token: " + oauthToken);
             System.out.println("OAuth Verifier: " + oauthVerifier);
@@ -157,6 +162,12 @@ public class TwitterController {
                 System.err.println("Invalid tokens format: " + line);
                 throw new RuntimeException("Invalid tokens format: " + line);
             }
+            Twitter newTwitterCredentials = new Twitter();
+            newTwitterCredentials.setAccessToken(tokens[0]);
+            newTwitterCredentials.setAccessTokenSecret(tokens[1]);
+//            newTwitterCredentials.setCreationDate(LocalDateTime.now());
+
+            twitterService.saveTweet(newTwitterCredentials);
 
             session.setAttribute("access_token", tokens[0]);
             session.setAttribute("access_token_secret", tokens[1]);
@@ -164,7 +175,8 @@ public class TwitterController {
             System.out.println("Token 1 Access Token Secret-> " + tokens[1]);
             System.out.println("Access token and secret set in session. Redirecting to post-tweet.");
 
-            return "redirect:/post-tweet";
+
+            return "redirect:/login";
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Exception in oauthCallback: " + e.getMessage());
