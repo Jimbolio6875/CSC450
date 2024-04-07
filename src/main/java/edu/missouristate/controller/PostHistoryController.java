@@ -54,10 +54,10 @@ public class PostHistoryController {
         // will have to implement user id as foreign key in mastodon/tumblr tables
 
         List<Mastodon> mastodonPosts = mastodonService.getAllPosts();
-        Collections.reverse(mastodonPosts);
+//        Collections.reverse(mastodonPosts);
 
         List<Tumblr> tumblrPosts = tumblrService.getAllPosts();
-        Collections.reverse(tumblrPosts);
+//        Collections.reverse(tumblrPosts);
 
         modelAndView.addObject("redditPosts", redditPosts);
         modelAndView.addObject("tweets", tweets);
