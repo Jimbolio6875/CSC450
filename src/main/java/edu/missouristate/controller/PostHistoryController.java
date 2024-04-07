@@ -1,8 +1,6 @@
 package edu.missouristate.controller;
 
-import edu.missouristate.domain.Mastodon;
 import edu.missouristate.domain.RedditPosts;
-import edu.missouristate.domain.Tumblr;
 import edu.missouristate.domain.Twitter;
 import edu.missouristate.service.MastodonService;
 import edu.missouristate.service.RedditPostsService;
@@ -14,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -54,16 +50,16 @@ public class PostHistoryController {
         // todo will check whenever i can sign out and make a new account
         // will have to implement user id as foreign key in mastodon/tumblr tables
 
-        List<Mastodon> mastodonPosts = mastodonService.getAllPosts();
-        Collections.reverse(mastodonPosts);
+//        List<Mastodon> mastodonPosts = mastodonService.getAllPosts();
+//        Collections.reverse(mastodonPosts);
 
-        List<Tumblr> tumblrPosts = tumblrService.getAllPosts();
-        Collections.reverse(tumblrPosts);
+//        List<Tumblr> tumblrPosts = tumblrService.getAllPosts();
+//        Collections.reverse(tumblrPosts);
 
         modelAndView.addObject("redditPosts", redditPosts);
         modelAndView.addObject("tweets", tweets);
-        modelAndView.addObject("mastodonPosts", mastodonPosts);
-        modelAndView.addObject("tumblrPosts", tumblrPosts);
+//        modelAndView.addObject("mastodonPosts", mastodonPosts);
+//        modelAndView.addObject("tumblrPosts", tumblrPosts);
 //        modelAndView.addObject("posts", tumblrPosts);
 
         return modelAndView;

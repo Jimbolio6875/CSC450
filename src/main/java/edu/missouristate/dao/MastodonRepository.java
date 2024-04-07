@@ -5,5 +5,5 @@ import edu.missouristate.domain.Mastodon;
 import org.springframework.data.repository.CrudRepository;
 
 public interface MastodonRepository extends CrudRepository<Mastodon, String>, MastodonRepositoryCustom {
-    
+
 }

@@ -1,22 +1,22 @@
 package edu.missouristate.service.impl;
 
+import com.querydsl.core.Tuple;
 import edu.missouristate.dao.MastodonRepository;
-import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.Mastodon;
 import edu.missouristate.service.MastodonService;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
+@Transactional
 @Service
 public class MastodonServiceImpl implements MastodonService {
 
@@ -55,6 +55,12 @@ public class MastodonServiceImpl implements MastodonService {
             JSONObject jsonResponse = new JSONObject(response.getBody());
             String accessToken = jsonResponse.getString("access_token");
             System.out.println("access token: " + accessToken);
+
+
+            Mastodon mastodon = new Mastodon();
+            mastodon.setAccessToken(accessToken);
+            mastodonRepository.save(mastodon);
+
             return accessToken;
 
         } catch (Exception e) {
@@ -127,14 +133,15 @@ public class MastodonServiceImpl implements MastodonService {
 
 //            System.out.println(userObject.getString("id"));
 
-            Mastodon post = new Mastodon();
+            mastodonRepository.updateWherePostIdIsNull(accessToken, id, userId, content, url, favourites);
 
+            Mastodon post = new Mastodon();
             post.setPostId(id);
             post.setUserId(userId);
             post.setContent(content);
             post.setPostUrl(url);
             post.setFavouriteCount(favourites);
-//            post.setCentralLogin(centralLogin);
+
 
             return post;
 //            System.out.println(id.concat(" ").concat(content).concat(" ").concat(url).concat(" ").concat(String.valueOf(favourites)));
@@ -147,60 +154,6 @@ public class MastodonServiceImpl implements MastodonService {
         return null;
     }
 
-
-
-    @Override
-    public List<Mastodon> fetchMastodonPostsByUserId(String userId, String accessToken) {
-        RestTemplate restTemplate = new RestTemplate();
-        List<Mastodon> posts = new ArrayList<>();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-
-        // Assuming Mastodon's API provides a way to fetch posts by user ID
-        String url = "https://mastodon.social/api/v1/accounts/" + userId + "/statuses";
-
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            JSONArray postsArray = new JSONArray(response.getBody());
-            for (int i = 0; i < postsArray.length(); i++) {
-                JSONObject postObject = postsArray.getJSONObject(i);
-                Mastodon post = transformToMastodonPost(postObject);
-                posts.add(post);
-                // Optionally, save each post to the database here
-                savePost(post);
-            }
-        } else {
-            throw new RuntimeException("Failed to fetch Mastodon posts for user ID: " + userId);
-        }
-
-        return posts;
-    }
-
-    @Override
-    public List<Mastodon> getAllPosts() {
-        return (List<Mastodon>) mastodonRepository.findAll();
-    }
-
-    @Override
-    public void updatePosts() {
-
-    }
-
-    private Mastodon transformToMastodonPost(JSONObject postObject) {
-        Mastodon post = new Mastodon();
-
-        post.setPostId(postObject.getString("id"));
-        post.setContent(postObject.getString("content"));
-        post.setPostUrl(postObject.getString("url"));
-        post.setFavouriteCount(postObject.getInt("favourites_count"));
-
-        // Transform other fields as necessary
-        return post;
-    }
-
     @Override
     public void savePost(Mastodon post) {
         mastodonRepository.save(post);
@@ -209,6 +162,31 @@ public class MastodonServiceImpl implements MastodonService {
     @Override
     public List<Mastodon> getPostsByUserId(String userId) {
         return mastodonRepository.getPostsByUserId(userId);
+    }
+
+    @Override
+    public Tuple getLatestAccessToken() {
+        return mastodonRepository.getLatestAccessToken();
+    }
+
+    @Override
+    public Mastodon findExistingPostByTokenAndNoText(String accessToken) {
+        return mastodonRepository.findExistingPostByTokenAndNoText(accessToken);
+    }
+
+    @Override
+    public void updateOrCreateMastodonPost(String mastroAccessToken, String message) {
+        Mastodon existingPost = mastodonRepository.findExistingPostByTokenAndNoText(mastroAccessToken);
+
+        if (existingPost != null) {
+            existingPost.setContent(message);
+            mastodonRepository.save(existingPost);
+        } else {
+            Mastodon newPost = new Mastodon();
+            newPost.setAccessToken(mastroAccessToken);
+            newPost.setContent(message);
+            mastodonRepository.save(newPost);
+        }
     }
 
 

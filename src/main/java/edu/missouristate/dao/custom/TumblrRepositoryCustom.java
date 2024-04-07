@@ -1,5 +1,6 @@
 package edu.missouristate.dao.custom;
 
+import com.querydsl.core.Tuple;
 import edu.missouristate.domain.Tumblr;
 
 import java.util.List;
@@ -9,9 +10,9 @@ public interface TumblrRepositoryCustom {
 
     void updatePost(Tumblr post);
 
-    List<String> getAllTumblrIds();
+    Tuple getLatestUser();
 
-    List<Tumblr> tumblrPosts(List<String> tublrIds);
+    void updateWherePostIdIsNull(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message);
 
-//    TumblrAccessToken getTumblrAccessToken(String blogIdentifier);
+    Tumblr findExistingPostByTokenAndNoText(String accessToken);
 }

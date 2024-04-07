@@ -1,5 +1,6 @@
 package edu.missouristate.dao.impl;
 
+import com.querydsl.core.Tuple;
 import edu.missouristate.dao.custom.TumblrRepositoryCustom;
 import edu.missouristate.domain.QTumblr;
 import edu.missouristate.domain.Tumblr;
@@ -9,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Transactional
 @Repository
 public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements TumblrRepositoryCustom {
 
@@ -38,27 +38,32 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
                 .execute();
     }
 
+
     @Override
-    public List<String> getAllTumblrIds() {
-        return from(tumblrTable).select(tumblrTable.postId).fetch();
+    public Tuple getLatestUser() {
+        return from(tumblrTable)
+                .select(tumblrTable.accessToken, tumblrTable.tokenSecret, tumblrTable.blogIdentifier, tumblrTable.id.max())
+                .groupBy(tumblrTable.accessToken, tumblrTable.tokenSecret, tumblrTable.blogIdentifier)
+                .fetchOne();
+    }
+
+    @Override
+    public void updateWherePostIdIsNull(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message) {
+        update(tumblrTable).where(tumblrTable.postId.isNull())
+                .set(tumblrTable.accessToken, accessToken)
+                .set(tumblrTable.tokenSecret, tokenSecret)
+                .set(tumblrTable.blogIdentifier, blogIdentifier)
+                .set(tumblrTable.postId, postId)
+                .set(tumblrTable.content, message)
+                .execute();
+
+    }
+
+    @Override
+    public Tumblr findExistingPostByTokenAndNoText(String accessToken) {
+        return from(tumblrTable)
+                .where(tumblrTable.accessToken.eq(accessToken).and(tumblrTable.content.isNull())).fetchOne();
     }
 
 
-    @Override
-    public List<Tumblr> tumblrPosts(List<String> tumblrIds) {
-        return from(tumblrTable).where(tumblrTable.postId.in(tumblrIds)).fetch();
-    }
-
-//    public TumblrAccessToken getTumblrAccessToken(String blogIdentifier) {
-//
-//        Tumblr account = from(tumblrTable)
-//                .where(tumblrTable.blogIdentifier.eq(blogIdentifier))
-//                .fetchOne();
-//
-//        if (account == null) {
-//            throw new IllegalStateException("Access token not found for blogIdentifier: " + blogIdentifier);
-//        }
-//
-//        return new TumblrAccessToken(account.getAccessToken(), account.getAccessTokenSecret());
-//    }
 }

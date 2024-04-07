@@ -1,5 +1,6 @@
 package edu.missouristate.service;
 
+import com.querydsl.core.Tuple;
 import edu.missouristate.domain.Mastodon;
 
 import java.util.List;
@@ -18,10 +19,9 @@ public interface MastodonService {
 
     List<Mastodon> getPostsByUserId(String userId);
 
-    public List<Mastodon> fetchMastodonPostsByUserId(String userId, String accessToken);
+    Tuple getLatestAccessToken();
 
-    List<Mastodon> getAllPosts();
+    Mastodon findExistingPostByTokenAndNoText(String accessToken);
 
-    void updatePosts();
-
+    void updateOrCreateMastodonPost(String mastroAccessToken, String message);
 }

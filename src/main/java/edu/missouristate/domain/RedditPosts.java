@@ -5,6 +5,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+
 @Entity
 @Table(name = "reddit_posts")
 public class RedditPosts {
@@ -13,15 +14,15 @@ public class RedditPosts {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", columnDefinition = "INTEGER")
     private Integer id;
-    @Column(name = "post_id", columnDefinition = "VARCHAR(255)", nullable = false)
+    @Column(name = "post_id", columnDefinition = "VARCHAR(255)")
     private String postId;
-    @Column(name = "subreddit", columnDefinition = "VARCHAR(255)", nullable = false)
+    @Column(name = "subreddit", columnDefinition = "VARCHAR(255)")
     private String subreddit;
-    @Column(name = "title", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "title", columnDefinition = "TEXT")
     private String title;
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
-    @Column(name = "author", columnDefinition = "VARCHAR(225)", nullable = false)
+    @Column(name = "author", columnDefinition = "VARCHAR(225)")
     private String author;
 
     @Column(name = "up_votes", columnDefinition = "INTEGER")
@@ -36,7 +37,10 @@ public class RedditPosts {
     @Column(name = "num_comments", columnDefinition = "INTEGER")
     private Integer numComments = 0;
 
-    @Column(name = "url", columnDefinition = "TEXT", nullable = false)
+    @Column(name = "access_token", columnDefinition = "VARCHAR(1000)", nullable = false)
+    private String accessToken;
+
+    @Column(name = "url", columnDefinition = "TEXT")
     private String url;
     @Column(name = "creation_date", columnDefinition = "TIMESTAMP")
     @CreationTimestamp
@@ -125,6 +129,14 @@ public class RedditPosts {
         this.numComments = numComments;
     }
 
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
     public String getUrl() {
         return url;
     }
@@ -139,24 +151,6 @@ public class RedditPosts {
 
     public void setCreationDate(LocalDateTime creationDate) {
         this.creationDate = creationDate;
-    }
-
-    @Override
-    public String toString() {
-        return "RedditPosts{" +
-                "id=" + id +
-                ", postId='" + postId + '\'' +
-                ", subreddit='" + subreddit + '\'' +
-                ", title='" + title + '\'' +
-                ", content='" + content + '\'' +
-                ", author='" + author + '\'' +
-                ", upVotes=" + upVotes +
-                ", downVotes=" + downVotes +
-                ", score=" + score +
-                ", numComments=" + numComments +
-                ", url='" + url + '\'' +
-                ", creationDate=" + creationDate +
-                '}';
     }
 }
 

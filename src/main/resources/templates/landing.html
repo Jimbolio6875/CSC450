@@ -91,11 +91,20 @@
                 </div>
             </div>
             <div class="container written-post">
-                <form class="was-validated">
+                <form action="/submit-post" class="was-validated" method="post">
+                    <div>
+                        <label for="subreddit">Subreddit:</label>
+                        <input id="subreddit" name="subreddit" placeholder="subreddit name" required type="text">
+                    </div>
+                    <div>
+                        <label for="title">Title:</label>
+                        <input id="title" name="title" placeholder="Post title" required type="text">
+                    </div>
                     <div class="mb-3">
                         <label class="form-label" for="validationTextarea">Looks like you're all set! Now it's time
                             to share what's on your mind!</label>
-                        <textarea class="form-control" id="validationTextarea" placeholder="Write something here..."
+                        <textarea class="form-control" id="validationTextarea" name="message"
+                                  placeholder="Write something here..."
                                   required></textarea>
                         <div class="invalid-feedback">
                             Please enter a message!
