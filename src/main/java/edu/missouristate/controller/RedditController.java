@@ -53,8 +53,7 @@ public class RedditController {
     private String pythonPath;
 
     @GetMapping("/reddit/auth")
-    public ModelAndView redditAuth(HttpSession session) {
-        ModelAndView modelAndView = new ModelAndView("reddit/redditAuth");
+    public String redditAuth(HttpSession session) {
         String state = UUID.randomUUID().toString();
         session.setAttribute("REDDIT_STATE", state);
 
@@ -68,9 +67,7 @@ public class RedditController {
                 "&duration=permanent" +
                 "&scope=identity submit read";
 
-
-        modelAndView.addObject("authUrl", authUrl);
-        return modelAndView;
+        return "redirect:" + authUrl;
     }
 
 
