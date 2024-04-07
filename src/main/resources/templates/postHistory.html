@@ -61,8 +61,9 @@
         <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white"
              style="border-right: 2px solid #000; width: 200px">
             <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-                <a th:href="@{/index}">
-                    <img alt="#" id="logo" th:src="@{/resources/Socials/logo.png}">
+                <a class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-black text-decoration-none title"
+                   th:href="@{/}">
+                    <img alt="#" id="logo" src="/resources/Socials/logo.png">
                 </a>
                 <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
                     id="menu">
@@ -72,24 +73,22 @@
                         </a>
                     </li>
                     <li>
-                        <a th:href="@{/postHistory}" class="nav-link px-0 align-middle text-black">
+                        <a class="nav-link px-0 align-middle text-black" th:href="@{/postHistory}">
                             <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Post
                                     History</span></a>
                     </li>
-                    <div class="dropdown pb-4">
-                        <div class="dropdown">
-                            <a href="#"
-                               class="d-flex align-items-center text-black text-decoration-none dropdown-toggle"
-                               id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                                <!--<img src="Socials/user.png" width="25" height="25" class="rounded-circle">-->
-                                <i class="fs-4 bi-people"></i>
-                                <span class="d-none d-sm-inline mx-1">User</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-white text-small shadow"
-                                aria-labelledby="dropdownUser1">
-                                <li><a class="dropdown-item" href="#">Sign out</a></li>
-                            </ul>
-                        </div>
+                    <div class="dropdown">
+                        <a aria-expanded="false"
+                           class="d-flex align-items-center text-black text-decoration-none dropdown-toggle"
+                           data-bs-toggle="dropdown" href="#" id="dropdownUser1">
+                            <!--<img src="Socials/user.png" width="25" height="25" class="rounded-circle">-->
+                            <i class="fs-4 bi-people"></i>
+                            <span class="d-none d-sm-inline mx-1">User</span>
+                        </a>
+                        <ul aria-labelledby="dropdownUser1"
+                            class="dropdown-menu dropdown-menu-white text-small shadow">
+                            <li><a class="dropdown-item" th:href="@{/signOut}">Sign out</a></li>
+                        </ul>
                     </div>
                 </ul>
             </div>
