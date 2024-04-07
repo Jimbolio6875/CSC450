@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import java.util.List;
 @Controller
 public class SocialMediaPostingController {
 
+    // userInfo needed for tumblr usage
     String userInfo;
 
     @Autowired
@@ -41,15 +43,15 @@ public class SocialMediaPostingController {
     RedditPostsService redditPostsService;
 
 
-    // TODO this looks terrible clean this up
-    // TODO add reddit and twitter
-
     //    ---------------------------MASTODON--------------------------------
+
+    // when mastodon icon clicked redirect to auth url
     @GetMapping("/mastodon/auth")
     public RedirectView startMastodonAuth() {
         return new RedirectView(mastodonService.getAuthorizationUrl());
     }
 
+    // after auth redirect to post message after setting session access token
     @GetMapping("/callback")
     public String handleCallback(@RequestParam("code") String code, HttpSession session) {
 
@@ -58,6 +60,9 @@ public class SocialMediaPostingController {
         return "redirect:/post-message";
     }
 
+    // gets mastodon posts for post history page
+    // todo same thing with tumblr it doesn't update correctly
+    // todo should rename the mapping if we fix all bugs because it's not accurate anymore
     @RequestMapping("/post-message")
     public ModelAndView showPostMessageForm(HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("landing");
@@ -86,12 +91,16 @@ public class SocialMediaPostingController {
 
 //    -----------------------TUMBLR--------------------------
 
+    // when tumblr icon clicked redirect to auth url
     @GetMapping("/tumblr/start-oauth")
     public String startOAuthProcess(RedirectAttributes redirectAttributes) {
         String authorizationUrl = tumblrService.getAuthorizationUrl();
         return "redirect:" + authorizationUrl;
     }
 
+    // after authentication redirect to post message endpoint which updates posts and gets posts for post history
+    // todo update feature for tumblr doesn't work meaning if you like something on the site it won't update on post history yet
+    // todo should be easy to fix
     @GetMapping("/tumblr/oauth-callback")
     public String oauthCallback(@RequestParam("oauth_verifier") String oauthVerifier, Model model) throws Exception {
         userInfo = tumblrService.getUserInfo(oauthVerifier);
@@ -114,7 +123,11 @@ public class SocialMediaPostingController {
         return modelAndView;
     }
 
+    //    -----------------------------------------------------------------------
 
+//    -----------------------POST MESSAGE TO ALL SITES--------------------------
+
+    // handles submits for every social media site
     @PostMapping("/submit-post")
     public ModelAndView submitPost(@RequestParam("message") String message,
                                    @RequestParam("subreddit") String subreddit,
@@ -126,39 +139,37 @@ public class SocialMediaPostingController {
         Tuple mastodonAccessToken = mastodonService.getLatestAccessToken();
         String mastroAccessToken = mastodonAccessToken.get(0, String.class);
 
+
+        // hanldes posting for mastodon
+        // todo will put this in try catch after second sprint presentation don't wanna break anything rn
         if (mastodonAccessToken != null) {
-            // Attempt to post the message to Mastodon
 
 //            mastodonPost.updateInfo(message);
 
             mastodonService.updateOrCreateMastodonPost(mastroAccessToken, message);
             mastodonPost = mastodonService.postMessageToMastodon(message, mastroAccessToken);
 
-            // Check if the post was successfully created and returned
             if (mastodonPost != null) {
-                success = true; // Indicate success if we have a Mastodon post
+                success = true;
             } else {
-                // Handle the failure case
                 modelAndView.setViewName("error");
                 modelAndView.addObject("message", "Failed to post your message to Mastodon.");
                 return modelAndView;
             }
         } else {
-            // Handle the case where there's no access token available
             modelAndView.setViewName("error");
             modelAndView.addObject("message", "No access token available for Mastodon.");
             return modelAndView;
         }
 
 
-        // Handling Reddit posting
+        // handles posting for reddit
         try {
-            Tuple redditAccessTokenTuple = redditPostsService.getLatestUser(); // Fetch the latest Reddit access token for the user
+            Tuple redditAccessTokenTuple = redditPostsService.getLatestUser();
             if (redditAccessTokenTuple != null) {
                 String redditAccessToken = redditAccessTokenTuple.get(0, String.class);
                 String fullName = redditPostsService.postToReddit(redditAccessToken, subreddit, title, message);
                 if (fullName == null || fullName.isEmpty()) {
-                    // Handle failure to post to Reddit.
                     modelAndView.setViewName("error");
                     modelAndView.addObject("message", "Failed to post your message to Reddit.");
                     return modelAndView;
@@ -173,43 +184,43 @@ public class SocialMediaPostingController {
             return modelAndView;
         }
 
-//        // Handling Twitter posting
-//        try {
-//            Tuple twitterToken = twitterService.getLatestUser();
-//            if (twitterToken != null) {
-//                String accessToken = twitterToken.get(0, String.class);
-//                String accessTokenSecret = twitterToken.get(1, String.class);
-//                twitterService.updateContent(accessToken, message, LocalDateTime.now(), accessTokenSecret);
-//                success = twitterService.postTweet(message, accessToken, accessTokenSecret);
-//                if (!success) {
-//                    modelAndView.setViewName("error");
-//                    modelAndView.addObject("message", "Failed to post your message to Twitter.");
-//                    return modelAndView;
-//                }
-//            }
-//        } catch (Exception e) {
-//            modelAndView.setViewName("error");
-//            modelAndView.addObject("message", "Failed to post your message to Twitter: " + e.getMessage());
-//            return modelAndView;
-//        }
-
-        // Handling Tumblr posting
+        // handles posting for twiiter
         try {
-            // Assuming you have a method to fetch the latest Tumblr credentials
+            Tuple twitterToken = twitterService.getLatestUser();
+            if (twitterToken != null) {
+                String accessToken = twitterToken.get(0, String.class);
+                String accessTokenSecret = twitterToken.get(1, String.class);
+                twitterService.updateContent(accessToken, message, LocalDateTime.now(), accessTokenSecret);
+                success = twitterService.postTweet(message, accessToken, accessTokenSecret);
+                if (!success) {
+                    modelAndView.setViewName("error");
+                    modelAndView.addObject("message", "Failed to post your message to Twitter.");
+                    return modelAndView;
+                }
+            }
+        } catch (Exception e) {
+            modelAndView.setViewName("error");
+            modelAndView.addObject("message", "Failed to post your message to Twitter: " + e.getMessage());
+            return modelAndView;
+        }
+
+        // handles posting for tumblr
+        try {
+
             Tuple tumblrCredentialsTuple = tumblrService.getLatestUser();
             if (tumblrCredentialsTuple != null) {
                 String accessToken = tumblrCredentialsTuple.get(0, String.class);
                 String tokenSecret = tumblrCredentialsTuple.get(1, String.class);
                 String blogIdentifier = tumblrCredentialsTuple.get(2, String.class);
 
-                // Assuming you have a method to post to Tumblr and it returns the post ID on success
+
                 String postId = tumblrService.postToBlog(message);
                 if (postId != null && !postId.isEmpty()) {
-                    // Success! Update or create the Tumblr post record in the database
+
                     tumblrService.updateOrCreateTumblrPost(accessToken, tokenSecret, blogIdentifier, postId, message);
-                    success = true; // Indicate success
+                    success = true;
                 } else {
-                    // Handle failure to post to Tumblr
+
                     modelAndView.setViewName("error");
                     modelAndView.addObject("message", "Failed to post your message to Tumblr.");
                     return modelAndView;
@@ -222,16 +233,16 @@ public class SocialMediaPostingController {
         }
 
 
-        // If all posts succeed
+        // check if every social media was successfully posted to
         if (success) {
             modelAndView.setViewName("success");
             modelAndView.addObject("message", "Your message has been posted successfully to all platforms!");
         } else {
-            // Handle the case where no tokens were found for any platform
             modelAndView.setViewName("error");
             modelAndView.addObject("message", "No access tokens available for posting.");
         }
 
+        // redirect back to landing after making post
         return new ModelAndView("redirect:/landing");
     }
 
