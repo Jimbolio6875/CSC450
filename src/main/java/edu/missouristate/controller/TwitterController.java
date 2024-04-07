@@ -187,14 +187,13 @@ public class TwitterController {
 
     @GetMapping("/start-auth")
     public ModelAndView startAuth(HttpSession session) {
-        ModelAndView modelAndView = new ModelAndView("auth-start");
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(pythonPath, "scripts/TwitterPythonScripts/generate_auth_url.py");
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String authUrl = reader.readLine();
+            String authUrl = reader.readLine(); // Read the authorization URL directly
             String tokensLine = reader.readLine();
             String[] tokens = tokensLine.split(",");
 
@@ -205,16 +204,17 @@ public class TwitterController {
                 session.setAttribute("request_token", requestToken);
                 session.setAttribute("request_token_secret", requestTokenSecret);
 
-                modelAndView.addObject("authUrl", authUrl);
+                return new ModelAndView("redirect:" + authUrl);
             } else {
                 throw new IOException("Invalid token response from script");
             }
         } catch (IOException e) {
             e.printStackTrace();
-            modelAndView.setViewName("error");
+            ModelAndView modelAndView = new ModelAndView("error");
             modelAndView.addObject("message", "Error generating authorization URL.");
+            return modelAndView;
         }
-        return modelAndView;
     }
+
 
 }
