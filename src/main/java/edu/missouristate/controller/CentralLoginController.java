@@ -84,6 +84,8 @@ public class CentralLoginController {
     public LoginResponse login(@RequestBody CentralLogin login, HttpSession session) {
         LoginResponse loginResponse = centralLoginService.login(login);
         if (loginResponse.isLoggedIn()) {
+        	//TODO: only send back secure attributes. Rn this is not great
+        	session.setAttribute("centralLoginId", loginResponse.getCentralLoginId());
             session.setAttribute("username", loginResponse.getUsername());
             session.setAttribute("firstName", loginResponse.getFirstName());
             session.setAttribute("lastName", loginResponse.getLastName());

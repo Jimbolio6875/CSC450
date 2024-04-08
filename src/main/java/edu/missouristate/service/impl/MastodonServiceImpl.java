@@ -1,20 +1,30 @@
 package edu.missouristate.service.impl;
 
-import com.querydsl.core.Tuple;
-import edu.missouristate.dao.MastodonRepository;
-import edu.missouristate.domain.Mastodon;
-import edu.missouristate.service.MastodonService;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+import com.querydsl.core.Tuple;
+
+import edu.missouristate.dao.CentralLoginRepository;
+import edu.missouristate.dao.MastodonRepository;
+import edu.missouristate.domain.CentralLogin;
+import edu.missouristate.domain.Mastodon;
+import edu.missouristate.domain.Twitter;
+import edu.missouristate.service.MastodonService;
 
 @Transactional
 @Service
@@ -24,6 +34,10 @@ public class MastodonServiceImpl implements MastodonService {
     private static final String SCOPE = "read write";
     @Autowired
     MastodonRepository mastodonRepository;
+    
+    @Autowired
+    CentralLoginRepository centralLoginRepo;
+    
     @Value("${mastodon.clientId}")
     private String CLIENT_ID;
     @Value("${mastodon.clientSecret}")
@@ -175,15 +189,17 @@ public class MastodonServiceImpl implements MastodonService {
     }
 
     @Override
-    public void updateOrCreateMastodonPost(String mastroAccessToken, String message) {
+    public void updateOrCreateMastodonPost(String mastroAccessToken, String message, Integer centralLoginId) {
         Mastodon existingPost = mastodonRepository.findExistingPostByTokenAndNoText(mastroAccessToken);
 
         if (existingPost != null) {
             existingPost.setContent(message);
+            existingPost.setCentralLogin(centralLoginRepo.findById(centralLoginId).get());
             mastodonRepository.save(existingPost);
         } else {
             Mastodon newPost = new Mastodon();
             newPost.setAccessToken(mastroAccessToken);
+            existingPost.setCentralLogin(centralLoginRepo.findById(centralLoginId).get());
             newPost.setContent(message);
             mastodonRepository.save(newPost);
         }
@@ -192,6 +208,12 @@ public class MastodonServiceImpl implements MastodonService {
     @Override
     public List<Mastodon> getAllPosts() {
         return (List<Mastodon>) mastodonRepository.findAll();
+    }
+    
+    @Override
+    public List<Mastodon> findCentralUserMastodons(Integer centralLoginId){
+    	CentralLogin login = centralLoginRepo.findById(centralLoginId).get();
+    	return mastodonRepository.findMastodonsByCentralLogin(login);
     }
 
 

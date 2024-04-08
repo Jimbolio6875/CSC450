@@ -1,13 +1,17 @@
 package edu.missouristate.repository.Impl;
 
-import com.querydsl.core.Tuple;
-import edu.missouristate.domain.QTwitter;
-import edu.missouristate.domain.Twitter;
-import edu.missouristate.repository.custom.TwitterRepositoryCustom;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import com.querydsl.core.Tuple;
+
+import edu.missouristate.domain.CentralLogin;
+import edu.missouristate.domain.QTwitter;
+import edu.missouristate.domain.Twitter;
+import edu.missouristate.repository.custom.TwitterRepositoryCustom;
 
 @Repository
 public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements TwitterRepositoryCustom {
@@ -31,6 +35,13 @@ public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements 
                 .fetchOne();
     }
 
+    @Override
+    public List<Twitter> findTweetsByCentralLogin(CentralLogin centralLogin){
+    	return from(twitterTable)
+    			.where(twitterTable.centralLogin.eq(centralLogin))
+    			.fetch();
+    }
+    
     @Override
     public void updateTextWithAccessToken(String accessToken, String message, LocalDateTime date) {
         update(twitterTable)

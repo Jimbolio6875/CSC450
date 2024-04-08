@@ -32,6 +32,6 @@ public interface RedditPostsService {
 
     public void updatePostIdWhereNull(String postId);
 
-    void updateOrCreateRedditPost(String redditAccessToken, String subreddit, String title, String message, String fullName);
+    void updateOrCreateRedditPost(String redditAccessToken, String subreddit, String title, String message, String fullName, Integer centralLoginId);
 
 }

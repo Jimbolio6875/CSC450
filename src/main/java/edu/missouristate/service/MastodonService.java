@@ -23,7 +23,9 @@ public interface MastodonService {
 
     Mastodon findExistingPostByTokenAndNoText(String accessToken);
 
-    void updateOrCreateMastodonPost(String mastroAccessToken, String message);
+    void updateOrCreateMastodonPost(String mastroAccessToken, String message, Integer centralLoginId);
 
+    public List<Mastodon> findCentralUserMastodons(Integer centralLoginId);
+    
     List<Mastodon> getAllPosts();
 }

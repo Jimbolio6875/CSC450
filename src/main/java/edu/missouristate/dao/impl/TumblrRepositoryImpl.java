@@ -2,6 +2,7 @@ package edu.missouristate.dao.impl;
 
 import com.querydsl.core.Tuple;
 import edu.missouristate.dao.custom.TumblrRepositoryCustom;
+import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.QTumblr;
 import edu.missouristate.domain.Tumblr;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -38,6 +39,12 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
                 .execute();
     }
 
+    @Override
+    public List<Tumblr> findTumblrsByCentralLogin(CentralLogin centralLogin){
+    	return from(tumblrTable)
+    			.where(tumblrTable.centralLogin.eq(centralLogin))
+    			.fetch();
+    }
 
     @Override
     public Tuple getLatestUser() {

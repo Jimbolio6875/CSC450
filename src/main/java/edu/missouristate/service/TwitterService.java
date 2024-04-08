@@ -13,11 +13,13 @@ public interface TwitterService {
 //    List<Twitter> findByTweetId(Long userId);
 
     List<Twitter> getAllTweets();
+    
+    public List<Twitter> findCentralUserTweets(Integer centralLoginId);
 
 
     boolean postTweet(String message, String accessToken, String accessTokenSecret);
 
     Tuple getLatestUser();
 
-    void updateContent(String accessToken, String message, LocalDateTime date, String accessTokenSecret);
+    void updateContent(String accessToken, String message, LocalDateTime date, String accessTokenSecret, Integer centralLoginId);
 }

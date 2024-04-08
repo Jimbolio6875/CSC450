@@ -1,19 +1,5 @@
 package edu.missouristate.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.querydsl.core.Tuple;
-import edu.missouristate.domain.RedditPosts;
-import edu.missouristate.domain.reddit.RedditResponse;
-import edu.missouristate.repository.RedditPostsRepository;
-import edu.missouristate.service.RedditPostsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.time.Duration;
@@ -26,6 +12,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.querydsl.core.Tuple;
+
+import edu.missouristate.dao.CentralLoginRepository;
+import edu.missouristate.domain.RedditPosts;
+import edu.missouristate.domain.reddit.RedditResponse;
+import edu.missouristate.repository.RedditPostsRepository;
+import edu.missouristate.service.RedditPostsService;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 @Service
 public class RedditPostsServiceImpl implements RedditPostsService {
@@ -41,6 +44,9 @@ public class RedditPostsServiceImpl implements RedditPostsService {
         this.redditPostsRepository = redditPostsRepository;
         this.webClient = webClient;
     }
+    
+    @Autowired
+    CentralLoginRepository centralLoginRepo;
 
 
     public String postToReddit(String accessToken, String subreddit, String title, String text) {
@@ -168,11 +174,12 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     }
 
     @Override
-    public void updateOrCreateRedditPost(String redditAccessToken, String subreddit, String title, String message, String fullName) {
+    public void updateOrCreateRedditPost(String redditAccessToken, String subreddit, String title, String message, String fullName, Integer centralLoginId) {
 
         RedditPosts exists = redditPostsRepository.updateOrCreateRedditPost(redditAccessToken);
 
         if (exists != null) {
+        	exists.setCentralLogin(centralLoginRepo.findById(centralLoginId).get());
             exists.setSubreddit(subreddit);
             exists.setPostId(fullName);
             exists.setContent(message);
@@ -181,6 +188,7 @@ public class RedditPostsServiceImpl implements RedditPostsService {
             redditPostsRepository.save(exists);
         } else {
             RedditPosts redditPosts = new RedditPosts();
+            exists.setCentralLogin(centralLoginRepo.findById(centralLoginId).get());
             redditPosts.setSubreddit(subreddit);
             redditPosts.setPostId(fullName);
             redditPosts.setContent(message);

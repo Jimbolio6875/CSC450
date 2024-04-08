@@ -8,7 +8,17 @@ public class LoginResponse {
 	private String username;
 	private String firstName;
 	private String lastName;
+	private int centralLoginId;
 	
+	//TODO: GET THIS OUT OF HERE. Or at least encrypt it
+	public int getCentralLoginId() {
+		return centralLoginId;
+	}
+
+	public void setCentralLoginId(int centralLoginId) {
+		this.centralLoginId = centralLoginId;
+	}
+
 	public String getFirstName() {
 		return firstName;
 	}

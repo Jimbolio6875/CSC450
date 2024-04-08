@@ -1,20 +1,5 @@
 package edu.missouristate.service.impl;
 
-import com.github.scribejava.apis.TumblrApi;
-import com.github.scribejava.core.builder.ServiceBuilder;
-import com.github.scribejava.core.model.*;
-import com.github.scribejava.core.oauth.OAuth10aService;
-import com.querydsl.core.Tuple;
-import edu.missouristate.dao.TumblrRepository;
-import edu.missouristate.domain.Tumblr;
-import edu.missouristate.service.SocialMediaAccountService;
-import edu.missouristate.service.TumblrService;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -26,12 +11,38 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.github.scribejava.apis.TumblrApi;
+import com.github.scribejava.core.builder.ServiceBuilder;
+import com.github.scribejava.core.model.OAuth1AccessToken;
+import com.github.scribejava.core.model.OAuth1RequestToken;
+import com.github.scribejava.core.model.OAuthRequest;
+import com.github.scribejava.core.model.Response;
+import com.github.scribejava.core.model.Verb;
+import com.github.scribejava.core.oauth.OAuth10aService;
+import com.querydsl.core.Tuple;
+
+import edu.missouristate.dao.CentralLoginRepository;
+import edu.missouristate.dao.TumblrRepository;
+import edu.missouristate.domain.CentralLogin;
+import edu.missouristate.domain.Tumblr;
+import edu.missouristate.service.SocialMediaAccountService;
+import edu.missouristate.service.TumblrService;
+
 @Transactional
 @Service
 public class TumblrServiceImpl implements TumblrService {
 
     @Autowired
     private SocialMediaAccountService socialMediaAccountService;
+    
+    @Autowired
+    private CentralLoginRepository centralLoginRepo;
 
     @Autowired
     private TumblrRepository tumblrRepository;
@@ -77,7 +88,7 @@ public class TumblrServiceImpl implements TumblrService {
     }
 
     @Override
-    public String getUserInfo(String oauthVerifier) {
+    public String getUserInfo(String oauthVerifier, Integer centralLoginId) {
         try {
             accessToken = oauthService.getAccessToken(requestToken, oauthVerifier);
             OAuthRequest request = new OAuthRequest(Verb.GET, "https://api.tumblr.com/v2/user/info");
@@ -102,6 +113,7 @@ public class TumblrServiceImpl implements TumblrService {
             tumblrCredentials.setAccessToken(accessToken.getToken());
             tumblrCredentials.setTokenSecret(accessToken.getTokenSecret());
             tumblrCredentials.setBlogIdentifier(blogIdentifier);
+            tumblrCredentials.setCentralLogin(centralLoginRepo.findById(centralLoginId).get());
             tumblrRepository.save(tumblrCredentials);
 
             return response.getBody();
@@ -111,6 +123,11 @@ public class TumblrServiceImpl implements TumblrService {
         }
     }
 
+    public List<Tumblr> findCentralUserTumblrs(Integer centralLoginId){
+    	CentralLogin login = centralLoginRepo.findById(centralLoginId).get();
+    	return tumblrRepository.findTumblrsByCentralLogin(login);
+    }
+    
     private Date getPostDate(String postId) throws IOException, ExecutionException, InterruptedException {
 
         String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts?api_key=" + consumerKey + "&id=" + postId;

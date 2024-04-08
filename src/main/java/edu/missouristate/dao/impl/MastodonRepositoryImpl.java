@@ -2,6 +2,7 @@ package edu.missouristate.dao.impl;
 
 import com.querydsl.core.Tuple;
 import edu.missouristate.dao.custom.MastodonRepositoryCustom;
+import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.Mastodon;
 import edu.missouristate.domain.QMastodon;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -44,11 +45,18 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
                 .execute();
 
     }
+    
+    public List<Mastodon> findMastodonsByCentralLogin(CentralLogin centralLogin){
+    	return from(mastodonTable)
+    			.where(mastodonTable.centralLogin.eq(centralLogin))
+    			.fetch();
+    }
 
+    //TODO: This is bugged and needs to be reworked. Todd implemented limit(1) to fix but the fact that that's needed is problematic
     @Override
     public Mastodon findExistingPostByTokenAndNoText(String accessToken) {
         return from(mastodonTable)
-                .where(mastodonTable.accessToken.eq(accessToken).and(mastodonTable.content.isNull())).fetchOne();
+                .where(mastodonTable.accessToken.eq(accessToken).and(mastodonTable.content.isNull())).limit(1).fetchOne();
     }
 
 

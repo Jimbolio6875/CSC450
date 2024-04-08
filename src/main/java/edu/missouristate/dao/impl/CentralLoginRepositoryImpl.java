@@ -46,6 +46,8 @@ public class CentralLoginRepositoryImpl extends QuerydslRepositorySupport implem
 			response.setFirstName(login.getFirstName());
 			response.setLastName(login.getLastName());
 			response.setUsername(login.getUsername());
+			//TODO: encrypt this
+			response.setCentralLoginId(login.getCentralLoginId());
 			return response;
 		}
 		

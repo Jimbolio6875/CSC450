@@ -1,6 +1,7 @@
 package edu.missouristate.service;
 
 import com.querydsl.core.Tuple;
+
 import edu.missouristate.domain.Tumblr;
 
 import java.io.IOException;
@@ -10,9 +11,11 @@ import java.util.concurrent.ExecutionException;
 public interface TumblrService {
     String getAuthorizationUrl();
 
-    String getUserInfo(String oauthVerifier) throws Exception;
+    String getUserInfo(String oauthVerifier, Integer centralLoginId) throws Exception;
 
     String postToBlog(String postContent) throws Exception;
+    
+    public List<Tumblr> findCentralUserTumblrs(Integer centralLoginId);
 
     List<Tumblr> getPostsByBlog();
 

@@ -102,8 +102,9 @@ public class SocialMediaPostingController {
     // todo update feature for tumblr doesn't work meaning if you like something on the site it won't update on post history yet
     // todo should be easy to fix
     @GetMapping("/tumblr/oauth-callback")
-    public String oauthCallback(@RequestParam("oauth_verifier") String oauthVerifier, Model model) throws Exception {
-        userInfo = tumblrService.getUserInfo(oauthVerifier);
+    public String oauthCallback(@RequestParam("oauth_verifier") String oauthVerifier, Model model, HttpSession session) throws Exception {
+    	Integer centralLoginId = (Integer) session.getAttribute("centralLoginId");
+    	userInfo = tumblrService.getUserInfo(oauthVerifier, centralLoginId);
         model.addAttribute("userInfo", userInfo);
         return "redirect:/tumblr/post-message";
     }
@@ -138,7 +139,7 @@ public class SocialMediaPostingController {
         Mastodon mastodonPost = null;
         Tuple mastodonAccessToken = mastodonService.getLatestAccessToken();
         String mastroAccessToken = mastodonAccessToken.get(0, String.class);
-
+        Integer centralLoginId = (Integer) session.getAttribute("centralLoginId");
 
         // hanldes posting for mastodon
         // todo will put this in try catch after second sprint presentation don't wanna break anything rn
@@ -146,7 +147,8 @@ public class SocialMediaPostingController {
 
 //            mastodonPost.updateInfo(message);
 
-            mastodonService.updateOrCreateMastodonPost(mastroAccessToken, message);
+        	
+            mastodonService.updateOrCreateMastodonPost(mastroAccessToken, message, centralLoginId);
             mastodonPost = mastodonService.postMessageToMastodon(message, mastroAccessToken);
 
             if (mastodonPost != null) {
@@ -175,7 +177,7 @@ public class SocialMediaPostingController {
                     return modelAndView;
                 }
 
-                redditPostsService.updateOrCreateRedditPost(redditAccessToken, subreddit, title, message, fullName);
+                redditPostsService.updateOrCreateRedditPost(redditAccessToken, subreddit, title, message, fullName, centralLoginId);
 
             }
         } catch (Exception e) {
@@ -190,7 +192,7 @@ public class SocialMediaPostingController {
             if (twitterToken != null) {
                 String accessToken = twitterToken.get(0, String.class);
                 String accessTokenSecret = twitterToken.get(1, String.class);
-                twitterService.updateContent(accessToken, message, LocalDateTime.now(), accessTokenSecret);
+                twitterService.updateContent(accessToken, message, LocalDateTime.now(), accessTokenSecret, centralLoginId);
                 success = twitterService.postTweet(message, accessToken, accessTokenSecret);
                 if (!success) {
                     modelAndView.setViewName("error");
