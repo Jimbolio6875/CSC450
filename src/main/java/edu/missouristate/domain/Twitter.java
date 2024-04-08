@@ -24,8 +24,22 @@ public class Twitter {
 
     @Column(name = "access_token_secret", columnDefinition = "VARCHAR(320)")
     private String accessTokenSecret;
+    
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name="central_login_id")
+    private CentralLogin centralLogin;
+    
+    
 
-    public Twitter() {
+    public CentralLogin getCentralLogin() {
+		return centralLogin;
+	}
+
+	public void setCentralLogin(CentralLogin centralLogin) {
+		this.centralLogin = centralLogin;
+	}
+
+	public Twitter() {
     }
 
     public Integer getId() {

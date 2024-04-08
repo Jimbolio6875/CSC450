@@ -27,6 +27,51 @@ public class CentralLogin {
 	
 	@Column(name="last_name", columnDefinition = "VARCHAR(32")
 	private String lastName;
+	
+	
+	@OneToMany(mappedBy = "centralLogin")
+	  private List<Mastodon> mastodonPosts;
+	
+	@OneToMany(mappedBy = "centralLogin")
+	  private List<RedditPosts> redditPosts;
+	
+	@OneToMany(mappedBy = "centralLogin")
+	  private List<Tumblr> tumblrPosts;
+	
+	@OneToMany(mappedBy = "centralLogin")
+	  private List<Twitter> twitterPosts;
+
+	public List<Mastodon> getMastodonPosts() {
+		return mastodonPosts;
+	}
+
+	public void setMastodonPosts(List<Mastodon> mastodonPosts) {
+		this.mastodonPosts = mastodonPosts;
+	}
+
+	public List<RedditPosts> getRedditPosts() {
+		return redditPosts;
+	}
+
+	public void setRedditPosts(List<RedditPosts> redditPosts) {
+		this.redditPosts = redditPosts;
+	}
+
+	public List<Tumblr> getTumblrPosts() {
+		return tumblrPosts;
+	}
+
+	public void setTumblrPosts(List<Tumblr> tumblrPosts) {
+		this.tumblrPosts = tumblrPosts;
+	}
+
+	public List<Twitter> getTwitterPosts() {
+		return twitterPosts;
+	}
+
+	public void setTwitterPosts(List<Twitter> twitterPosts) {
+		this.twitterPosts = twitterPosts;
+	}
 
 	@Override
 	public String toString() {

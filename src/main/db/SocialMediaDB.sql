@@ -1,3 +1,4 @@
+use login;
 DROP TABLE IF EXISTS mastodon;
 DROP TABLE IF EXISTS tumblr;
 DROP TABLE IF EXISTS twitter;
@@ -11,7 +12,13 @@ CREATE TABLE mastodon
     content         VARCHAR(255),
     post_url        VARCHAR(255),
     favourite_count INTEGER,
-    access_token    VARCHAR(1000) NOT NULL
+    access_token    VARCHAR(1000) NOT NULL,
+    
+    central_login_id int NOT NULL,
+    INDEX(central_login_id),
+    FOREIGN KEY (central_login_id)
+      REFERENCES `central_login`(central_login_id)
+      ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE TABLE tumblr
@@ -24,7 +31,13 @@ CREATE TABLE tumblr
     content         VARCHAR(255),
     post_url        VARCHAR(255),
     note_count      INTEGER,
-    date            TIMESTAMP
+    date            TIMESTAMP,
+    
+    central_login_id int NOT NULL,
+    INDEX(central_login_id),
+    FOREIGN KEY (central_login_id)
+      REFERENCES `central_login`(central_login_id)
+      ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE TABLE twitter
@@ -33,7 +46,13 @@ CREATE TABLE twitter
     tweet_text          TEXT,
     creation_date       TIMESTAMP,
     access_token        VARCHAR(320) NOT NULL,
-    access_token_secret VARCHAR(320) NOT NULL
+    access_token_secret VARCHAR(320) NOT NULL,
+    
+    central_login_id int NOT NULL,
+    INDEX(central_login_id),
+    FOREIGN KEY (central_login_id)
+      REFERENCES `central_login`(central_login_id)
+      ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 
@@ -51,7 +70,11 @@ CREATE TABLE reddit_posts
     num_comments  INT       DEFAULT 0,
     url           TEXT,
     creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    access_token  VARCHAR(1000) NOT NULL
+    access_token  VARCHAR(1000) NOT NULL,
+    
+    central_login_id int NOT NULL,
+    INDEX(central_login_id),
+    FOREIGN KEY (central_login_id)
+      REFERENCES `central_login`(central_login_id)
+      ON UPDATE CASCADE ON DELETE RESTRICT
 );
-
-

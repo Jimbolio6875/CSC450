@@ -45,8 +45,22 @@ public class RedditPosts {
     @Column(name = "creation_date", columnDefinition = "TIMESTAMP")
     @CreationTimestamp
     private LocalDateTime creationDate;
+    
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name="central_login_id")
+    private CentralLogin centralLogin;
+    
+    
 
-    public RedditPosts() {
+    public CentralLogin getCentralLogin() {
+		return centralLogin;
+	}
+
+	public void setCentralLogin(CentralLogin centralLogin) {
+		this.centralLogin = centralLogin;
+	}
+
+	public RedditPosts() {
     }
 
     public Integer getId() {

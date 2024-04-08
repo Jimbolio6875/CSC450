@@ -25,7 +25,21 @@ public class Mastodon implements Serializable {
     @Column(name = "favourite_count", columnDefinition = "INTEGER")
     private Integer favouriteCount;
 
-    public Mastodon() {
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(name="central_login_id")
+    private CentralLogin centralLogin;
+    
+    
+    
+    public CentralLogin getCentralLogin() {
+		return centralLogin;
+	}
+
+	public void setCentralLogin(CentralLogin centralLogin) {
+		this.centralLogin = centralLogin;
+	}
+
+	public Mastodon() {
     }
 
     public String getAccessToken() {
