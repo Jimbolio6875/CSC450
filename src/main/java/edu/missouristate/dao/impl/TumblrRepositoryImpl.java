@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements TumblrRepositoryCustom {
@@ -44,12 +45,17 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
         return from(tumblrTable)
                 .select(tumblrTable.accessToken, tumblrTable.tokenSecret, tumblrTable.blogIdentifier, tumblrTable.id.max())
                 .groupBy(tumblrTable.accessToken, tumblrTable.tokenSecret, tumblrTable.blogIdentifier)
+                .limit(1)
                 .fetchOne();
     }
 
     @Override
     public void updateWherePostIdIsNull(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message) {
-        update(tumblrTable).where(tumblrTable.postId.isNull())
+
+        int mostRecentId = Objects.requireNonNull(getQuerydsl()).createQuery().select(tumblrTable.id.max())
+                .from(tumblrTable).fetchOne();
+
+        update(tumblrTable).where(tumblrTable.id.eq(mostRecentId))
                 .set(tumblrTable.accessToken, accessToken)
                 .set(tumblrTable.tokenSecret, tokenSecret)
                 .set(tumblrTable.blogIdentifier, blogIdentifier)
@@ -62,7 +68,20 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
     @Override
     public Tumblr findExistingPostByTokenAndNoText(String accessToken) {
         return from(tumblrTable)
-                .where(tumblrTable.accessToken.eq(accessToken).and(tumblrTable.content.isNull())).fetchOne();
+                .where(tumblrTable.accessToken.eq(accessToken).and(tumblrTable.content.isNull()))
+                .orderBy(tumblrTable.id.desc())
+                .limit(1)
+                .fetchOne();
+    }
+
+    @Override
+    public List<Tumblr> getAllPostsWherePostIsNotNull() {
+        return from(tumblrTable).where(tumblrTable.postId.isNotNull()).fetch();
+    }
+
+    @Override
+    public void cleanTable() {
+        delete(tumblrTable).where(tumblrTable.postId.isNull()).execute();
     }
 
 

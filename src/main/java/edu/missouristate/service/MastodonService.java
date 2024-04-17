@@ -26,4 +26,8 @@ public interface MastodonService {
     void updateOrCreateMastodonPost(String mastroAccessToken, String message);
 
     List<Mastodon> getAllPosts();
+
+    List<Mastodon> getAllPostsWherePostIsNotNull();
+
+    void cleanTable();
 }

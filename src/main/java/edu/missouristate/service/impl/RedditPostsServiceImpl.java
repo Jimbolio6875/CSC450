@@ -10,6 +10,7 @@ import edu.missouristate.service.RedditPostsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
@@ -27,6 +28,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+@Transactional
 @Service
 public class RedditPostsServiceImpl implements RedditPostsService {
 
@@ -189,6 +191,16 @@ public class RedditPostsServiceImpl implements RedditPostsService {
             redditPostsRepository.save(redditPosts);
         }
 
+    }
+
+    @Override
+    public List<String> getAllRedditPostIdsWhereNotNull() {
+        return redditPostsRepository.getAllRedditPostIdsWhereNotNull();
+    }
+
+    @Override
+    public void cleanTable() {
+        redditPostsRepository.cleanTable();
     }
 
     @Override

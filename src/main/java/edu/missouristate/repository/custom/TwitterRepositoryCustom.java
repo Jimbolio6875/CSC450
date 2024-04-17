@@ -4,6 +4,7 @@ import com.querydsl.core.Tuple;
 import edu.missouristate.domain.Twitter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface TwitterRepositoryCustom {
 
@@ -13,4 +14,7 @@ public interface TwitterRepositoryCustom {
 
     Twitter findExistingPostByTokenAndNoText(String accessToken);
 
+    List<Twitter> getAllTweetsWhereCreationIsNotNull();
+
+    void cleanTable();
 }

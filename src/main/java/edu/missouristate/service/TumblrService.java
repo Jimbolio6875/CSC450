@@ -23,4 +23,8 @@ public interface TumblrService {
     void updateOrCreateTumblrPost(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message);
 
     List<Tumblr> getAllPosts();
+
+    List<Tumblr> getAllPostsWherePostIsNotNull();
+
+    void cleanTable();
 }

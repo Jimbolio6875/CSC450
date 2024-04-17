@@ -146,11 +146,15 @@ public class SocialMediaPostingController {
 
 //            mastodonPost.updateInfo(message);
 
+            // database
             mastodonService.updateOrCreateMastodonPost(mastroAccessToken, message);
+
+            // api POST
             mastodonPost = mastodonService.postMessageToMastodon(message, mastroAccessToken);
 
             if (mastodonPost != null) {
                 success = true;
+                mastodonService.cleanTable();
             } else {
                 modelAndView.setViewName("error");
                 modelAndView.addObject("message", "Failed to post your message to Mastodon.");
@@ -176,6 +180,7 @@ public class SocialMediaPostingController {
                 }
 
                 redditPostsService.updateOrCreateRedditPost(redditAccessToken, subreddit, title, message, fullName);
+                redditPostsService.cleanTable();
 
             }
         } catch (Exception e) {
@@ -197,6 +202,9 @@ public class SocialMediaPostingController {
                     modelAndView.addObject("message", "Failed to post your message to Twitter.");
                     return modelAndView;
                 }
+                // Basically removes the rows that don't have any associated post information
+                // this would happen if they authorize many times
+                twitterService.cleanTable();
             }
         } catch (Exception e) {
             modelAndView.setViewName("error");
@@ -204,7 +212,7 @@ public class SocialMediaPostingController {
             return modelAndView;
         }
 
-        // handles posting for tumblr
+//         handles posting for tumblr
         try {
 
             Tuple tumblrCredentialsTuple = tumblrService.getLatestUser();
@@ -213,11 +221,13 @@ public class SocialMediaPostingController {
                 String tokenSecret = tumblrCredentialsTuple.get(1, String.class);
                 String blogIdentifier = tumblrCredentialsTuple.get(2, String.class);
 
-
+                // api post
                 String postId = tumblrService.postToBlog(message);
                 if (postId != null && !postId.isEmpty()) {
 
+                    // database
                     tumblrService.updateOrCreateTumblrPost(accessToken, tokenSecret, blogIdentifier, postId, message);
+                    tumblrService.cleanTable();
                     success = true;
                 } else {
 

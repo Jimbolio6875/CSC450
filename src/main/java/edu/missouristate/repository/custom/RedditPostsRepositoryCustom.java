@@ -3,6 +3,8 @@ package edu.missouristate.repository.custom;
 import com.querydsl.core.Tuple;
 import edu.missouristate.domain.RedditPosts;
 
+import java.util.List;
+
 public interface RedditPostsRepositoryCustom {
 
     public Tuple getLatestUser();
@@ -14,4 +16,8 @@ public interface RedditPostsRepositoryCustom {
     RedditPosts findByAccessToken(String accessToken);
 
     RedditPosts updateOrCreateRedditPost(String redditAccessToken);
+
+    List<String> getAllRedditPostIdsWhereNotNull();
+
+    void cleanTable();
 }

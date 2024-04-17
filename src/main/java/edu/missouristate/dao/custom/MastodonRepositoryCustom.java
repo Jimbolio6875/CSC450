@@ -17,4 +17,8 @@ public interface MastodonRepositoryCustom {
     Mastodon findExistingPostByTokenAndNoText(String accessToken);
 
     void updateWherePostIdIsNull(String accessToken, String id, String userId, String content, String url, Integer favourites);
+
+    List<Mastodon> getAllPostsWherePostIsNotNull();
+
+    void cleanTable();
 }

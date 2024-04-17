@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements TwitterRepositoryCustom {
@@ -26,8 +27,9 @@ public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements 
     @Override
     public Tuple getLatestUser() {
         return from(twitterTable)
-                .select(twitterTable.accessToken, twitterTable.accessTokenSecret, twitterTable.id.max())
-                .groupBy(twitterTable.accessToken, twitterTable.accessTokenSecret)
+                .select(twitterTable.accessToken, twitterTable.accessTokenSecret)
+                .orderBy(twitterTable.id.desc())
+                .limit(1)
                 .fetchOne();
     }
 
@@ -43,7 +45,20 @@ public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements 
     @Override
     public Twitter findExistingPostByTokenAndNoText(String accessToken) {
         return from(twitterTable)
-                .where(twitterTable.accessToken.eq(accessToken).and(twitterTable.tweetText.isNull())).fetchOne();
+                .where(twitterTable.accessToken.eq(accessToken).and(twitterTable.tweetText.isNull()))
+                .orderBy(twitterTable.id.desc())
+                .limit(1)
+                .fetchOne();
+    }
+
+    @Override
+    public List<Twitter> getAllTweetsWhereCreationIsNotNull() {
+        return from(twitterTable).where(twitterTable.creationDate.isNotNull()).fetch();
+    }
+
+    @Override
+    public void cleanTable() {
+        delete(twitterTable).where(twitterTable.creationDate.isNull()).execute();
     }
 
 

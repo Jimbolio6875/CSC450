@@ -96,5 +96,15 @@ public class TwitterServiceImpl implements TwitterService {
 
     }
 
+    @Override
+    public List<Twitter> getAllTweetsWhereCreationIsNotNull() {
+        return twitterRepository.getAllTweetsWhereCreationIsNotNull();
+    }
+
+    @Override
+    public void cleanTable() {
+        twitterRepository.cleanTable();
+    }
+
 
 }

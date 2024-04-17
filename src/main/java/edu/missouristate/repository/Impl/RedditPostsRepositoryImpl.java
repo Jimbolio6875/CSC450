@@ -8,6 +8,8 @@ import edu.missouristate.repository.custom.RedditPostsRepositoryCustom;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class RedditPostsRepositoryImpl extends QuerydslRepositorySupport implements RedditPostsRepositoryCustom {
 
@@ -20,8 +22,9 @@ public class RedditPostsRepositoryImpl extends QuerydslRepositorySupport impleme
     @Override
     public Tuple getLatestUser() {
         return from(redditPostsTable)
-                .select(redditPostsTable.accessToken, redditPostsTable.id.max())
-                .groupBy(redditPostsTable.accessToken)
+                .select(redditPostsTable.accessToken, redditPostsTable.id)
+                .orderBy(redditPostsTable.id.desc())
+                .limit(1)
                 .fetchOne();
     }
 
@@ -51,5 +54,17 @@ public class RedditPostsRepositoryImpl extends QuerydslRepositorySupport impleme
         return from(redditPostsTable).where(redditPostsTable.accessToken.eq(redditAccessToken)
                 .and(redditPostsTable.content.isNull())).fetchOne();
 
+    }
+
+    @Override
+    public List<String> getAllRedditPostIdsWhereNotNull() {
+        return from(redditPostsTable).select(redditPostsTable.postId).where(redditPostsTable.postId.isNotNull()).fetch();
+    }
+
+    @Override
+    public void cleanTable() {
+        delete(redditPostsTable)
+                .where(redditPostsTable.postId.isNull())
+                .execute();
     }
 }

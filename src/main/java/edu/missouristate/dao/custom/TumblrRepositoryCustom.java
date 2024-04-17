@@ -15,4 +15,8 @@ public interface TumblrRepositoryCustom {
     void updateWherePostIdIsNull(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message);
 
     Tumblr findExistingPostByTokenAndNoText(String accessToken);
+
+    List<Tumblr> getAllPostsWherePostIsNotNull();
+
+    void cleanTable();
 }

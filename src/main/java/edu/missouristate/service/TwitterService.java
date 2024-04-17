@@ -20,4 +20,8 @@ public interface TwitterService {
     Tuple getLatestUser();
 
     void updateContent(String accessToken, String message, LocalDateTime date, String accessTokenSecret);
+
+    List<Twitter> getAllTweetsWhereCreationIsNotNull();
+
+    void cleanTable();
 }

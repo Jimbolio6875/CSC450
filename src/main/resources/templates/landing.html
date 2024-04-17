@@ -64,25 +64,31 @@
             <div class="container">
                 <div class="posts-text">
                     <p>Click on any social media icon below and connect to your account!</p>
+                    <hr style="margin: 36px auto;">
                 </div>
                 <div class="container">
                     <div class="row socials-list">
-                        <div class="col-6 col-md-3">
+
+                        <div class="col-6 col-md-3 d-flex flex-column align-items-center">
+                            <input style="width: 20px; padding: 10px" type="checkbox">
                             <a th:href=" @{/start-auth}">
                                 <img alt="#" th:src="@{/resources/Socials/twitter.jpg}">
                             </a>
                         </div>
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-3 d-flex flex-column align-items-center">
+                            <input style="width: 20px; padding: 10px" type="checkbox">
                             <a th:href="@{/tumblr/start-oauth}">
                                 <img alt="#" th:src="@{/resources/Socials/tumblr.jpg}">
                             </a>
                         </div>
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-3 d-flex flex-column align-items-center">
+                            <input style="width: 20px; padding: 10px" type="checkbox">
                             <a th:href="@{/reddit/auth}">
                                 <img alt="#" th:src="@{/resources/Socials/reddit.png}">
                             </a>
                         </div>
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-3 d-flex flex-column align-items-center">
+                            <input style="width: 20px; padding: 10px" type="checkbox">
                             <a th:href="@{/mastodon/auth}">
                                 <img alt="#" th:src="@{/resources/Socials/mastodon.png}">
                             </a>
@@ -119,6 +125,17 @@
         </div>
     </div>
 </div>
+
+<style>
+    input[type="checkbox"] {
+        transform: scale(2);
+    }
+
+    .d-flex {
+        gap: 12px;
+    }
+
+</style>
 
 <script crossorigin="anonymous"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"

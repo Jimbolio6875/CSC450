@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements MastodonRepositoryCustom {
@@ -34,7 +35,11 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 
     @Override
     public void updateWherePostIdIsNull(String accessToken, String id, String userId, String content, String url, Integer favourites) {
-        update(mastodonTable).where(mastodonTable.postId.isNull())
+
+        int mostRecentId = Objects.requireNonNull(getQuerydsl()).createQuery().select(mastodonTable.id.max())
+                .from(mastodonTable).fetchOne();
+
+        update(mastodonTable).where(mastodonTable.id.eq(mostRecentId))
                 .set(mastodonTable.accessToken, accessToken)
                 .set(mastodonTable.postId, id)
                 .set(mastodonTable.userId, userId)
@@ -42,13 +47,27 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
                 .set(mastodonTable.postUrl, url)
                 .set(mastodonTable.favouriteCount, favourites)
                 .execute();
+    }
 
+    @Override
+    public List<Mastodon> getAllPostsWherePostIsNotNull() {
+        return from(mastodonTable)
+                .where(mastodonTable.postId.isNotNull())
+                .fetch();
+    }
+
+    @Override
+    public void cleanTable() {
+        delete(mastodonTable).where(mastodonTable.postId.isNull()).execute();
     }
 
     @Override
     public Mastodon findExistingPostByTokenAndNoText(String accessToken) {
         return from(mastodonTable)
-                .where(mastodonTable.accessToken.eq(accessToken).and(mastodonTable.content.isNull())).fetchOne();
+                .where(mastodonTable.accessToken.eq(accessToken).and(mastodonTable.content.isNull()))
+                .orderBy(mastodonTable.id.desc())
+                .limit(1)
+                .fetchOne();
     }
 
 

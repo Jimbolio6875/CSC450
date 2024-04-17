@@ -194,5 +194,15 @@ public class MastodonServiceImpl implements MastodonService {
         return (List<Mastodon>) mastodonRepository.findAll();
     }
 
+    @Override
+    public List<Mastodon> getAllPostsWherePostIsNotNull() {
+        return mastodonRepository.getAllPostsWherePostIsNotNull();
+    }
+
+    @Override
+    public void cleanTable() {
+        mastodonRepository.cleanTable();
+    }
+
 
 }

@@ -23,41 +23,6 @@
 <body>
 <div class="container-fluid">
     <div class="row flex-nowrap">
-<!--        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white"-->
-<!--             style="border-right: 2px solid #000; width: 200px">-->
-<!--            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">-->
-<!--                <a class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-black text-decoration-none title"-->
-<!--                   href="index.html">-->
-<!--                    <img alt="#" id="logo" src="/resources/Socials/logo.png">-->
-<!--                </a>-->
-<!--                <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"-->
-<!--                    id="menu">-->
-<!--                    <li class="nav-item">-->
-<!--                        <a class="nav-link align-middle px-0 text-black" href="posts.html">-->
-<!--                            <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>-->
-<!--                        </a>-->
-<!--                    </li>-->
-<!--                    <li>-->
-<!--                        <a class="nav-link px-0 align-middle text-black" href="postHistory.html">-->
-<!--                            <i class="fs-4 bi-table"></i> <span class="ms-1 d-none d-sm-inline">Post-->
-<!--                                    History</span></a>-->
-<!--                    </li>-->
-<!--                    <div class="dropdown">-->
-<!--                        <a aria-expanded="false"-->
-<!--                           class="d-flex align-items-center text-black text-decoration-none dropdown-toggle"-->
-<!--                           data-bs-toggle="dropdown" href="#" id="dropdownUser1">-->
-<!--                            &lt;!&ndash;<img src="Socials/user.png" width="25" height="25" class="rounded-circle">&ndash;&gt;-->
-<!--                            <i class="fs-4 bi-people"></i>-->
-<!--                            <span class="d-none d-sm-inline mx-1">User</span>-->
-<!--                        </a>-->
-<!--                        <ul aria-labelledby="dropdownUser1"-->
-<!--                            class="dropdown-menu dropdown-menu-white text-small shadow">-->
-<!--                            <li><a class="dropdown-item" href="#">Sign out</a></li>-->
-<!--                        </ul>-->
-<!--                    </div>-->
-<!--                </ul>-->
-<!--            </div>-->
-<!--        </div>-->
         <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-white"
              style="border-right: 2px solid #000; width: 200px">
             <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
@@ -68,7 +33,7 @@
                 <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
                     id="menu">
                     <li class="nav-item">
-                        <a th:href="@{/landing}" class="nav-link align-middle px-0 text-black">
+                        <a class="nav-link align-middle px-0 text-black" th:href="@{/landing}">
                             <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
                         </a>
                     </li>
@@ -93,11 +58,11 @@
                 </ul>
             </div>
         </div>
-        <div class="col py-3">
+        <div class="col py-3 renderText">
             <h3>Post History</h3>
             <div class="container">
                 <div class="posts-text">
-                    <p>Select any social media platform below to view all the posts you've made!</p>
+                    <p>Here are the posts you've made to the following social media platforms!</p>
                 </div>
                 <div class="container">
                     <div class="row socials-list">
@@ -118,12 +83,12 @@
 
             </div>
             <div class="container">
-                <div class="posts-text">
-                    <p>Looks like you've made quite the amount of posts!</p>
+                <div class="posts-text d-flex justify-content-center align-items-center pb-0" style="padding: 32px">
+                    <p class="displayText mb-0"></p>
                 </div>
                 <div class="container">
-                    <div class="row posts-list">
-                        <div th:each="redditPost : ${redditPosts}" class="post-container first-reddit">
+                    <div class="row posts-list checkReddit">
+                        <div class="post-container first-reddit" th:each="redditPost : ${redditPosts}">
                             <div style="display: flex; justify-content: space-between; flex-direction: row-reverse; align-items: center">
                                 <div>
                                     <ion-icon name="logo-reddit"></ion-icon>
@@ -158,16 +123,16 @@
                                 <p th:text="'Down Votes: ' + ${redditPost.downVotes}"></p>
                             </div>
                             <div class="original-post">
-                                <a th:href="${redditPost.url}" class="original-post" target="_blank">Original Post</a>
+                                <a class="original-post" target="_blank" th:href="${redditPost.url}">Original Post</a>
                             </div>
                             <hr>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="container">
-                <div class="row posts-list">
-                    <div th:each="tweet : ${tweets}" class="post-container first-tweet">
+            <div class="container twitter">
+                <div class="row posts-list checkTwitter">
+                    <div class="post-container first-tweet" th:each="tweet : ${tweets}">
                         <div style="display: flex; justify-content: space-between; flex-direction: row-reverse; align-items: center">
                             <div>
                                 <ion-icon name="logo-twitter"></ion-icon>
@@ -189,9 +154,9 @@
             </div>
 
             <!--            mastodon not updating when refreshing page so i took out favourites count for now           -->
-            <div class="container">
-                <div class="row posts-list">
-                    <div th:each="post : ${mastodonPosts}" class="post-container first-tweet">
+            <div class="container mastodon">
+                <div class="row posts-list checkMastodon">
+                    <div class="post-container first-tweet" th:each="post : ${mastodonPosts}">
                         <div style="display: flex; justify-content: space-between; flex-direction: row-reverse; align-items: center">
                             <div>
                                 <ion-icon name="logo-mastodon"></ion-icon>
@@ -200,16 +165,11 @@
                                 <p style="margin-left: 9px">Mastodon</p>
                             </div>
                         </div>
-<!--                        <div class="interactions">-->
-<!--                            <img height="25" src="/resources/Gifs/like.webp" width="25">-->
-<!--                            &lt;!&ndash;/*@thymesVar id="favouriteCount" type="java.lang.Integer"*/&ndash;&gt;-->
-<!--                            <p th:text="'Favourite Count: ' + ${post.favouriteCount}"></p>-->
-<!--                        </div>-->
                         <div class="post-content">
                             <p th:utext="${post.content}">Your post content will be here!</p>
                         </div>
                         <div class="original-post">
-                            <a th:href="${post.postUrl}" class="original-post" target="_blank">Original Post</a>
+                            <a class="original-post" target="_blank" th:href="${post.postUrl}">Original Post</a>
                         </div>
                         <hr>
                     </div>
@@ -217,9 +177,9 @@
             </div>
 
             <!--             took out note count for same reason i took out mastodon favourites count                -->
-            <div class="container">
-                <div class="row posts-list">
-                    <div th:each="post : ${tumblrPosts}" class="post-container first-tweet">
+            <div class="container tumblr">
+                <div class="row posts-list checkTumblr">
+                    <div class="post-container first-tweet" th:each="post : ${tumblrPosts}">
                         <div style="display: flex; justify-content: space-between; flex-direction: row-reverse; align-items: center">
                             <div>
                                 <ion-icon name="logo-tumblr"></ion-icon>
@@ -240,61 +200,73 @@
                             <p th:text="'Note Count: ' + ${post.noteCount}"></p>
                         </div>
                         <div class="original-post">
-                            <a th:href="${post.postUrl}" class="original-post" target="_blank">Original Post</a>
+                            <a class="original-post" target="_blank" th:href="${post.postUrl}">Original Post</a>
                         </div>
                         <hr>
                     </div>
                 </div>
             </div>
-<!--            <div class="container">-->
-<!--                <div class="row posts-list">-->
-<!--                    &lt;!&ndash; Iterating over each post &ndash;&gt;-->
-<!--                    <div th:each="post : ${posts}" class="col-md-4 post-container">-->
-<!--                        <p>Tumblr</p>-->
-<!--                        <div class="main">-->
-<!--                            &lt;!&ndash; Assuming you have or will convert the post's creation time into a format that can be used as an image alt text &ndash;&gt;-->
-<!--                            <img height="25" src="/resources/Gifs/clock.webp" width="25" alt="Post Creation Time">-->
-<!--                            <p th:text="'Created: ' + ${#temporals.format(post.date, 'yyyy-MM-dd HH:mm')}">Created: </p>-->
-<!--                        </div>-->
-<!--                        <div class="post-content">-->
-<!--                            <p th:utext="${post.content}">Your post content will be here!</p>-->
-<!--                        </div>-->
-<!--                        <div class="interactions">-->
-<!--                            <img height="25" src="/resources/Gifs/comment.webp" width="25" alt="Note Count">-->
-<!--                            <p th:text="'Note Count: ' + ${post.noteCount}">Note Count: </p>-->
-<!--                        </div>-->
-<!--                        <div class="original-post">-->
-<!--                            <a th:href="${post.postUrl}" th:text="${post.postUrl}">Original Post</a>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--                <div class="container">-->
-<!--                    <div class="row posts-list">-->
-<!--                        <div class="post-container">-->
-
-<!--                            <p>Mastodon</p>-->
-<!--                            <div class="post-content">-->
-<!--                                <p>Your post content will be here!</p>-->
-<!--                            </div>-->
-<!--                            <div class="interactions">-->
-
-<!--                                <img height="25" src="/resources/Gifs/favorite.webp" width="25">-->
-<!--                                <p>Favorite count: </p>-->
-
-<!--                            </div>-->
-<!--                            <div class="original-post">-->
-<!--                                <a class="original-post" href="#">Original Post</a>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
-            </div>
         </div>
     </div>
 </div>
 
+<script>
+
+    const checkReddit = document.querySelector(".checkReddit");
+    const checkTwitter = document.querySelector(".checkTwitter");
+    const checkMastodon = document.querySelector(".checkMastodon");
+    const checkTumblr = document.querySelector(".checkTumblr");
+    const displayText = document.querySelector(".displayText");
+    const twitterDisplay = document.querySelector(".twitter");
+    const tumblrDisplay = document.querySelector(".tumblr");
+    const mastodonDisplay = document.querySelector(".mastodon");
+    mastodonDisplay.style.display = 'none';
+    twitterDisplay.style.display = 'none';
+    tumblrDisplay.style.display = 'none';
+    let existingPosts = false;
+    const beforeHistory = "Create a post and see!";
+    const afterHistory = "Looks like you've made quite the amount of posts!";
+    const renderText = document.querySelector(".renderText");
+    const listToCheck = [checkReddit, checkTwitter, checkMastodon, checkTumblr];
+
+    window.addEventListener("DOMContentLoaded", () => {
+
+        for (let i = 0; i < listToCheck.length; i++) {
+
+            if (listToCheck[i].children.length > 0) {
+                let currentSocial = listToCheck[i];
+                existingPosts = true;
+
+                const classElement = currentSocial.className;
+
+                if (classElement.includes("Twitter")) {
+                    twitterDisplay.style.display = 'block';
+                } else if (classElement.includes("Mastodon")) {
+                    mastodonDisplay.style.display = 'block';
+                } else if (classElement.includes("Tumblr")) {
+                    tumblrDisplay.style.display = 'block';
+                }
+
+            }
+        }
+
+        if (existingPosts === false) {
+            displayText.textContent = beforeHistory;
+        } else {
+            displayText.textContent = afterHistory;
+        }
+    })
+
+
+</script>
+
 <style>
+
+    * {
+        padding: 0;
+        margin: 0;
+    }
+
     .first-tweet:first-child {
         margin-top: 28px;
     }

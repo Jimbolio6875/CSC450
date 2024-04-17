@@ -14,4 +14,5 @@ public interface RedditPostsRepository extends CrudRepository<RedditPosts, Integ
     List<String> findAllPostIds();
 
     RedditPosts findByPostId(String postId);
+
 }

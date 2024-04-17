@@ -305,4 +305,14 @@ public class TumblrServiceImpl implements TumblrService {
     public List<Tumblr> getAllPosts() {
         return (List<Tumblr>) tumblrRepository.findAll();
     }
+
+    @Override
+    public List<Tumblr> getAllPostsWherePostIsNotNull() {
+        return tumblrRepository.getAllPostsWherePostIsNotNull();
+    }
+
+    @Override
+    public void cleanTable() {
+        tumblrRepository.cleanTable();
+    }
 }

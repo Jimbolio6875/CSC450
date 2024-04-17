@@ -11,6 +11,3 @@ CREATE TABLE tumblr
     note_count      INTEGER,
     date            TIMESTAMP
 );
-
-SELECT *
-FROM tumblr;

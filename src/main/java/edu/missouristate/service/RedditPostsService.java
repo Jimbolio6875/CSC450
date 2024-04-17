@@ -34,4 +34,7 @@ public interface RedditPostsService {
 
     void updateOrCreateRedditPost(String redditAccessToken, String subreddit, String title, String message, String fullName);
 
+    List<String> getAllRedditPostIdsWhereNotNull();
+
+    void cleanTable();
 }

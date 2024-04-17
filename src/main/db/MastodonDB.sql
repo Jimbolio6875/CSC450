@@ -1,4 +1,4 @@
-USE login;
+# USE login;
 
 DROP TABLE IF EXISTS mastodon;
 
@@ -12,6 +12,3 @@ CREATE TABLE mastodon
     favourite_count INTEGER,
     access_token    VARCHAR(1000) NOT NULL
 );
-
-SELECT *
-FROM mastodon;

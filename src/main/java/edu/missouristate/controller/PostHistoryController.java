@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -37,7 +36,7 @@ public class PostHistoryController {
     public ModelAndView getPostHistory() throws IOException, ExecutionException, InterruptedException {
         ModelAndView modelAndView = new ModelAndView("postHistory");
 
-        List<String> redditPostIds = redditPostsService.getAllRedditPostIds();
+        List<String> redditPostIds = redditPostsService.getAllRedditPostIdsWhereNotNull();
         List<RedditPosts> redditPosts = redditPostsService.fetchRedditPostDetails(redditPostIds);
 
 //        List<String> mastrodonPostIds = mastodonService.getPostsByUserId();
@@ -47,16 +46,22 @@ public class PostHistoryController {
 //        List<String> tumblrIds = tumblrService.getAllTubmlrIds();
 //        tumblrPosts = tumblrService.tumblrPosts(tumblrIds); // Fetch Tumblr posts
 
-        List<Twitter> tweets = twitterService.getAllTweets();
+//        List<Twitter> tweets = twitterService.getAllTweets();
+        List<Twitter> tweets = twitterService.getAllTweetsWhereCreationIsNotNull();
+
 
         // todo im like 99% sure the mastodon and tumblr post calls just get everything from the database no matter the current user
         // todo will check whenever i can sign out and make a new account
         // will have to implement user id as foreign key in mastodon/tumblr tables
 
-        List<Mastodon> mastodonPosts = mastodonService.getAllPosts();
+//        List<Mastodon> mastodonPosts = mastodonService.getAllPosts();
+        List<Mastodon> mastodonPosts = mastodonService.getAllPostsWherePostIsNotNull();
+
 //        Collections.reverse(mastodonPosts);
 
-        List<Tumblr> tumblrPosts = tumblrService.getAllPosts();
+//        List<Tumblr> tumblrPosts = tumblrService.getAllPosts();
+        List<Tumblr> tumblrPosts = tumblrService.getAllPostsWherePostIsNotNull();
+
 //        Collections.reverse(tumblrPosts);
 
         modelAndView.addObject("redditPosts", redditPosts);
