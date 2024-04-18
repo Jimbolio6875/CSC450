@@ -204,6 +204,11 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     }
 
     @Override
+    public boolean hasToken() {
+        return redditPostsRepository.hasToken();
+    }
+
+    @Override
     public Mono<RedditPosts> transformAndSaveRedditPost(RedditResponse response) {
         try {
             RedditPosts post = transformToRedditPosts(response);

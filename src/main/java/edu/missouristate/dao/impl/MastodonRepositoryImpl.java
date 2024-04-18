@@ -62,6 +62,14 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
     }
 
     @Override
+    public boolean hasToken() {
+        long fetchCountAmount = from(mastodonTable).where(mastodonTable.accessToken.isNotNull()).fetchCount();
+
+        return fetchCountAmount > 0;
+
+    }
+
+    @Override
     public Mastodon findExistingPostByTokenAndNoText(String accessToken) {
         return from(mastodonTable)
                 .where(mastodonTable.accessToken.eq(accessToken).and(mastodonTable.content.isNull()))

@@ -17,4 +17,6 @@ public interface TwitterRepositoryCustom {
     List<Twitter> getAllTweetsWhereCreationIsNotNull();
 
     void cleanTable();
+
+    boolean hasToken();
 }

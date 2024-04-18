@@ -19,4 +19,6 @@ public interface TumblrRepositoryCustom {
     List<Tumblr> getAllPostsWherePostIsNotNull();
 
     void cleanTable();
+
+    boolean hasToken();
 }

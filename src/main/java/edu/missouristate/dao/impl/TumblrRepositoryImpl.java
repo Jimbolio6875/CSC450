@@ -84,5 +84,13 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
         delete(tumblrTable).where(tumblrTable.postId.isNull()).execute();
     }
 
+    @Override
+    public boolean hasToken() {
+
+        long tokenAmount = from(tumblrTable).where(tumblrTable.accessToken.isNotNull()).fetchCount();
+
+        return tokenAmount > 0;
+    }
+
 
 }

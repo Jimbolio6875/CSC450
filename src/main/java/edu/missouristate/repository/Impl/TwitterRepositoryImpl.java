@@ -61,5 +61,13 @@ public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements 
         delete(twitterTable).where(twitterTable.creationDate.isNull()).execute();
     }
 
+    @Override
+    public boolean hasToken() {
+
+        long hasToken = from(twitterTable).where(twitterTable.accessToken.isNotNull()).fetchCount();
+
+        return hasToken > 0;
+    }
+
 
 }

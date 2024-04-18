@@ -315,4 +315,9 @@ public class TumblrServiceImpl implements TumblrService {
     public void cleanTable() {
         tumblrRepository.cleanTable();
     }
+
+    @Override
+    public boolean hasToken() {
+        return tumblrRepository.hasToken();
+    }
 }

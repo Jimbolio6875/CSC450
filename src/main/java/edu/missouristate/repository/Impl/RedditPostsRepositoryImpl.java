@@ -67,4 +67,12 @@ public class RedditPostsRepositoryImpl extends QuerydslRepositorySupport impleme
                 .where(redditPostsTable.postId.isNull())
                 .execute();
     }
+
+    @Override
+    public boolean hasToken() {
+
+        long tokenAmount = from(redditPostsTable).where(redditPostsTable.accessToken.isNotNull()).fetchCount();
+
+        return tokenAmount > 0;
+    }
 }

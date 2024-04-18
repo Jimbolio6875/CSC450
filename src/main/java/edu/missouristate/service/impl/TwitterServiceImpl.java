@@ -106,5 +106,10 @@ public class TwitterServiceImpl implements TwitterService {
         twitterRepository.cleanTable();
     }
 
+    @Override
+    public boolean hasToken() {
+        return twitterRepository.hasToken();
+    }
+
 
 }

@@ -24,4 +24,6 @@ public interface TwitterService {
     List<Twitter> getAllTweetsWhereCreationIsNotNull();
 
     void cleanTable();
+
+    boolean hasToken();
 }

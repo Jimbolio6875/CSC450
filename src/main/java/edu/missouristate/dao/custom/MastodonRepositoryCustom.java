@@ -21,4 +21,6 @@ public interface MastodonRepositoryCustom {
     List<Mastodon> getAllPostsWherePostIsNotNull();
 
     void cleanTable();
+
+    boolean hasToken();
 }

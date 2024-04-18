@@ -37,4 +37,6 @@ public interface RedditPostsService {
     List<String> getAllRedditPostIdsWhereNotNull();
 
     void cleanTable();
+
+    boolean hasToken();
 }

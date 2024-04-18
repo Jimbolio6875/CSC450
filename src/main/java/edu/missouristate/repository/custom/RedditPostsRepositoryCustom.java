@@ -20,4 +20,6 @@ public interface RedditPostsRepositoryCustom {
     List<String> getAllRedditPostIdsWhereNotNull();
 
     void cleanTable();
+
+    boolean hasToken();
 }

@@ -30,4 +30,6 @@ public interface MastodonService {
     List<Mastodon> getAllPostsWherePostIsNotNull();
 
     void cleanTable();
+
+    boolean hasToken();
 }

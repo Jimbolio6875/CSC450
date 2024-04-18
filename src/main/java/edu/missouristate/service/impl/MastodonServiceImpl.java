@@ -204,5 +204,10 @@ public class MastodonServiceImpl implements MastodonService {
         mastodonRepository.cleanTable();
     }
 
+    @Override
+    public boolean hasToken() {
+        return mastodonRepository.hasToken();
+    }
+
 
 }

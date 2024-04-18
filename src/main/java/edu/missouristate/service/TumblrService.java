@@ -27,4 +27,6 @@ public interface TumblrService {
     List<Tumblr> getAllPostsWherePostIsNotNull();
 
     void cleanTable();
+
+    boolean hasToken();
 }

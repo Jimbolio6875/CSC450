@@ -9,7 +9,6 @@ import edu.missouristate.service.TumblrService;
 import edu.missouristate.service.TwitterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,7 +56,7 @@ public class SocialMediaPostingController {
 
         session.setAttribute("accessToken", mastodonService.getAccessToken(code));
 
-        return "redirect:/post-message";
+        return "redirect:/login";
     }
 
     // gets mastodon posts for post history page
@@ -102,10 +101,14 @@ public class SocialMediaPostingController {
     // todo update feature for tumblr doesn't work meaning if you like something on the site it won't update on post history yet
     // todo should be easy to fix
     @GetMapping("/tumblr/oauth-callback")
-    public String oauthCallback(@RequestParam("oauth_verifier") String oauthVerifier, Model model) throws Exception {
-        userInfo = tumblrService.getUserInfo(oauthVerifier);
-        model.addAttribute("userInfo", userInfo);
-        return "redirect:/tumblr/post-message";
+    public String oauthCallback(@RequestParam("oauth_verifier") String oauthVerifier, HttpSession session) throws Exception {
+        String userInfo = tumblrService.getUserInfo(oauthVerifier);
+        session.setAttribute("userInfo", userInfo);
+
+        tumblrService.updatePosts();
+        session.setAttribute("postsUpdated", true);
+
+        return "redirect:/landing";
     }
 
     @RequestMapping("/tumblr/post-message")
@@ -132,115 +135,141 @@ public class SocialMediaPostingController {
     public ModelAndView submitPost(@RequestParam("message") String message,
                                    @RequestParam("subreddit") String subreddit,
                                    @RequestParam("title") String title,
+                                   @RequestParam(required = false) Boolean twitter,
+                                   @RequestParam(required = false) Boolean tumblr,
+                                   @RequestParam(required = false) Boolean reddit,
+                                   @RequestParam(required = false) Boolean mastodon,
                                    HttpSession session) {
+
         ModelAndView modelAndView = new ModelAndView();
+
+        // Checks if sent over value is null and assigns true or false
+        boolean isTwitterChecked = twitter != null && twitter;
+        boolean isTumblrChecked = tumblr != null && tumblr;
+        boolean isRedditChecked = reddit != null && reddit;
+        boolean isMastodonChecked = mastodon != null && mastodon;
+//        boolean existingMastodonToken = mastodonService.hasToken();
+//        boolean existingTwitterToken = twitterService.hasToken();
+
+
         boolean success = false;
         Mastodon mastodonPost = null;
-        Tuple mastodonAccessToken = mastodonService.getLatestAccessToken();
-        String mastroAccessToken = mastodonAccessToken.get(0, String.class);
 
 
-        // hanldes posting for mastodon
-        // todo will put this in try catch after second sprint presentation don't wanna break anything rn
-        if (mastodonAccessToken != null) {
+        if (isMastodonChecked) {
+            Tuple mastodonAccessToken = mastodonService.getLatestAccessToken();
+            String mastroAccessToken = mastodonAccessToken.get(0, String.class);
+
+            // hanldes posting for mastodon
+            // todo will put this in try catch after second sprint presentation don't wanna break anything rn
+            if (mastodonAccessToken != null) {
 
 //            mastodonPost.updateInfo(message);
 
-            // database
-            mastodonService.updateOrCreateMastodonPost(mastroAccessToken, message);
+                // database
+                mastodonService.updateOrCreateMastodonPost(mastroAccessToken, message);
 
-            // api POST
-            mastodonPost = mastodonService.postMessageToMastodon(message, mastroAccessToken);
+                // api POST
+                mastodonPost = mastodonService.postMessageToMastodon(message, mastroAccessToken);
 
-            if (mastodonPost != null) {
-                success = true;
-                mastodonService.cleanTable();
+                if (mastodonPost != null) {
+                    success = true;
+                    mastodonService.cleanTable();
+                } else {
+                    modelAndView.setViewName("error");
+                    modelAndView.addObject("message", "Failed to post your message to Mastodon.");
+                    return modelAndView;
+                }
             } else {
                 modelAndView.setViewName("error");
-                modelAndView.addObject("message", "Failed to post your message to Mastodon.");
+                modelAndView.addObject("message", "No access token available for Mastodon.");
                 return modelAndView;
             }
-        } else {
-            modelAndView.setViewName("error");
-            modelAndView.addObject("message", "No access token available for Mastodon.");
-            return modelAndView;
+
         }
 
+        if (isRedditChecked) {
+            // handles posting for reddit
+            try {
+                Tuple redditAccessTokenTuple = redditPostsService.getLatestUser();
+                if (redditAccessTokenTuple != null) {
+                    String redditAccessToken = redditAccessTokenTuple.get(0, String.class);
+                    String fullName = redditPostsService.postToReddit(redditAccessToken, subreddit, title, message);
+                    if (fullName == null || fullName.isEmpty()) {
+                        modelAndView.setViewName("error");
+                        modelAndView.addObject("message", "Failed to post your message to Reddit.");
+                        return modelAndView;
+                    }
 
-        // handles posting for reddit
-        try {
-            Tuple redditAccessTokenTuple = redditPostsService.getLatestUser();
-            if (redditAccessTokenTuple != null) {
-                String redditAccessToken = redditAccessTokenTuple.get(0, String.class);
-                String fullName = redditPostsService.postToReddit(redditAccessToken, subreddit, title, message);
-                if (fullName == null || fullName.isEmpty()) {
-                    modelAndView.setViewName("error");
-                    modelAndView.addObject("message", "Failed to post your message to Reddit.");
-                    return modelAndView;
+                    redditPostsService.updateOrCreateRedditPost(redditAccessToken, subreddit, title, message, fullName);
+                    redditPostsService.cleanTable();
+
                 }
-
-                redditPostsService.updateOrCreateRedditPost(redditAccessToken, subreddit, title, message, fullName);
-                redditPostsService.cleanTable();
-
+            } catch (Exception e) {
+                modelAndView.setViewName("error");
+                modelAndView.addObject("message", "Failed to post your message to Reddit: " + e.getMessage());
+                return modelAndView;
             }
-        } catch (Exception e) {
-            modelAndView.setViewName("error");
-            modelAndView.addObject("message", "Failed to post your message to Reddit: " + e.getMessage());
-            return modelAndView;
         }
 
-        // handles posting for twiiter
-        try {
-            Tuple twitterToken = twitterService.getLatestUser();
-            if (twitterToken != null) {
-                String accessToken = twitterToken.get(0, String.class);
-                String accessTokenSecret = twitterToken.get(1, String.class);
-                twitterService.updateContent(accessToken, message, LocalDateTime.now(), accessTokenSecret);
-                success = twitterService.postTweet(message, accessToken, accessTokenSecret);
-                if (!success) {
-                    modelAndView.setViewName("error");
-                    modelAndView.addObject("message", "Failed to post your message to Twitter.");
-                    return modelAndView;
+        if (isTwitterChecked) {
+            // handles posting for twiiter
+            try {
+                Tuple twitterToken = twitterService.getLatestUser();
+                if (twitterToken != null) {
+                    String accessToken = twitterToken.get(0, String.class);
+                    String accessTokenSecret = twitterToken.get(1, String.class);
+                    twitterService.updateContent(accessToken, message, LocalDateTime.now(), accessTokenSecret);
+                    success = twitterService.postTweet(message, accessToken, accessTokenSecret);
+                    if (!success) {
+                        modelAndView.setViewName("error");
+                        modelAndView.addObject("message", "Failed to post your message to Twitter.");
+                        return modelAndView;
+                    }
+                    // Basically removes the rows that don't have any associated post information
+                    // this would happen if they authorize many times
+                    twitterService.cleanTable();
                 }
-                // Basically removes the rows that don't have any associated post information
-                // this would happen if they authorize many times
-                twitterService.cleanTable();
+            } catch (Exception e) {
+                modelAndView.setViewName("error");
+                modelAndView.addObject("message", "Failed to post your message to Twitter: " + e.getMessage());
+                return modelAndView;
             }
-        } catch (Exception e) {
-            modelAndView.setViewName("error");
-            modelAndView.addObject("message", "Failed to post your message to Twitter: " + e.getMessage());
-            return modelAndView;
         }
+
+        if (isTumblrChecked) {
+            try {
+
+                Tuple tumblrCredentialsTuple = tumblrService.getLatestUser();
+                if (tumblrCredentialsTuple != null) {
+                    String accessToken = tumblrCredentialsTuple.get(0, String.class);
+                    String tokenSecret = tumblrCredentialsTuple.get(1, String.class);
+                    String blogIdentifier = tumblrCredentialsTuple.get(2, String.class);
+
+                    // api post
+                    String postId = tumblrService.postToBlog(message);
+                    if (postId != null && !postId.isEmpty()) {
+
+                        // database
+                        tumblrService.updateOrCreateTumblrPost(accessToken, tokenSecret, blogIdentifier, postId, message);
+                        tumblrService.cleanTable();
+                        success = true;
+                    } else {
+
+                        modelAndView.setViewName("error");
+                        modelAndView.addObject("message", "Failed to post your message to Tumblr.");
+                        return modelAndView;
+                    }
+                }
+            } catch (Exception e) {
+                modelAndView.setViewName("error");
+                modelAndView.addObject("message", "Failed to post your message to Tumblr: " + e.getMessage());
+                return modelAndView;
+            }
+        }
+
 
 //         handles posting for tumblr
-        try {
-
-            Tuple tumblrCredentialsTuple = tumblrService.getLatestUser();
-            if (tumblrCredentialsTuple != null) {
-                String accessToken = tumblrCredentialsTuple.get(0, String.class);
-                String tokenSecret = tumblrCredentialsTuple.get(1, String.class);
-                String blogIdentifier = tumblrCredentialsTuple.get(2, String.class);
-
-                // api post
-                String postId = tumblrService.postToBlog(message);
-                if (postId != null && !postId.isEmpty()) {
-
-                    // database
-                    tumblrService.updateOrCreateTumblrPost(accessToken, tokenSecret, blogIdentifier, postId, message);
-                    tumblrService.cleanTable();
-                    success = true;
-                } else {
-
-                    modelAndView.setViewName("error");
-                    modelAndView.addObject("message", "Failed to post your message to Tumblr.");
-                    return modelAndView;
-                }
-            }
-        } catch (Exception e) {
-            modelAndView.setViewName("error");
-            modelAndView.addObject("message", "Failed to post your message to Tumblr: " + e.getMessage());
-            return modelAndView;
-        }
 
 
         // check if every social media was successfully posted to
