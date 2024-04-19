@@ -46,7 +46,19 @@ public class RedditPosts {
     @CreationTimestamp
     private LocalDateTime creationDate;
 
+    @ManyToOne
+    @JoinColumn(name = "central_login_id", referencedColumnName = "central_login_id")
+    private CentralLogin centralLogin;
+
     public RedditPosts() {
+    }
+
+    public CentralLogin getCentralLogin() {
+        return centralLogin;
+    }
+
+    public void setCentralLogin(CentralLogin centralLogin) {
+        this.centralLogin = centralLogin;
     }
 
     public Integer getId() {

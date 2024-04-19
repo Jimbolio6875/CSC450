@@ -38,7 +38,19 @@ public class Tumblr implements Serializable {
     @Column(name = "date", columnDefinition = "TIMESTAMP")
     private Timestamp date;
 
+    @ManyToOne
+    @JoinColumn(name = "central_login_id", referencedColumnName = "central_login_id")
+    private CentralLogin centralLogin;
+
     public Tumblr() {
+    }
+
+    public CentralLogin getCentralLogin() {
+        return centralLogin;
+    }
+
+    public void setCentralLogin(CentralLogin centralLogin) {
+        this.centralLogin = centralLogin;
     }
 
     public Integer getId() {
