@@ -18,6 +18,10 @@
     <!-- Bootstrap Icons CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.css" rel="stylesheet">
 
+    <script crossorigin="anonymous"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </head>
 
 <body>
@@ -66,7 +70,7 @@
                     <p>Click on any social media icon below and connect to your account!</p>
                     <hr style="margin: 36px auto;">
                 </div>
-                <form action="/submit-post" class="was-validated" method="post">
+                <form action="/submit-post" id="myForm" class="was-validated" method="post">
                     <div class="container">
                         <div class="row socials-list">
                             <div class="col-6 col-md-3 d-flex flex-column align-items-center">
@@ -81,7 +85,8 @@
                             </div>
                             <div class="col-6 col-md-3 d-flex flex-column align-items-center">
                                 <label>
-                                    <input id="tumblr" name="tumblr" th:disabled="${hasTumblrToken != null ? !hasTumblrToken : true}"
+                                    <input id="tumblr" name="tumblr"
+                                           th:disabled="${hasTumblrToken != null ? !hasTumblrToken : true}"
                                            type="checkbox">
                                 </label>
 
@@ -91,7 +96,8 @@
                             </div>
                             <div class="col-6 col-md-3 d-flex flex-column align-items-center">
                                 <label>
-                                    <input id="reddit" name="reddit" th:disabled="${hasRedditToken != null ? !hasRedditToken : true}"
+                                    <input id="reddit" name="reddit" onclick="run()"
+                                           th:disabled="${hasRedditToken != null ? !hasRedditToken : true}"
                                            type="checkbox">
                                 </label>
 
@@ -112,34 +118,171 @@
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <label for="subreddit">Subreddit:</label>
-                        <input id="subreddit" name="subreddit" placeholder="subreddit name" required type="text">
-                    </div>
-                    <div>
-                        <label for="title">Title:</label>
-                        <input id="title" name="title" placeholder="Post title" required type="text">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label" for="validationTextarea">Looks like you're all set! Now it's time
-                            to share what's on your mind!</label>
-                        <textarea class="form-control" id="validationTextarea" name="message"
-                                  placeholder="Write something here..."
-                                  required></textarea>
-                        <div class="invalid-feedback">
-                            Please enter a message!
+                    <div class="reddit-options" style="display: flex; flex-direction: column; gap: 12px">
+                        <div style="display: flex; gap: 12px">
+                            <label for="subreddit"><strong> Subreddit:</strong></label>
+                            <input class="form-control" id="subreddit" name="subreddit" placeholder="subreddit name"
+                                   type="text">
+                        </div>
+                        <div style="display: flex; gap: 12px">
+                            <label for="title"><strong>Title:</strong></label>
+                            <input class="form-control" id="title" name="title" placeholder="Post title"
+                                   type="text">
                         </div>
                     </div>
-                    <div class="mb-3 sharing">
-                        <button class="btn btn-primary" type="submit">Share Post</button>
+
+                    <div class="mb-3">
+                        <hr>
+                        <label class="before-validation" for="validationTextarea">
+                            <strong>
+                                Please
+                                connect a social media to
+                                begin!
+                            </strong>
+                        </label>
+                        <div class="post-box">
+                            <label class="after-validation form-label mt-3" for="validationTextarea">Looks like you're
+                                all set! Now it's time
+                                to share what's on your mind!</label>
+                            <textarea class="form-control main-textbox" id="validationTextarea" name="message"
+                                      placeholder="Write something here..."
+                                      required></textarea>
+                            <div class="invalid-feedback">
+                                Please enter a message!
+                            </div>
+                            <div class="mb-3 sharing">
+                                <button class="btn btn-primary" type="submit">Share Post</button>
+                            </div>
+                        </div>
                     </div>
                 </form>
+            </div>
+            <input type="hidden" id="flashMessage" th:value="${message}" />
+            <div class="toast" id="toast"></div>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    const subreddit = document.querySelector("#subreddit");
+    const redditTitle = document.querySelector("#title");
+    const form = document.querySelector("#myForm");
+
+    const redditDisplay = document.querySelector(".reddit-options");
+    const redditRatio = document.querySelector("#reddit");
+    const tumblrRatio = document.querySelector("#tumblr");
+    const twitterRadio = document.querySelector("#twitter");
+    const mastodonRatio = document.querySelector("#mastodon");
+    const beforeValidationText = document.querySelector(".before-validation");
+    const afterValidationText = document.querySelector(".after-validation");
+    const mainTextBox = document.querySelector(".main-textbox");
+    const postBox = document.querySelector(".post-box");
+    const toast = document.getElementById("toast");
+    redditDisplay.style.display = 'none';
+    const flashMessage = document.getElementById('flashMessage').value;
+
+    function run() {
+        redditDisplay.style.display = redditRatio.checked ? 'flex' : 'none';
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        redditRatio.addEventListener('change', function() {
+            updateVisibility();
+        });
+
+        function updateVisibility() {
+            if (redditRatio.checked) {
+                subreddit.style.visibility = 'visible';
+                redditTitle.style.visibility = 'visible';
+                subreddit.required = true;
+                redditTitle.required = true;
+            } else {
+                subreddit.style.visibility = 'hidden';
+                redditTitle.style.visibility = 'hidden';
+                subreddit.required = false;
+                redditTitle.required = false;
+            }
+        }
+
+        function validateForm() {
+            var isValid = true;
+            // Perform your validation logic here
+            if (!redditRatio.checked && !twitterRadio.checked && !mastodonRatio.checked && !tumblrRatio.checked) {
+                displayToast("Please check a social media to post!", 'red');
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        function displayToast(message, color) {
+            toast.innerText = message;
+            toast.className = "toast show";
+            toast.style.background = color;
+            setTimeout(function() {
+                toast.className = toast.className.replace("show", "");
+            }, 6000);
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (validateForm()) {
+                form.submit();
+            }
+        });
+
+        if (!redditRatio.hasAttribute('disabled') || !tumblrRatio.hasAttribute('disabled') || !twitterRadio.hasAttribute('disabled') || !mastodonRatio.hasAttribute('disabled')) {
+            beforeValidationText.style.display = "none";
+            postBox.style.display = "block";
+            afterValidationText.style.display = "block";
+        } else {
+            postBox.style.display = "none";
+            afterValidationText.style.display = "none";
+            beforeValidationText.style.display = "flex";
+            beforeValidationText.style.justifyContent = "center";
+        }
+
+        updateVisibility();
+
+        if(flashMessage.includes("Failed")) {
+            displayToast(flashMessage, '#F39F5A');
+        } else if(flashMessage.toLowerCase().includes("successfully")) {
+            displayToast(flashMessage, 'green');
+        }
+    });
+
+
+
+
+</script>
+
+
 <style>
+
+    .toast {
+        visibility: hidden;
+        min-width: 250px;
+        margin-left: -125px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        bottom: 30px;
+        font-size: 17px;
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+
+    .toast.show {
+        visibility: visible;
+        opacity: 1;
+    }
+
     input[type="checkbox"] {
         transform: scale(2);
     }

@@ -139,8 +139,9 @@ public class SocialMediaPostingController {
                                    @RequestParam(required = false) Boolean tumblr,
                                    @RequestParam(required = false) Boolean reddit,
                                    @RequestParam(required = false) Boolean mastodon,
-                                   HttpSession session) {
+                                   HttpSession session, RedirectAttributes redirectAttrs) {
 
+        StringBuilder statusMessage = new StringBuilder();
         ModelAndView modelAndView = new ModelAndView();
 
         // Checks if sent over value is null and assigns true or false
@@ -148,141 +149,160 @@ public class SocialMediaPostingController {
         boolean isTumblrChecked = tumblr != null && tumblr;
         boolean isRedditChecked = reddit != null && reddit;
         boolean isMastodonChecked = mastodon != null && mastodon;
-//        boolean existingMastodonToken = mastodonService.hasToken();
-//        boolean existingTwitterToken = twitterService.hasToken();
 
-
-        boolean success = false;
-        Mastodon mastodonPost = null;
-
+        boolean twitterSuccess = true;
+        boolean tumblrSuccess = true;
+        boolean redditSuccess = true;
+        boolean mastodonSuccess = true;
 
         if (isMastodonChecked) {
-            Tuple mastodonAccessToken = mastodonService.getLatestAccessToken();
-            String mastroAccessToken = mastodonAccessToken.get(0, String.class);
-
-            // hanldes posting for mastodon
-            // todo will put this in try catch after second sprint presentation don't wanna break anything rn
-            if (mastodonAccessToken != null) {
-
-//            mastodonPost.updateInfo(message);
-
-                // database
-                mastodonService.updateOrCreateMastodonPost(mastroAccessToken, message);
-
-                // api POST
-                mastodonPost = mastodonService.postMessageToMastodon(message, mastroAccessToken);
-
-                if (mastodonPost != null) {
-                    success = true;
-                    mastodonService.cleanTable();
-                } else {
+            try {
+                Tuple mastodonAccessTokenTuple = mastodonService.getLatestAccessToken();
+                if (mastodonAccessTokenTuple == null) {
                     modelAndView.setViewName("error");
-                    modelAndView.addObject("message", "Failed to post your message to Mastodon.");
-                    return modelAndView;
-                }
-            } else {
-                modelAndView.setViewName("error");
-                modelAndView.addObject("message", "No access token available for Mastodon.");
-                return modelAndView;
-            }
+                    modelAndView.addObject("message", "No access token available for Mastodon.");
+                    statusMessage.append("Failed to post to Mastodon due to missing access token. ");
+                    mastodonSuccess = false;
+                } else {
+                    String mastroAccessToken = mastodonAccessTokenTuple.get(0, String.class);
 
+                    // API POST
+                    Mastodon mastodonPost = mastodonService.postMessageToMastodon(message, mastroAccessToken);
+                    if (mastodonPost != null) {
+                        // Database update
+                        mastodonService.updateOrCreateMastodonPost(mastroAccessToken, message);
+
+                        mastodonService.cleanTable();
+                        statusMessage.append("Successfully posted to Mastodon. ");
+                    } else {
+                        modelAndView.setViewName("error");
+                        modelAndView.addObject("message", "Failed to post your message to Mastodon.");
+                        statusMessage.append("Failed to post to Mastodon. ");
+                        mastodonSuccess = false;
+                    }
+                }
+            } catch (Exception e) {
+                modelAndView.setViewName("error");
+                modelAndView.addObject("message", "Error posting to Mastodon: " + e.getMessage());
+                statusMessage.append("Exception while posting to Mastodon: ").append(e.getMessage()).append(" ");
+                mastodonSuccess = false;
+            }
         }
 
+
         if (isRedditChecked) {
-            // handles posting for reddit
             try {
                 Tuple redditAccessTokenTuple = redditPostsService.getLatestUser();
-                if (redditAccessTokenTuple != null) {
+                if (redditAccessTokenTuple == null) {
+                    modelAndView.setViewName("error");
+                    modelAndView.addObject("message", "No Reddit access token available.");
+                    statusMessage.append("Failed to post to Reddit due to missing access token. ");
+                    redditSuccess = false;
+                } else {
                     String redditAccessToken = redditAccessTokenTuple.get(0, String.class);
                     String fullName = redditPostsService.postToReddit(redditAccessToken, subreddit, title, message);
-                    if (fullName == null || fullName.isEmpty()) {
+                    if (fullName == null || fullName.isEmpty() || fullName.equals("No ID found")) {
                         modelAndView.setViewName("error");
-                        modelAndView.addObject("message", "Failed to post your message to Reddit.");
-                        return modelAndView;
+                        modelAndView.addObject("message", "Failed to post your message to Reddit: Invalid Subreddit.");
+                        statusMessage.append("Failed to post to Reddit due to invalid Subreddit. ");
+                        redditSuccess = false;
+                    } else {
+                        redditPostsService.updateOrCreateRedditPost(redditAccessToken, subreddit, title, message, fullName);
+                        redditPostsService.cleanTable();
+                        statusMessage.append("Successfully posted to Reddit. ");
+
                     }
-
-                    redditPostsService.updateOrCreateRedditPost(redditAccessToken, subreddit, title, message, fullName);
-                    redditPostsService.cleanTable();
-
                 }
             } catch (Exception e) {
                 modelAndView.setViewName("error");
                 modelAndView.addObject("message", "Failed to post your message to Reddit: " + e.getMessage());
-                return modelAndView;
+                statusMessage.append("Exception while posting to Reddit: ").append(e.getMessage()).append(" ");
+                redditSuccess = false;
             }
         }
 
+
         if (isTwitterChecked) {
-            // handles posting for twiiter
             try {
                 Tuple twitterToken = twitterService.getLatestUser();
-                if (twitterToken != null) {
+                if (twitterToken == null) {
+                    modelAndView.setViewName("error");
+                    modelAndView.addObject("message", "No access token available for Twitter.");
+                    statusMessage.append("Failed to post to Twitter due to missing access token. ");
+                    twitterSuccess = false;
+                } else {
                     String accessToken = twitterToken.get(0, String.class);
                     String accessTokenSecret = twitterToken.get(1, String.class);
-                    twitterService.updateContent(accessToken, message, LocalDateTime.now(), accessTokenSecret);
-                    success = twitterService.postTweet(message, accessToken, accessTokenSecret);
-                    if (!success) {
+                    boolean success = twitterService.postTweet(message, accessToken, accessTokenSecret);
+
+                    if (success) {
+                        twitterService.updateContent(accessToken, message, LocalDateTime.now(), accessTokenSecret);
+                        statusMessage.append("Successfully posted to Twitter. ");
+
+                        twitterService.cleanTable();
+                    } else {
                         modelAndView.setViewName("error");
                         modelAndView.addObject("message", "Failed to post your message to Twitter.");
-                        return modelAndView;
+                        statusMessage.append("Failed to post to Twitter. ");
+                        twitterSuccess = false;
                     }
-                    // Basically removes the rows that don't have any associated post information
-                    // this would happen if they authorize many times
-                    twitterService.cleanTable();
                 }
             } catch (Exception e) {
                 modelAndView.setViewName("error");
-                modelAndView.addObject("message", "Failed to post your message to Twitter: " + e.getMessage());
-                return modelAndView;
+                modelAndView.addObject("message", "Error posting to Twitter: " + e.getMessage());
+                statusMessage.append("Exception while posting to Twitter: ").append(e.getMessage()).append(" ");
+                twitterSuccess = false;
             }
         }
 
+
         if (isTumblrChecked) {
             try {
-
                 Tuple tumblrCredentialsTuple = tumblrService.getLatestUser();
-                if (tumblrCredentialsTuple != null) {
+                if (tumblrCredentialsTuple == null) {
+                    modelAndView.setViewName("error");
+                    modelAndView.addObject("message", "No access token available for Tumblr.");
+                    statusMessage.append("Failed to post to Tumblr due to missing access token. ");
+                    tumblrSuccess = false;
+                } else {
                     String accessToken = tumblrCredentialsTuple.get(0, String.class);
                     String tokenSecret = tumblrCredentialsTuple.get(1, String.class);
                     String blogIdentifier = tumblrCredentialsTuple.get(2, String.class);
 
-                    // api post
+                    // API post
                     String postId = tumblrService.postToBlog(message);
                     if (postId != null && !postId.isEmpty()) {
-
-                        // database
+                        // Database update
                         tumblrService.updateOrCreateTumblrPost(accessToken, tokenSecret, blogIdentifier, postId, message);
                         tumblrService.cleanTable();
-                        success = true;
+                        statusMessage.append("Successfully posted to Tumblr. ");
                     } else {
-
                         modelAndView.setViewName("error");
                         modelAndView.addObject("message", "Failed to post your message to Tumblr.");
-                        return modelAndView;
+                        statusMessage.append("Failed to post to Tumblr. ");
+                        tumblrSuccess = false;
                     }
                 }
             } catch (Exception e) {
                 modelAndView.setViewName("error");
-                modelAndView.addObject("message", "Failed to post your message to Tumblr: " + e.getMessage());
-                return modelAndView;
+                modelAndView.addObject("message", "Error posting to Tumblr: " + e.getMessage());
+                statusMessage.append("Exception while posting to Tumblr: " + e.getMessage() + " ");
+                tumblrSuccess = false;
             }
         }
 
 
-//         handles posting for tumblr
-
-
-        // check if every social media was successfully posted to
-        if (success) {
-            modelAndView.setViewName("success");
-            modelAndView.addObject("message", "Your message has been posted successfully to all platforms!");
+        // checks if every social media was successfully posted to
+        if (twitterSuccess && tumblrSuccess && mastodonSuccess && redditSuccess) {
+            redirectAttrs.addFlashAttribute("message", "Your message has been posted successfully!");
+            modelAndView.setViewName("redirect:/landing");
         } else {
-            modelAndView.setViewName("error");
-            modelAndView.addObject("message", "No access tokens available for posting.");
+            redirectAttrs.addFlashAttribute("message", statusMessage.toString());
+            modelAndView.setViewName("redirect:/landing");
         }
 
         // redirect back to landing after making post
-        return new ModelAndView("redirect:/landing");
+        return modelAndView;
     }
 
 }
