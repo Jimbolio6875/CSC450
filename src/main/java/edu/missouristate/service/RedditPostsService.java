@@ -32,11 +32,11 @@ public interface RedditPostsService {
 
     public void updatePostIdWhereNull(String postId);
 
-    void updateOrCreateRedditPost(String redditAccessToken, String subreddit, String title, String message, String fullName);
+    void updateContent(String redditAccessToken, String subreddit, String title, String message, String fullName, Integer userId);
 
-    List<String> getAllRedditPostIdsWhereNotNull();
+    void cleanTable(Integer userId);
 
-    void cleanTable();
+    boolean hasToken(Integer userId);
 
-    boolean hasToken();
+    List<String> getAllRedditPostIdsWhereNotNullAndSameUserid(Integer userId);
 }

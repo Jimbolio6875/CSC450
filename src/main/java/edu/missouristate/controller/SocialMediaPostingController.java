@@ -3,10 +3,8 @@ package edu.missouristate.controller;
 import com.querydsl.core.Tuple;
 import edu.missouristate.domain.Mastodon;
 import edu.missouristate.domain.Tumblr;
-import edu.missouristate.service.MastodonService;
-import edu.missouristate.service.RedditPostsService;
-import edu.missouristate.service.TumblrService;
-import edu.missouristate.service.TwitterService;
+import edu.missouristate.dto.MastodonPostDTO;
+import edu.missouristate.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +39,9 @@ public class SocialMediaPostingController {
     @Autowired
     RedditPostsService redditPostsService;
 
+    @Autowired
+    CentralLoginService centralLoginService;
+
 
     //    ---------------------------MASTODON--------------------------------
 
@@ -54,7 +55,7 @@ public class SocialMediaPostingController {
     @GetMapping("/callback")
     public String handleCallback(@RequestParam("code") String code, HttpSession session) {
 
-        session.setAttribute("accessToken", mastodonService.getAccessToken(code));
+        session.setAttribute("accessToken", mastodonService.getAccessToken(code, session));
 
         return "redirect:/login";
     }
@@ -102,7 +103,7 @@ public class SocialMediaPostingController {
     // todo should be easy to fix
     @GetMapping("/tumblr/oauth-callback")
     public String oauthCallback(@RequestParam("oauth_verifier") String oauthVerifier, HttpSession session) throws Exception {
-        String userInfo = tumblrService.getUserInfo(oauthVerifier);
+        String userInfo = tumblrService.getUserInfo(oauthVerifier, session);
         session.setAttribute("userInfo", userInfo);
 
         tumblrService.updatePosts();
@@ -112,19 +113,26 @@ public class SocialMediaPostingController {
     }
 
     @RequestMapping("/tumblr/post-message")
-    public ModelAndView showPostCreationPage() {
+    public ModelAndView showPostCreationPage(HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("landing");
+        Integer userId = (Integer) session.getAttribute("userId");  // Get user ID from session
+
+        if (userId == null) {
+            modelAndView.setViewName("redirect:/login");  // Redirect to login if userID is not found
+            return modelAndView;
+        }
 
         try {
-            tumblrService.updatePosts();
-            List<Tumblr> userPosts = tumblrService.getPostsByBlog();
+            tumblrService.updatePosts();  // Assuming updatePosts method also needs to be user-specific eventually
+            List<Tumblr> userPosts = tumblrService.getPostsByBlog(userId);  // Pass userId to the method
             modelAndView.addObject("posts", userPosts);
         } catch (Exception e) {
-            modelAndView.addObject("error", "Failed to get posts" + e.getMessage());
+            modelAndView.addObject("error", "Failed to get posts: " + e.getMessage());
         }
 
         return modelAndView;
     }
+
 
     //    -----------------------------------------------------------------------
 
@@ -139,7 +147,8 @@ public class SocialMediaPostingController {
                                    @RequestParam(required = false) Boolean tumblr,
                                    @RequestParam(required = false) Boolean reddit,
                                    @RequestParam(required = false) Boolean mastodon,
-                                   HttpSession session, RedirectAttributes redirectAttrs) {
+                                   HttpSession session, RedirectAttributes redirectAttrs, Integer userId) {
+
 
         StringBuilder statusMessage = new StringBuilder();
         ModelAndView modelAndView = new ModelAndView();
@@ -164,15 +173,15 @@ public class SocialMediaPostingController {
                     statusMessage.append("Failed to post to Mastodon due to missing access token. ");
                     mastodonSuccess = false;
                 } else {
+                    userId = (Integer) session.getAttribute("userId");
                     String mastroAccessToken = mastodonAccessTokenTuple.get(0, String.class);
 
                     // API POST
-                    Mastodon mastodonPost = mastodonService.postMessageToMastodon(message, mastroAccessToken);
-                    if (mastodonPost != null) {
+                    MastodonPostDTO mastodonPost = mastodonService.postMessageToMastodon(message, mastroAccessToken);
+                    if (!mastodonPost.getId().isEmpty()) {
                         // Database update
-                        mastodonService.updateOrCreateMastodonPost(mastroAccessToken, message);
-
-                        mastodonService.cleanTable();
+                        mastodonService.updateOrCreateMastodonPost(mastroAccessToken, message, userId, mastodonPost);
+                        mastodonService.cleanTable(userId); // add userId
                         statusMessage.append("Successfully posted to Mastodon. ");
                     } else {
                         modelAndView.setViewName("error");
@@ -199,6 +208,7 @@ public class SocialMediaPostingController {
                     statusMessage.append("Failed to post to Reddit due to missing access token. ");
                     redditSuccess = false;
                 } else {
+                    userId = (Integer) session.getAttribute("userId");
                     String redditAccessToken = redditAccessTokenTuple.get(0, String.class);
                     String fullName = redditPostsService.postToReddit(redditAccessToken, subreddit, title, message);
                     if (fullName == null || fullName.isEmpty() || fullName.equals("No ID found")) {
@@ -207,8 +217,8 @@ public class SocialMediaPostingController {
                         statusMessage.append("Failed to post to Reddit due to invalid Subreddit. ");
                         redditSuccess = false;
                     } else {
-                        redditPostsService.updateOrCreateRedditPost(redditAccessToken, subreddit, title, message, fullName);
-                        redditPostsService.cleanTable();
+                        redditPostsService.updateContent(redditAccessToken, subreddit, title, message, fullName, userId);
+                        redditPostsService.cleanTable(userId);
                         statusMessage.append("Successfully posted to Reddit. ");
 
                     }
@@ -228,29 +238,26 @@ public class SocialMediaPostingController {
                 if (twitterToken == null) {
                     modelAndView.setViewName("error");
                     modelAndView.addObject("message", "No access token available for Twitter.");
-                    statusMessage.append("Failed to post to Twitter due to missing access token. ");
                     twitterSuccess = false;
                 } else {
+                    userId = (Integer) session.getAttribute("userId");
                     String accessToken = twitterToken.get(0, String.class);
                     String accessTokenSecret = twitterToken.get(1, String.class);
                     boolean success = twitterService.postTweet(message, accessToken, accessTokenSecret);
 
                     if (success) {
-                        twitterService.updateContent(accessToken, message, LocalDateTime.now(), accessTokenSecret);
-                        statusMessage.append("Successfully posted to Twitter. ");
-
-                        twitterService.cleanTable();
+                        twitterService.updateContent(accessToken, message, LocalDateTime.now(), accessTokenSecret, userId);
+                        twitterService.cleanTable(userId);
+                        twitterSuccess = true;
                     } else {
                         modelAndView.setViewName("error");
                         modelAndView.addObject("message", "Failed to post your message to Twitter.");
-                        statusMessage.append("Failed to post to Twitter. ");
                         twitterSuccess = false;
                     }
                 }
             } catch (Exception e) {
                 modelAndView.setViewName("error");
                 modelAndView.addObject("message", "Error posting to Twitter: " + e.getMessage());
-                statusMessage.append("Exception while posting to Twitter: ").append(e.getMessage()).append(" ");
                 twitterSuccess = false;
             }
         }
@@ -265,6 +272,7 @@ public class SocialMediaPostingController {
                     statusMessage.append("Failed to post to Tumblr due to missing access token. ");
                     tumblrSuccess = false;
                 } else {
+                    userId = (Integer) session.getAttribute("userId");
                     String accessToken = tumblrCredentialsTuple.get(0, String.class);
                     String tokenSecret = tumblrCredentialsTuple.get(1, String.class);
                     String blogIdentifier = tumblrCredentialsTuple.get(2, String.class);
@@ -273,8 +281,8 @@ public class SocialMediaPostingController {
                     String postId = tumblrService.postToBlog(message);
                     if (postId != null && !postId.isEmpty()) {
                         // Database update
-                        tumblrService.updateOrCreateTumblrPost(accessToken, tokenSecret, blogIdentifier, postId, message);
-                        tumblrService.cleanTable();
+                        tumblrService.updateOrCreateTumblrPost(accessToken, tokenSecret, blogIdentifier, postId, message, userId);
+                        tumblrService.cleanTable(userId);
                         statusMessage.append("Successfully posted to Tumblr. ");
                     } else {
                         modelAndView.setViewName("error");
@@ -286,7 +294,7 @@ public class SocialMediaPostingController {
             } catch (Exception e) {
                 modelAndView.setViewName("error");
                 modelAndView.addObject("message", "Error posting to Tumblr: " + e.getMessage());
-                statusMessage.append("Exception while posting to Tumblr: " + e.getMessage() + " ");
+                statusMessage.append("Exception while posting to Tumblr: ").append(e.getMessage()).append(" ");
                 tumblrSuccess = false;
             }
         }

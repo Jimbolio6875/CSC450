@@ -6,6 +6,9 @@ import edu.missouristate.domain.Tumblr;
 import java.util.List;
 
 public interface TumblrRepositoryCustom {
+
+    Tumblr findExistingPostByTokenAndNoTextAndCentralLoginId(String accessToken, Integer centralLoginId);
+
     List<Tumblr> getPostsByBlogIdentifier(String blog);
 
     void updatePost(Tumblr post);
@@ -16,9 +19,9 @@ public interface TumblrRepositoryCustom {
 
     Tumblr findExistingPostByTokenAndNoText(String accessToken);
 
-    List<Tumblr> getAllPostsWherePostIsNotNull();
+    List<Tumblr> getAllPostsWhereCreationIsNotNullAndSameUserid(Integer userId);
 
-    void cleanTable();
+    void cleanTable(Integer userId);
 
-    boolean hasToken();
+    boolean hasToken(Integer userId);
 }

@@ -3,6 +3,7 @@ package edu.missouristate.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.Tuple;
+import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.RedditPosts;
 import edu.missouristate.domain.reddit.RedditResponse;
 import edu.missouristate.repository.RedditPostsRepository;
@@ -15,6 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
+import javax.persistence.EntityManager;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.time.Duration;
@@ -34,7 +36,8 @@ public class RedditPostsServiceImpl implements RedditPostsService {
 
     private final RedditPostsRepository redditPostsRepository;
     private final WebClient webClient;
-
+    @Autowired
+    EntityManager entityManager;
     @Value("${python.path}")
     private String pythonPath;
 
@@ -170,15 +173,17 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     }
 
     @Override
-    public void updateOrCreateRedditPost(String redditAccessToken, String subreddit, String title, String message, String fullName) {
+    public void updateContent(String redditAccessToken, String subreddit, String title, String message, String fullName, Integer userId) {
 
-        RedditPosts exists = redditPostsRepository.updateOrCreateRedditPost(redditAccessToken);
+        RedditPosts exists = redditPostsRepository.updateOrCreateRedditPost(redditAccessToken, userId);
 
         if (exists != null) {
             exists.setSubreddit(subreddit);
             exists.setPostId(fullName);
             exists.setContent(message);
+            CentralLogin user = entityManager.getReference(CentralLogin.class, userId);
             exists.setTitle(title);
+            exists.setCentralLogin(user);
             exists.setAccessToken(redditAccessToken);
             redditPostsRepository.save(exists);
         } else {
@@ -187,6 +192,8 @@ public class RedditPostsServiceImpl implements RedditPostsService {
             redditPosts.setPostId(fullName);
             redditPosts.setContent(message);
             redditPosts.setTitle(title);
+            CentralLogin user = entityManager.getReference(CentralLogin.class, userId);
+            redditPosts.setCentralLogin(user);
             redditPosts.setAccessToken(redditAccessToken);
             redditPostsRepository.save(redditPosts);
         }
@@ -194,18 +201,18 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     }
 
     @Override
-    public List<String> getAllRedditPostIdsWhereNotNull() {
-        return redditPostsRepository.getAllRedditPostIdsWhereNotNull();
+    public List<String> getAllRedditPostIdsWhereNotNullAndSameUserid(Integer userId) {
+        return redditPostsRepository.getAllRedditPostIdsWhereNotNullAndSameUserid(userId);
     }
 
     @Override
-    public void cleanTable() {
-        redditPostsRepository.cleanTable();
+    public void cleanTable(Integer userId) {
+        redditPostsRepository.cleanTable(userId);
     }
 
     @Override
-    public boolean hasToken() {
-        return redditPostsRepository.hasToken();
+    public boolean hasToken(Integer userId) {
+        return redditPostsRepository.hasToken(userId);
     }
 
     @Override

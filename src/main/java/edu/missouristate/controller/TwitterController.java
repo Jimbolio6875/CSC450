@@ -2,7 +2,9 @@ package edu.missouristate.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.Twitter;
+import edu.missouristate.service.CentralLoginService;
 import edu.missouristate.service.SocialMediaAccountService;
 import edu.missouristate.service.TwitterService;
 import org.slf4j.Logger;
@@ -30,6 +32,9 @@ public class TwitterController {
 
     @Autowired
     TwitterService twitterService;
+
+    @Autowired
+    CentralLoginService centralLoginService;
 
     @Autowired
     private SocialMediaAccountService socialMediaAccountService;
@@ -162,18 +167,29 @@ public class TwitterController {
                 System.err.println("Invalid tokens format: " + line);
                 throw new RuntimeException("Invalid tokens format: " + line);
             }
+
+            // Get user ID from session
+            Integer userId = (Integer) session.getAttribute("userId");
+            if (userId == null) {
+                return "redirect:/login";  // Handle missing userId
+            }
+
+            // Fetch the CentralLogin using userId
+            CentralLogin user = centralLoginService.getUserById(userId);
+            if (user == null) {
+                return "redirect:/login";  // Handle user not found
+            }
+
+            // Create new Twitter credentials and associate with the user
             Twitter newTwitterCredentials = new Twitter();
             newTwitterCredentials.setAccessToken(tokens[0]);
             newTwitterCredentials.setAccessTokenSecret(tokens[1]);
-//            newTwitterCredentials.setCreationDate(LocalDateTime.now());
-
+            newTwitterCredentials.setCentralLogin(user);
             twitterService.saveTweet(newTwitterCredentials);
 
+            // Set tokens in the session
             session.setAttribute("access_token", tokens[0]);
             session.setAttribute("access_token_secret", tokens[1]);
-            System.out.println("Token 0 Access Token-> " + tokens[0]);
-            System.out.println("Token 1 Access Token Secret-> " + tokens[1]);
-            System.out.println("Access token and secret set in session. Redirecting to post-tweet.");
 
 
             return "redirect:/login";

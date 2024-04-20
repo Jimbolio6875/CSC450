@@ -2,7 +2,10 @@ package edu.missouristate.service.impl;
 
 import com.querydsl.core.Tuple;
 import edu.missouristate.dao.MastodonRepository;
+import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.Mastodon;
+import edu.missouristate.dto.MastodonPostDTO;
+import edu.missouristate.service.CentralLoginService;
 import edu.missouristate.service.MastodonService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpSession;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -24,6 +29,12 @@ public class MastodonServiceImpl implements MastodonService {
     private static final String SCOPE = "read write";
     @Autowired
     MastodonRepository mastodonRepository;
+
+    @Autowired
+    EntityManager entityManager;
+
+    @Autowired
+    CentralLoginService centralLoginService;
     @Value("${mastodon.clientId}")
     private String CLIENT_ID;
     @Value("${mastodon.clientSecret}")
@@ -31,7 +42,7 @@ public class MastodonServiceImpl implements MastodonService {
 
     @Override
     // set client_id/secret/auth to get token
-    public String getAccessToken(String authorizationCode) {
+    public String getAccessToken(String authorizationCode, HttpSession session) {
         RestTemplate restTemplate = new RestTemplate();
         String tokenEndpoint = "https://mastodon.social/oauth/token";
 
@@ -55,10 +66,12 @@ public class MastodonServiceImpl implements MastodonService {
             JSONObject jsonResponse = new JSONObject(response.getBody());
             String accessToken = jsonResponse.getString("access_token");
             System.out.println("access token: " + accessToken);
-
+            Integer userId = (Integer) session.getAttribute("userId");
+            CentralLogin user = centralLoginService.getUserById(userId);
 
             Mastodon mastodon = new Mastodon();
             mastodon.setAccessToken(accessToken);
+            mastodon.setCentralLogin(user);
             mastodonRepository.save(mastodon);
 
             return accessToken;
@@ -105,7 +118,7 @@ public class MastodonServiceImpl implements MastodonService {
 
     @Override
     // post message and add message attributes to database
-    public Mastodon postMessageToMastodon(String message, String accessToken) {
+    public MastodonPostDTO postMessageToMastodon(String message, String accessToken) {
 
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -131,27 +144,17 @@ public class MastodonServiceImpl implements MastodonService {
             String url = postObject.getString("url");
             Integer favourites = postObject.getInt("favourites_count");
 
-//            System.out.println(userObject.getString("id"));
-
-            mastodonRepository.updateWherePostIdIsNull(accessToken, id, userId, content, url, favourites);
-
-            Mastodon post = new Mastodon();
-            post.setPostId(id);
-            post.setUserId(userId);
-            post.setContent(content);
-            post.setPostUrl(url);
-            post.setFavouriteCount(favourites);
-
-
-            return post;
+            return new MastodonPostDTO(id, userId, content, url, favourites);
 //            System.out.println(id.concat(" ").concat(content).concat(" ").concat(url).concat(" ").concat(String.valueOf(favourites)));
+        } else {
+
+            return null;
         }
 
-        if (response.getStatusCode() != HttpStatus.OK) {
-            throw new RuntimeException("Failed to post to Mastodon, response code: " + response.getStatusCode());
-        }
 
-        return null;
+//        throw new RuntimeException("Failed to post to Mastodon, response code: " + response.getStatusCode());
+
+
     }
 
     @Override
@@ -170,24 +173,67 @@ public class MastodonServiceImpl implements MastodonService {
     }
 
     @Override
-    public Mastodon findExistingPostByTokenAndNoText(String accessToken) {
-        return mastodonRepository.findExistingPostByTokenAndNoText(accessToken);
+    public Mastodon findExistingPostByTokenAndNoText(String accessToken, Integer userId) {
+        return mastodonRepository.findExistingPostByTokenAndNoText(accessToken, userId);
     }
 
     @Override
-    public void updateOrCreateMastodonPost(String mastroAccessToken, String message) {
-        Mastodon existingPost = mastodonRepository.findExistingPostByTokenAndNoText(mastroAccessToken);
+    public void updateOrCreateMastodonPost(String mastodonAccessToken, String message, Integer userId, MastodonPostDTO mastodonPostDTO) {
+        CentralLogin user = entityManager.getReference(CentralLogin.class, userId);
+        Mastodon existingPost = mastodonRepository.findExistingPostByTokenAndNoText(mastodonAccessToken, userId);
 
         if (existingPost != null) {
+            existingPost.setPostUrl(mastodonPostDTO.getUrl());
+            existingPost.setPostId(mastodonPostDTO.getId());
+            existingPost.setFavouriteCount(mastodonPostDTO.getFavouritesCount());
+            existingPost.setUserId(mastodonPostDTO.getUserId());
             existingPost.setContent(message);
+            existingPost.setCentralLogin(user);
             mastodonRepository.save(existingPost);
         } else {
             Mastodon newPost = new Mastodon();
-            newPost.setAccessToken(mastroAccessToken);
+            newPost.setPostUrl(mastodonPostDTO.getUrl());
+            newPost.setPostId(mastodonPostDTO.getId());
+            newPost.setFavouriteCount(mastodonPostDTO.getFavouritesCount());
+            newPost.setAccessToken(mastodonAccessToken);
+            newPost.setUserId(mastodonPostDTO.getUserId());
             newPost.setContent(message);
+            newPost.setCentralLogin(user);
             mastodonRepository.save(newPost);
         }
     }
+
+    @Transactional
+    @Override
+    public void updateAllPosts(HttpSession session, List<Mastodon> mastodonPosts) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+//        String accessToken = (String) session.getAttribute("accessToken");
+
+        try {
+
+            for (Mastodon mastodonPost : mastodonPosts) {
+
+                ResponseEntity<String> response = restTemplate.getForEntity("https://mastodon.social/api/v1/statuses/" + mastodonPost.getPostId(), String.class);
+                System.out.println(response.getBody());
+
+                JSONObject object = new JSONObject(response.getBody());
+
+                System.out.println(object.getInt("favourites_count"));
+
+                mastodonRepository.updateByPostId(mastodonPost.getPostId(), object.getInt("favourites_count"));
+
+//                mastodonRepository.save(());
+            }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+
+    }
+
 
     @Override
     public List<Mastodon> getAllPosts() {
@@ -195,18 +241,18 @@ public class MastodonServiceImpl implements MastodonService {
     }
 
     @Override
-    public List<Mastodon> getAllPostsWherePostIsNotNull() {
-        return mastodonRepository.getAllPostsWherePostIsNotNull();
+    public List<Mastodon> getAllMasterpostsWherePostIsNotNullAndSameUserId(Integer userId) {
+        return mastodonRepository.getAllMasterpostsWherePostIsNotNullAndSameUserId(userId);
     }
 
     @Override
-    public void cleanTable() {
-        mastodonRepository.cleanTable();
+    public void cleanTable(Integer userId) {
+        mastodonRepository.cleanTable(userId);
     }
 
     @Override
-    public boolean hasToken() {
-        return mastodonRepository.hasToken();
+    public boolean hasToken(Integer userId) {
+        return mastodonRepository.hasToken(userId);
     }
 
 

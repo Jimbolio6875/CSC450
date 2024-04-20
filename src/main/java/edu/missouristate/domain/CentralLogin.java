@@ -39,6 +39,38 @@ public class CentralLogin {
 
     }
 
+    public Set<Mastodon> getMastodonPosts() {
+        return mastodonPosts;
+    }
+
+    public void setMastodonPosts(Set<Mastodon> mastodonPosts) {
+        this.mastodonPosts = mastodonPosts;
+    }
+
+    public Set<RedditPosts> getRedditPosts() {
+        return redditPosts;
+    }
+
+    public void setRedditPosts(Set<RedditPosts> redditPosts) {
+        this.redditPosts = redditPosts;
+    }
+
+    public Set<Tumblr> getTumblrPosts() {
+        return tumblrPosts;
+    }
+
+    public void setTumblrPosts(Set<Tumblr> tumblrPosts) {
+        this.tumblrPosts = tumblrPosts;
+    }
+
+    public Set<Twitter> getTwitterPosts() {
+        return twitterPosts;
+    }
+
+    public void setTwitterPosts(Set<Twitter> twitterPosts) {
+        this.twitterPosts = twitterPosts;
+    }
+
     @Override
     public String toString() {
         return "CentralLogin [centralLoginId=" + centralLoginId + ", username=" + username + ", password=" + password

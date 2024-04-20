@@ -15,11 +15,11 @@ public interface RedditPostsRepositoryCustom {
 
     RedditPosts findByAccessToken(String accessToken);
 
-    RedditPosts updateOrCreateRedditPost(String redditAccessToken);
+    RedditPosts updateOrCreateRedditPost(String redditAccessToken, Integer userId);
 
-    List<String> getAllRedditPostIdsWhereNotNull();
+    List<String> getAllRedditPostIdsWhereNotNullAndSameUserid(Integer userId);
 
-    void cleanTable();
+    void cleanTable(Integer userId);
 
-    boolean hasToken();
+    boolean hasToken(Integer userId);
 }

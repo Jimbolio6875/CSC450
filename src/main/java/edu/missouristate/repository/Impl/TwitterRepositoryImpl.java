@@ -52,19 +52,23 @@ public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements 
     }
 
     @Override
-    public List<Twitter> getAllTweetsWhereCreationIsNotNull() {
-        return from(twitterTable).where(twitterTable.creationDate.isNotNull()).fetch();
+    public List<Twitter> getAllTweetsWhereCreationIsNotNullAndSameUserid(Integer userId) {
+        return from(twitterTable).where(twitterTable.creationDate.isNotNull()
+                .and(twitterTable.centralLogin.centralLoginId.eq(userId))).fetch();
     }
 
     @Override
-    public void cleanTable() {
-        delete(twitterTable).where(twitterTable.creationDate.isNull()).execute();
+    public void cleanTable(Integer userId) {
+        delete(twitterTable).where(twitterTable.creationDate.isNull()
+                        .and(twitterTable.centralLogin.centralLoginId.eq(userId)))
+                .execute();
     }
 
     @Override
-    public boolean hasToken() {
+    public boolean hasToken(Integer userId) {
 
-        long hasToken = from(twitterTable).where(twitterTable.accessToken.isNotNull()).fetchCount();
+        long hasToken = from(twitterTable).where(twitterTable.accessToken.isNotNull()
+                .and(twitterTable.centralLogin.centralLoginId.eq(userId))).fetchCount();
 
         return hasToken > 0;
     }

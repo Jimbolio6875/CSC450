@@ -61,6 +61,7 @@
     <div style="display: flex; justify-content: center; flex-direction: column; padding: 12px; background-color: lightyellow">
         <h1 style="text-align: center">Mastodon</h1>
         <li style="margin-bottom: 20px;" th:each="post : ${posts}">
+        <li style="margin-bottom: 20px;" th:each="post : ${mastodonPosts}">
             <div>
                 <strong style="display: inline-block; margin-right: 5px;">Content:</strong>
                 <span style="display: inline-block; max-width: 80%;" th:utext="${post.content}"></span>

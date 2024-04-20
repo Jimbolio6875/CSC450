@@ -45,16 +45,20 @@ public class CentralLoginController {
 
     @GetMapping("/login")
     public String getLoginPage(HttpSession session, Model model) {
-        if (session.getAttribute("username") == null) {
+        Integer userId = (Integer) session.getAttribute("userId");  // Retrieve userId from the session
+
+        if (userId == null) {
             return "login";
         } else {
-            model.addAttribute("hasTwitterToken", twitterService.hasToken());
-            model.addAttribute("hasTumblrToken", tumblrService.hasToken());
-            model.addAttribute("hasRedditToken", redditPostsService.hasToken());
-            model.addAttribute("hasMastodonToken", mastodonService.hasToken());
+            // Pass userId to the service methods to check tokens specific to the logged-in user
+            model.addAttribute("hasTwitterToken", twitterService.hasToken(userId));
+            model.addAttribute("hasTumblrToken", tumblrService.hasToken(userId));
+            model.addAttribute("hasRedditToken", redditPostsService.hasToken(userId));
+            model.addAttribute("hasMastodonToken", mastodonService.hasToken(userId));
             return "landing";
         }
     }
+
 
     @GetMapping("/register")
     public String getRegisterPage(HttpSession session) {
@@ -71,21 +75,26 @@ public class CentralLoginController {
         if (session.getAttribute("username") == null || session.getAttribute("username").equals("")) {
             return "redirect:/login";
         } else {
-            model.addAttribute("hasTwitterToken", twitterService.hasToken());
-            model.addAttribute("hasTumblrToken", tumblrService.hasToken());
-            model.addAttribute("hasRedditToken", redditPostsService.hasToken());
-            model.addAttribute("hasMastodonToken", mastodonService.hasToken());
+            Integer userId = (Integer) session.getAttribute("userId"); // Get user ID from session
+            if (userId == null) {
+                return "redirect:/login"; // Redirect if user ID is not found
+            }
+
+            model.addAttribute("hasTwitterToken", twitterService.hasToken(userId));
+            model.addAttribute("hasTumblrToken", tumblrService.hasToken(userId));
+            model.addAttribute("hasRedditToken", redditPostsService.hasToken(userId));
+            model.addAttribute("hasMastodonToken", mastodonService.hasToken(userId));
 
             if (Boolean.TRUE.equals(session.getAttribute("postsUpdated"))) {
                 try {
-                    List<Tumblr> userPosts = tumblrService.getPostsByBlog();
+                    List<Tumblr> userPosts = tumblrService.getPostsByBlog(userId);
                     model.addAttribute("posts", userPosts);
                     session.removeAttribute("postsUpdated");
                 } catch (Exception e) {
                     model.addAttribute("error", "Failed to get posts: " + e.getMessage());
                 }
             }
-            
+
             if (session.getAttribute("userInfo") != null) {
                 model.addAttribute("userInfo", session.getAttribute("userInfo"));
                 session.removeAttribute("userInfo");
@@ -118,9 +127,10 @@ public class CentralLoginController {
     public LoginResponse login(@RequestBody CentralLogin login, HttpSession session, Model model) {
         LoginResponse loginResponse = centralLoginService.login(login);
         if (loginResponse.isLoggedIn()) {
-            session.setAttribute("username", loginResponse.getUsername());// Assume tokenService can check by username
+            session.setAttribute("username", loginResponse.getUsername());
             session.setAttribute("firstName", loginResponse.getFirstName());
             session.setAttribute("lastName", loginResponse.getLastName());
+            session.setAttribute("userId", loginResponse.getUserId());
 //            model.addAttribute("hasTwitterToken", twitterService.hasToken());
             return loginResponse;
         } else {

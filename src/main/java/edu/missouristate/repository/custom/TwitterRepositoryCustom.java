@@ -14,9 +14,9 @@ public interface TwitterRepositoryCustom {
 
     Twitter findExistingPostByTokenAndNoText(String accessToken);
 
-    List<Twitter> getAllTweetsWhereCreationIsNotNull();
+    List<Twitter> getAllTweetsWhereCreationIsNotNullAndSameUserid(Integer userId);
 
-    void cleanTable();
+    void cleanTable(Integer userId);
 
-    boolean hasToken();
+    boolean hasToken(Integer userId);
 }

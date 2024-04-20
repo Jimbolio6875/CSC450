@@ -50,34 +50,46 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
     }
 
     @Override
-    public List<Mastodon> getAllPostsWherePostIsNotNull() {
+    public List<Mastodon> getAllMasterpostsWherePostIsNotNullAndSameUserId(Integer userId) {
         return from(mastodonTable)
-                .where(mastodonTable.postId.isNotNull())
+                .where(mastodonTable.postId.isNotNull().and(mastodonTable.centralLogin.centralLoginId.eq(userId)))
                 .fetch();
     }
 
     @Override
-    public void cleanTable() {
-        delete(mastodonTable).where(mastodonTable.postId.isNull()).execute();
+    public void cleanTable(Integer userId) {
+        delete(mastodonTable)
+                .where(mastodonTable.postId.isNull()
+                        .and(mastodonTable.centralLogin.centralLoginId.eq(userId)))
+                .execute();
     }
 
     @Override
-    public boolean hasToken() {
-        long fetchCountAmount = from(mastodonTable).where(mastodonTable.accessToken.isNotNull()).fetchCount();
+    public boolean hasToken(Integer userId) {
+        long fetchCountAmount = from(mastodonTable)
+                .where(mastodonTable.accessToken.isNotNull().and(mastodonTable.centralLogin.centralLoginId.eq(userId)))
+                .fetchCount();
 
         return fetchCountAmount > 0;
 
     }
 
     @Override
-    public Mastodon findExistingPostByTokenAndNoText(String accessToken) {
+    public Mastodon findExistingPostByTokenAndNoText(String accessToken, Integer userId) {
         return from(mastodonTable)
-                .where(mastodonTable.accessToken.eq(accessToken).and(mastodonTable.content.isNull()))
-                .orderBy(mastodonTable.id.desc())
+                .where(mastodonTable.accessToken.eq(accessToken).and(mastodonTable.content.isNull()
+                        .and(mastodonTable.centralLogin.centralLoginId.eq(userId))))
                 .limit(1)
                 .fetchOne();
     }
 
+    @Override
+    public void updateByPostId(String postId, int favouritesCount) {
+        update(mastodonTable)
+                .where(mastodonTable.postId.eq(postId))
+                .set(mastodonTable.favouriteCount, favouritesCount)
+                .execute();
+    }
 
 //    @Override
 //    public List<String> getPostContent() {

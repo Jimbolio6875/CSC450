@@ -5,8 +5,11 @@ import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.*;
 import com.github.scribejava.core.oauth.OAuth10aService;
 import com.querydsl.core.Tuple;
+import edu.missouristate.dao.CentralLoginRepository;
 import edu.missouristate.dao.TumblrRepository;
+import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.Tumblr;
+import edu.missouristate.service.CentralLoginService;
 import edu.missouristate.service.SocialMediaAccountService;
 import edu.missouristate.service.TumblrService;
 import org.json.JSONObject;
@@ -15,12 +18,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -31,16 +35,20 @@ import java.util.concurrent.ExecutionException;
 public class TumblrServiceImpl implements TumblrService {
 
     @Autowired
-    private SocialMediaAccountService socialMediaAccountService;
+    EntityManager entityManager;
+    @Autowired
+    CentralLoginRepository centralLoginRepository;
 
     @Autowired
+    CentralLoginService centralLoginService;
+    @Autowired
+    private SocialMediaAccountService socialMediaAccountService;
+    @Autowired
     private TumblrRepository tumblrRepository;
-
     private OAuth10aService oauthService;
     private OAuth1RequestToken requestToken;
     private OAuth1AccessToken accessToken;
     private String blogIdentifier;
-
     @Value("${tumblr.consumerKey}")
     private String consumerKey;
 
@@ -77,7 +85,7 @@ public class TumblrServiceImpl implements TumblrService {
     }
 
     @Override
-    public String getUserInfo(String oauthVerifier) {
+    public String getUserInfo(String oauthVerifier, HttpSession session) {
         try {
             accessToken = oauthService.getAccessToken(requestToken, oauthVerifier);
             OAuthRequest request = new OAuthRequest(Verb.GET, "https://api.tumblr.com/v2/user/info");
@@ -97,10 +105,24 @@ public class TumblrServiceImpl implements TumblrService {
             System.out.println(blogUrl);
             blogIdentifier = blogUrl.substring(blogUrl.lastIndexOf('/') + 1);
 
+            // Get user ID from session
+            Integer userId = (Integer) session.getAttribute("userId");
+            if (userId == null) {
+                return "redirect:/login";  // Handle missing userId
+            }
+
+            // Fetch the CentralLogin using userId
+            CentralLogin user = centralLoginService.getUserById(userId);
+            if (user == null) {
+                return "redirect:/login";  // Handle user not found
+            }
+
+
             // Save or update the Tumblr credentials for the user
             Tumblr tumblrCredentials = new Tumblr();
             tumblrCredentials.setAccessToken(accessToken.getToken());
             tumblrCredentials.setTokenSecret(accessToken.getTokenSecret());
+            tumblrCredentials.setCentralLogin(user);
             tumblrCredentials.setBlogIdentifier(blogIdentifier);
             tumblrRepository.save(tumblrCredentials);
 
@@ -180,36 +202,16 @@ public class TumblrServiceImpl implements TumblrService {
     }
 
 
+    // In TumblrService.java
     @Override
-    public List<Tumblr> getPostsByBlog() {
-
-        List<Tumblr> posts = new ArrayList<>();
-
+    public List<Tumblr> getPostsByBlog(Integer userId) {
         try {
-
-            posts = tumblrRepository.getPostsByBlogIdentifier(blogIdentifier);
-
-            // this might be useful later
-//            OAuthRequest request = new OAuthRequest(Verb.GET, url);
-//            oauthService.signRequest(accessToken, request);
-//            Response response = oauthService.execute(request);
-
-//            JSONObject jsonResponse = new JSONObject(response.getBody());
-//            JSONArray postArray = jsonResponse.getJSONObject("response").getJSONArray("posts");
-
-//            for (int i = 0; i < postArray.length(); i++) {
-//                JSONObject postObject = postArray.getJSONObject(i);
-//                String postUrl = postObject.getString("post_url");
-//                postUrlList.add(postUrl);
-//            }
-
-
+            return tumblrRepository.findByCentralLogin_CentralLoginId(userId);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to get user post urls: " + e.getMessage());
+            throw new RuntimeException("Failed to get Tumblr posts for user " + userId + ": " + e.getMessage(), e);
         }
-
-        return posts;
     }
+
 
     @Override
     public void updatePosts() throws IOException, ExecutionException, InterruptedException {
@@ -270,9 +272,9 @@ public class TumblrServiceImpl implements TumblrService {
     }
 
     @Override
-    public void updateOrCreateTumblrPost(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message) {
+    public void updateOrCreateTumblrPost(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message, Integer userId) {
 
-        Tumblr exists = tumblrRepository.findExistingPostByTokenAndNoText(accessToken);
+        Tumblr exists = tumblrRepository.findExistingPostByTokenAndNoTextAndCentralLoginId(accessToken, userId);
 
         //post.setPostUrl("https://www.tumblr.com/blog/view/" + blogIdentifierValue + "/" + postId);
 
@@ -282,6 +284,8 @@ public class TumblrServiceImpl implements TumblrService {
             exists.setBlogIdentifier(blogIdentifier);
             exists.setPostId(postId);
             exists.setAccessToken(accessToken);
+            CentralLogin user = entityManager.getReference(CentralLogin.class, userId);
+            exists.setCentralLogin(user);
             exists.setTokenSecret(tokenSecret);
             exists.setNoteCount(0);
             exists.setPostUrl("https://www.tumblr.com/blog/view/" + blogIdentifier + "/" + postId);
@@ -295,6 +299,8 @@ public class TumblrServiceImpl implements TumblrService {
             tumblr.setAccessToken(accessToken);
             tumblr.setTokenSecret(tokenSecret);
             tumblr.setNoteCount(0);
+            CentralLogin user = entityManager.getReference(CentralLogin.class, userId);
+            tumblr.setCentralLogin(user);
             tumblr.setPostUrl("https://www.tumblr.com/blog/view/" + blogIdentifier + "/" + postId);
             tumblrRepository.save(tumblr);
         }
@@ -307,17 +313,23 @@ public class TumblrServiceImpl implements TumblrService {
     }
 
     @Override
-    public List<Tumblr> getAllPostsWherePostIsNotNull() {
-        return tumblrRepository.getAllPostsWherePostIsNotNull();
+    public List<Tumblr> getAllPostsWhereCreationIsNotNullAndSameUserid(Integer userId) {
+        return tumblrRepository.getAllPostsWhereCreationIsNotNullAndSameUserid(userId);
     }
 
     @Override
-    public void cleanTable() {
-        tumblrRepository.cleanTable();
+    public void cleanTable(Integer userId) {
+        tumblrRepository.cleanTable(userId);
     }
 
     @Override
-    public boolean hasToken() {
-        return tumblrRepository.hasToken();
+    public Tumblr findExistingPostByTokenAndNoTextAndCentralLoginId(String accessToken, Integer centralLoginId) {
+        return tumblrRepository.findExistingPostByTokenAndNoTextAndCentralLoginId(accessToken, centralLoginId);
     }
+
+    @Override
+    public boolean hasToken(Integer userId) {
+        return tumblrRepository.hasToken(userId);
+    }
+
 }

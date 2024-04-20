@@ -1,5 +1,6 @@
 package edu.missouristate.controller;
 
+import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.RedditPosts;
 import edu.missouristate.domain.Twitter;
 import edu.missouristate.service.*;
@@ -48,6 +49,8 @@ public class RedditController {
     String CLIENT_ID = "6aK_iXozHqB7AlJY3aF6ZA";
     String CLIENT_SECRET = "6bEXPVk7tYpAAFj4fbH9Vj-XSKzGag";
     String REDIRECT_URI = "http://localhost:8080/reddit/callback";
+    @Autowired
+    CentralLoginService centralLoginService;
     @Autowired
     private SocialMediaAccountService socialMediaAccountService;
     @Value("${python.path}")
@@ -143,8 +146,13 @@ public class RedditController {
             return modelAndView;
         }
 
+        // Get user ID from session
+        Integer userId = (Integer) session.getAttribute("userId");
+        CentralLogin user = centralLoginService.getUserById(userId);
+
         RedditPosts redditPosts = new RedditPosts();
         redditPosts.setAccessToken(accessToken);
+        redditPosts.setCentralLogin(user);
         redditPostsService.saveRedditPost(redditPosts);
 
         session.setAttribute("REDDIT_ACCESS_TOKEN", accessToken);

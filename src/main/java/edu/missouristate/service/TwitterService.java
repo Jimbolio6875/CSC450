@@ -19,11 +19,11 @@ public interface TwitterService {
 
     Tuple getLatestUser();
 
-    void updateContent(String accessToken, String message, LocalDateTime date, String accessTokenSecret);
+    void updateContent(String accessToken, String message, LocalDateTime date, String accessTokenSecret, Integer userId);
 
-    List<Twitter> getAllTweetsWhereCreationIsNotNull();
+    List<Twitter> getAllTweetsWhereCreationIsNotNullAndSameUserid(Integer userId);
 
-    void cleanTable();
+    void cleanTable(Integer userId);
 
-    boolean hasToken();
+    boolean hasToken(Integer userId);
 }

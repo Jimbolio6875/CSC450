@@ -1,6 +1,8 @@
 package edu.missouristate.service.impl;
 
 import com.querydsl.core.Tuple;
+import edu.missouristate.dao.CentralLoginRepository;
+import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.Twitter;
 import edu.missouristate.repository.TwitterRepository;
 import edu.missouristate.service.TwitterService;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.time.LocalDateTime;
@@ -22,6 +25,12 @@ import java.util.stream.Collectors;
 public class TwitterServiceImpl implements TwitterService {
 
     private static final Logger log = LoggerFactory.getLogger(TwitterServiceImpl.class);
+    @Autowired
+    CentralLoginRepository centralLoginRepository;
+
+    @Autowired
+    EntityManager entityManager;
+
     @Autowired
     TwitterRepository twitterRepository;
     @Value("${python.path}")
@@ -77,38 +86,47 @@ public class TwitterServiceImpl implements TwitterService {
     }
 
     @Override
-    public void updateContent(String accessToken, String message, LocalDateTime localDateTime, String accessTokenSecret) {
+    public void updateContent(String accessToken, String message, LocalDateTime localDateTime, String accessTokenSecret, Integer userId) {
+        // Find an existing Twitter post with the same accessToken but no associated tweet text
+        Twitter existingPost = twitterRepository.findExistingPostByTokenAndNoText(accessToken);
 
-        Twitter exists = twitterRepository.findExistingPostByTokenAndNoText(accessToken);
 
-        if (exists != null) {
-            exists.setTweetText(message);
-            exists.setCreationDate(localDateTime);
-            twitterRepository.save(exists);
+        if (existingPost != null) {
+            // If a post exists, update the message, the creation date, and potentially the user
+            existingPost.setTweetText(message);
+            existingPost.setCreationDate(localDateTime);
+            CentralLogin user = entityManager.getReference(CentralLogin.class, userId);
+            existingPost.setCentralLogin(user);
+            twitterRepository.save(existingPost);
         } else {
-            Twitter twitter = new Twitter();
-            twitter.setAccessToken(accessToken);
-            twitter.setAccessTokenSecret(accessTokenSecret);
-            twitter.setTweetText(message);
-            twitter.setCreationDate(localDateTime);
-            twitterRepository.save(twitter);
+            // If no post exists, create a new one and associate it with a user
+            Twitter newTwitterPost = new Twitter();
+            newTwitterPost.setAccessToken(accessToken);
+            newTwitterPost.setAccessTokenSecret(accessTokenSecret);
+            newTwitterPost.setTweetText(message);
+            newTwitterPost.setCreationDate(localDateTime);
+            CentralLogin user = entityManager.getReference(CentralLogin.class, userId);
+            newTwitterPost.setCentralLogin(user);
+
+            // Save the new Twitter post
+            twitterRepository.save(newTwitterPost);
         }
+    }
 
+
+    @Override
+    public List<Twitter> getAllTweetsWhereCreationIsNotNullAndSameUserid(Integer userId) {
+        return twitterRepository.getAllTweetsWhereCreationIsNotNullAndSameUserid(userId);
     }
 
     @Override
-    public List<Twitter> getAllTweetsWhereCreationIsNotNull() {
-        return twitterRepository.getAllTweetsWhereCreationIsNotNull();
+    public void cleanTable(Integer userId) {
+        twitterRepository.cleanTable(userId);
     }
 
     @Override
-    public void cleanTable() {
-        twitterRepository.cleanTable();
-    }
-
-    @Override
-    public boolean hasToken() {
-        return twitterRepository.hasToken();
+    public boolean hasToken(Integer userId) {
+        return twitterRepository.hasToken(userId);
     }
 
 

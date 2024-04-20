@@ -21,6 +21,17 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
     }
 
     @Override
+    public Tumblr findExistingPostByTokenAndNoTextAndCentralLoginId(String accessToken, Integer centralLoginId) {
+        return from(tumblrTable)
+                .where(tumblrTable.accessToken.eq(accessToken).and(tumblrTable.content.isNull())
+                        .and(tumblrTable.centralLogin.centralLoginId.eq(centralLoginId)))
+                .orderBy(tumblrTable.id.desc())
+                .limit(1)
+                .fetchOne();
+    }
+
+
+    @Override
     public List<Tumblr> getPostsByBlogIdentifier(String blog) {
         return from(tumblrTable)
                 .where(tumblrTable.blogIdentifier.eq(blog))
@@ -75,21 +86,25 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
     }
 
     @Override
-    public List<Tumblr> getAllPostsWherePostIsNotNull() {
-        return from(tumblrTable).where(tumblrTable.postId.isNotNull()).fetch();
+    public List<Tumblr> getAllPostsWhereCreationIsNotNullAndSameUserid(Integer userId) {
+        return from(tumblrTable).where(tumblrTable.postId.isNotNull().and(tumblrTable.centralLogin.centralLoginId.eq(userId)))
+                .fetch();
     }
 
     @Override
-    public void cleanTable() {
-        delete(tumblrTable).where(tumblrTable.postId.isNull()).execute();
+    public void cleanTable(Integer userId) {
+        delete(tumblrTable).where(tumblrTable.postId.isNull()
+                .and(tumblrTable.centralLogin.centralLoginId.eq(userId))).execute();
     }
 
     @Override
-    public boolean hasToken() {
+    public boolean hasToken(Integer userId) {
+        long count = from(tumblrTable)
+                .where(tumblrTable.accessToken.isNotNull()
+                        .and(tumblrTable.centralLogin.centralLoginId.eq(userId)))
+                .fetchCount();
 
-        long tokenAmount = from(tumblrTable).where(tumblrTable.accessToken.isNotNull()).fetchCount();
-
-        return tokenAmount > 0;
+        return count > 0;
     }
 
 

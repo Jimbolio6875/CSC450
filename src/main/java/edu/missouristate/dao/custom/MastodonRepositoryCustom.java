@@ -14,13 +14,15 @@ public interface MastodonRepositoryCustom {
 
     Tuple getLatestAccessToken();
 
-    Mastodon findExistingPostByTokenAndNoText(String accessToken);
+    Mastodon findExistingPostByTokenAndNoText(String accessToken, Integer userId);
 
     void updateWherePostIdIsNull(String accessToken, String id, String userId, String content, String url, Integer favourites);
 
-    List<Mastodon> getAllPostsWherePostIsNotNull();
+    List<Mastodon> getAllMasterpostsWherePostIsNotNullAndSameUserId(Integer userId);
 
-    void cleanTable();
+    void cleanTable(Integer userId);
 
-    boolean hasToken();
+    boolean hasToken(Integer userId);
+
+    void updateByPostId(String postId, int favouritesCount);
 }
