@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpSession;
 import java.net.URLEncoder;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -131,8 +133,6 @@ public class MastodonServiceImpl implements MastodonService {
             String url = postObject.getString("url");
             Integer favourites = postObject.getInt("favourites_count");
 
-//            System.out.println(userObject.getString("id"));
-
             mastodonRepository.updateWherePostIdIsNull(accessToken, id, userId, content, url, favourites);
 
             Mastodon post = new Mastodon();
@@ -192,6 +192,37 @@ public class MastodonServiceImpl implements MastodonService {
     @Override
     public List<Mastodon> getAllPosts() {
         return (List<Mastodon>) mastodonRepository.findAll();
+    }
+
+    @Transactional
+    @Override
+    public void updateAllPosts(HttpSession session, List<Mastodon> mastodonPosts) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+//        String accessToken = (String) session.getAttribute("accessToken");
+
+        try {
+
+            for (Mastodon mastodonPost : mastodonPosts) {
+
+                ResponseEntity<String> response = restTemplate.getForEntity("https://mastodon.social/api/v1/statuses/" + mastodonPost.getPostId(), String.class);
+                System.out.println(response.getBody());
+
+                JSONObject object = new JSONObject(response.getBody());
+
+                System.out.println(object.getInt("favourites_count"));
+
+                mastodonRepository.updateByPostId(mastodonPost.getPostId(), object.getInt("favourites_count"));
+
+//                mastodonRepository.save(());
+            }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+
     }
 
     @Override

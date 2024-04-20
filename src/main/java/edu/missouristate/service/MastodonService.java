@@ -3,6 +3,7 @@ package edu.missouristate.service;
 import com.querydsl.core.Tuple;
 import edu.missouristate.domain.Mastodon;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 public interface MastodonService {
@@ -26,6 +27,8 @@ public interface MastodonService {
     void updateOrCreateMastodonPost(String mastroAccessToken, String message);
 
     List<Mastodon> getAllPosts();
+
+    void updateAllPosts(HttpSession session, List<Mastodon> mastodonPosts);
 
     List<Mastodon> getAllPostsWherePostIsNotNull();
 

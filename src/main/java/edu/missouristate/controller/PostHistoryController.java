@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -33,7 +34,7 @@ public class PostHistoryController {
     TwitterService twitterService;
 
     @GetMapping("/postHistory")
-    public ModelAndView getPostHistory() throws IOException, ExecutionException, InterruptedException {
+    public ModelAndView getPostHistory(HttpSession session) throws IOException, ExecutionException, InterruptedException {
         ModelAndView modelAndView = new ModelAndView("postHistory");
 
         List<String> redditPostIds = redditPostsService.getAllRedditPostIdsWhereNotNull();
@@ -49,13 +50,11 @@ public class PostHistoryController {
 //        List<Twitter> tweets = twitterService.getAllTweets();
         List<Twitter> tweets = twitterService.getAllTweetsWhereCreationIsNotNull();
 
-
-        // todo im like 99% sure the mastodon and tumblr post calls just get everything from the database no matter the current user
-        // todo will check whenever i can sign out and make a new account
         // will have to implement user id as foreign key in mastodon/tumblr tables
 
 //        List<Mastodon> mastodonPosts = mastodonService.getAllPosts();
         List<Mastodon> mastodonPosts = mastodonService.getAllPostsWherePostIsNotNull();
+        mastodonService.updateAllPosts(session, mastodonPosts);
 
 //        Collections.reverse(mastodonPosts);
 

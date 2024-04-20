@@ -70,6 +70,14 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
     }
 
     @Override
+    public void updateByPostId(String postId, int favouritesCount) {
+        update(mastodonTable)
+                .where(mastodonTable.postId.eq(postId))
+                .set(mastodonTable.favouriteCount, favouritesCount)
+                .execute();
+    }
+
+    @Override
     public Mastodon findExistingPostByTokenAndNoText(String accessToken) {
         return from(mastodonTable)
                 .where(mastodonTable.accessToken.eq(accessToken).and(mastodonTable.content.isNull()))
@@ -94,6 +102,8 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 //                .limit(50)
 //                .fetch();
 //    }
+
+
 
 
 }

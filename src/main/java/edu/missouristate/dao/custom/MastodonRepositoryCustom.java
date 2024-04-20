@@ -23,4 +23,6 @@ public interface MastodonRepositoryCustom {
     void cleanTable();
 
     boolean hasToken();
+
+    void updateByPostId(String postId, int favouritesCount);
 }
