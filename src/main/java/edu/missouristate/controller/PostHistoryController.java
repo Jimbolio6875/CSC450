@@ -41,10 +41,14 @@ public class PostHistoryController {
 
         List<String> redditPostIds = redditPostsService.getAllRedditPostIdsWhereNotNullAndSameUserid(userId);
         List<RedditPosts> redditPosts = redditPostsService.fetchRedditPostDetails(redditPostIds);
+
         List<Twitter> tweets = twitterService.getAllTweetsWhereCreationIsNotNullAndSameUserid(userId);
+
         List<Mastodon> mastodonPosts = mastodonService.getAllMasterpostsWherePostIsNotNullAndSameUserId(userId);
         mastodonService.updateAllPosts(session, mastodonPosts);
+
         List<Tumblr> tumblrPosts = tumblrService.getAllPostsWhereCreationIsNotNullAndSameUserid(userId);
+        tumblrService.updateAllPosts(tumblrPosts);
 
         modelAndView.addObject("redditPosts", redditPosts);
         modelAndView.addObject("tweets", tweets);

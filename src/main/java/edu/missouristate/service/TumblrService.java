@@ -34,4 +34,6 @@ public interface TumblrService {
     boolean hasToken(Integer userId);
 
 //    void updateContent(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message, Integer userId);
+
+    void updateAllPosts(List<Tumblr> tumblrPosts);
 }

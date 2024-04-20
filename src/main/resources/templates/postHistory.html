@@ -165,15 +165,13 @@
                                 <p style="margin-left: 9px">Mastodon</p>
                             </div>
                         </div>
+                        <div class="post-content">
+                            <p th:utext="${post.content}">Your post content will be here!</p>
+                        </div>
                         <div class="interactions">
                             <img height="25" src="/resources/Gifs/like.webp" width="25">
                             <p th:text="'Favourite Count: ' + ${post.favouriteCount}"></p>
                         </div>
-                        <div class="post-content">
-                            <p th:utext="${post.content}">Your post content will be here!</p>
-                        </div>
-
-
                         <div class="original-post">
                             <a class="original-post" target="_blank" th:href="${post.postUrl}">Original Post</a>
                         </div>

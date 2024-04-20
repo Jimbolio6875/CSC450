@@ -15,8 +15,10 @@ import edu.missouristate.service.TumblrService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpSession;
@@ -49,6 +51,7 @@ public class TumblrServiceImpl implements TumblrService {
     private OAuth1RequestToken requestToken;
     private OAuth1AccessToken accessToken;
     private String blogIdentifier;
+
     @Value("${tumblr.consumerKey}")
     private String consumerKey;
 
@@ -330,6 +333,34 @@ public class TumblrServiceImpl implements TumblrService {
     @Override
     public boolean hasToken(Integer userId) {
         return tumblrRepository.hasToken(userId);
+    }
+
+    @Override
+    public void updateAllPosts(List<Tumblr> tumblrPosts) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        try {
+
+            for (Tumblr tumblrPost : tumblrPosts) {
+
+                String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts?api_key=" + consumerKey + "&id=" + tumblrPost.getPostId();
+
+                ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+                System.out.println(response.getBody());
+
+                JSONObject object = new JSONObject(response.getBody());
+
+                Integer noteCount = object.getJSONObject("response").getJSONArray("posts").getJSONObject(0).getInt("note_count");
+
+                tumblrRepository.updateByPostId(tumblrPost.getPostId(), noteCount);
+
+            }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 }

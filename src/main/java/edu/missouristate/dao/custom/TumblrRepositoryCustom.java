@@ -24,4 +24,6 @@ public interface TumblrRepositoryCustom {
     void cleanTable(Integer userId);
 
     boolean hasToken(Integer userId);
+
+    void updateByPostId(String postId, Integer noteCount);
 }
