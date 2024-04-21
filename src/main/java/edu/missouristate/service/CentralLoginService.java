@@ -16,7 +16,7 @@ public class CentralLoginService {
     @Autowired
     CentralLoginRepository loginRepo;
 
-    Argon2PasswordEncoder pwEncoder = new Argon2PasswordEncoder(32,64,1,15*1024,2);
+    Argon2PasswordEncoder pwEncoder = new Argon2PasswordEncoder(32,64,2,15*1024,2);
     
     @Transactional
     // edit this to return success value, I'm just throwing this together rn
