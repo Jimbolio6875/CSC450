@@ -66,16 +66,28 @@
                 </div>
                 <div class="container">
                     <div class="row socials-list">
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-3 d-flex flex-column align-items-center">
+	                        <label>
+		                        <input id="twitterCheckBox" name="twitterCheckBox" type="checkbox" checked="true">
+	                        </label>
                             <img src="/resources/Socials/twitter.jpg">
                         </div>
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-3 d-flex flex-column align-items-center">
+                        	<label>
+		                        <input id="tumblrCheckBox" name="tumblrCheckBox" type="checkbox" checked="true">
+	                        </label>
                             <img src="/resources/Socials/tumblr.jpg">
                         </div>
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-3 d-flex flex-column align-items-center">
+                        	<label>
+		                        <input id="redditCheckBox" name="redditCheckBox" type="checkbox" checked="true">
+	                        </label>
                             <img src="/resources/Socials/reddit.png">
                         </div>
-                        <div class="col-6 col-md-3">
+                        <div class="col-6 col-md-3 d-flex flex-column align-items-center">
+                        	<label>
+		                        <input id="mastodonCheckBox" name="mastodonCheckBox" type="checkbox" checked="true">
+	                        </label>
                             <img src="/resources/Socials/mastodon.png">
                         </div>
                     </div>
@@ -86,7 +98,7 @@
                 <div class="posts-text d-flex justify-content-center align-items-center pb-0" style="padding: 32px">
                     <p class="displayText mb-0"></p>
                 </div>
-                <div class="container">
+                <div class="container reddit">
                     <div class="row posts-list checkReddit">
                         <div class="post-container first-reddit" th:each="redditPost : ${redditPosts}">
                             <div style="display: flex; justify-content: space-between; flex-direction: row-reverse; align-items: center">
@@ -222,16 +234,22 @@
     const checkTumblr = document.querySelector(".checkTumblr");
     const displayText = document.querySelector(".displayText");
     const twitterDisplay = document.querySelector(".twitter");
+    const redditDisplay = document.querySelector(".reddit");
     const tumblrDisplay = document.querySelector(".tumblr");
     const mastodonDisplay = document.querySelector(".mastodon");
     mastodonDisplay.style.display = 'none';
     twitterDisplay.style.display = 'none';
     tumblrDisplay.style.display = 'none';
+    redditDisplay.style.display = 'none';
     let existingPosts = false;
     const beforeHistory = "Create a post and see!";
     const afterHistory = "Looks like you've made quite the amount of posts!";
     const renderText = document.querySelector(".renderText");
     const listToCheck = [checkReddit, checkTwitter, checkMastodon, checkTumblr];
+    const twitterCheckBox = document.querySelector("#twitterCheckBox");
+    const tumblrCheckBox = document.querySelector("#tumblrCheckBox");
+    const redditCheckBox = document.querySelector("#redditCheckBox");
+    const mastodonCheckBox = document.querySelector("#mastodonCheckBox");
 
     window.addEventListener("DOMContentLoaded", () => {
 
@@ -243,12 +261,14 @@
 
                 const classElement = currentSocial.className;
 
-                if (classElement.includes("Twitter")) {
+                if (classElement.includes("Twitter") && twitterCheckBox.checked) {
                     twitterDisplay.style.display = 'block';
-                } else if (classElement.includes("Mastodon")) {
+                } else if (classElement.includes("Mastodon") && mastodonCheckBox.checked) {
                     mastodonDisplay.style.display = 'block';
-                } else if (classElement.includes("Tumblr")) {
+                } else if (classElement.includes("Tumblr") && tumblrCheckBox.checked) {
                     tumblrDisplay.style.display = 'block';
+                } else if (classElement.includes("Reddit") && redditCheckBox.checked){
+                	redditDisplay.style.display = 'block';
                 }
 
             }
@@ -259,6 +279,35 @@
         } else {
             displayText.textContent = afterHistory;
         }
+        
+        twitterCheckBox.addEventListener('change', function() {
+       	  if (this.checked) {
+       			twitterDisplay.style.display = 'block';
+       		  } else {
+       			twitterDisplay.style.display = 'none';
+       		  }
+       	});
+        tumblrCheckBox.addEventListener('change', function() {
+         	  if (this.checked) {
+         			tumblrDisplay.style.display = 'block';
+         		  } else {
+         			tumblrDisplay.style.display = 'none';
+         		  }
+         	});
+        mastodonCheckBox.addEventListener('change', function() {
+         	  if (this.checked) {
+         			mastodonDisplay.style.display = 'block';
+         		  } else {
+         			mastodonDisplay.style.display = 'none';
+         		  }
+         	});
+        redditCheckBox.addEventListener('change', function() {
+       	  if (this.checked) {
+       			redditDisplay.style.display = 'block';
+       		  } else {
+       			redditDisplay.style.display = 'none';
+       		  }
+       	});
     })
 
 
@@ -287,6 +336,10 @@
     ion-icon[name="logo-twitter"] {
         color: #1da1f3;
         font-size: 32px;
+    }
+    
+    input[type="checkbox"] {
+        transform: scale(2);
     }
 </style>
 
