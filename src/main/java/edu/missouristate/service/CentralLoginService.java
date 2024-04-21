@@ -4,6 +4,7 @@ import edu.missouristate.dao.CentralLoginRepository;
 import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.dto.LoginResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,12 +16,21 @@ public class CentralLoginService {
     @Autowired
     CentralLoginRepository loginRepo;
 
+    Argon2PasswordEncoder pwEncoder = new Argon2PasswordEncoder(32,64,1,15*1024,2);
+    
     @Transactional
     // edit this to return success value, I'm just throwing this together rn
     // also edit this to hash password and then save
     public CentralLogin saveCentralLogin(CentralLogin centralLogin) {
+    	//hash password
+    	String encodedPassword = pwEncoder.encode(centralLogin.getPassword());
+    	System.out.println("Password length" + encodedPassword.length());
+    	System.out.println("Password hash: " + encodedPassword);
+    	System.out.println("Raw and hashed password match: " + pwEncoder.matches(centralLogin.getPassword(), encodedPassword));
+    	centralLogin.setPassword(encodedPassword);
+    	
         CentralLogin savedLogin = loginRepo.save(centralLogin);
-
+        
         return savedLogin;
     }
 
@@ -38,13 +48,16 @@ public class CentralLoginService {
         if (usernameExists(login.getUsername())) {
             return false;
         } else {
+        	
             CentralLogin loginResult = saveCentralLogin(login);
             return loginResult != null;
         }
     }
 
     public LoginResponse login(CentralLogin login) {
-        LoginResponse response = loginRepo.authenticate(login.getUsername(), login.getPassword());
+    	String hashedPassword = loginRepo.getHashedPasswordByUsername(login.getUsername());
+    	if (pwEncoder.matches(login.getPassword(), hashedPassword));
+        LoginResponse response = loginRepo.authenticate(login.getUsername(), hashedPassword);
         return response;
     }
 

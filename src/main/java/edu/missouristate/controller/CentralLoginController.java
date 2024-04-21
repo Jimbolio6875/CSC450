@@ -105,7 +105,7 @@ public class CentralLoginController {
     }
 
 
-    //TODO: Use responses and dto's instead of loose objects being passed everywhere
+    
     @ResponseBody
     @PostMapping("/register")
     public GenericResponse register(@RequestBody CentralLogin login, HttpSession session) {

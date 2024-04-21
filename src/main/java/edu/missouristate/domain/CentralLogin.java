@@ -13,7 +13,7 @@ public class CentralLogin {
     private Integer centralLoginId;
     @Column(name = "username", columnDefinition = "VARCHAR(32)")
     private String username;
-    @Column(name = "password", columnDefinition = "VARCHAR(32)")
+    @Column(name = "password", columnDefinition = "VARCHAR(256)")
     private String password;
     @Column(name = "first_name", columnDefinition = "VARCHAR(32)")
     private String firstName;

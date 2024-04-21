@@ -16,4 +16,6 @@ public interface CentralLoginRepository extends CrudRepository<CentralLogin, Int
     public LoginResponse authenticate(String username, String password);
 
     Optional<CentralLogin> findById(Integer userId);
+    
+    public String getHashedPasswordByUsername(String username);
 }

@@ -33,7 +33,7 @@ public class CentralLoginRepositoryImpl extends QuerydslRepositorySupport implem
                 .fetch();
         if (results.size() != 1) {
             response.setLoggedIn(false);
-            response.setMessage("Failed to authenticate");
+            response.setMessage("Username not found");
             response.setMessageType("danger");
             return response;
         } else {
@@ -46,7 +46,12 @@ public class CentralLoginRepositoryImpl extends QuerydslRepositorySupport implem
             response.setUserId(login.getCentralLoginId());
             return response;
         }
-
-
+    }
+    
+    public String getHashedPasswordByUsername(String username) {
+    	CentralLogin user = from(centralLoginTable)
+    			.where(centralLoginTable.username.eq(username))
+    			.fetchOne();
+    	return user.getPassword();
     }
 }
