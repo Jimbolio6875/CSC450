@@ -129,7 +129,7 @@
 
                     <div class="mb-3">
                         <hr>
-                        <label class="before-validation" for="validationTextarea">
+                        <label class="before-validation" for="validationTextArea">
                             <strong>
                                 Please
                                 connect a social media to
@@ -137,10 +137,10 @@
                             </strong>
                         </label>
                         <div class="post-box">
-                            <label class="after-validation form-label mt-3" for="validationTextarea">Looks like you're
+                            <label class="after-validation form-label mt-3" for="validationTextArea">Looks like you're
                                 all set! Now it's time
                                 to share what's on your mind!</label>
-                            <textarea class="form-control main-textbox" id="validationTextarea" name="message"
+                            <textarea class="form-control main-textbox" id="validationTextArea" name="message"
                                       placeholder="Write something here..."
                                       required></textarea>
                             <div class="invalid-feedback">
@@ -166,10 +166,10 @@
     const form = document.querySelector("#myForm");
 
     const redditDisplay = document.querySelector(".reddit-options");
-    const redditRatio = document.querySelector("#reddit");
-    const tumblrRatio = document.querySelector("#tumblr");
+    const redditRadio = document.querySelector("#reddit");
+    const tumblrRadio = document.querySelector("#tumblr");
     const twitterRadio = document.querySelector("#twitter");
-    const mastodonRatio = document.querySelector("#mastodon");
+    const mastodonRadio = document.querySelector("#mastodon");
     const beforeValidationText = document.querySelector(".before-validation");
     const afterValidationText = document.querySelector(".after-validation");
     const mainTextBox = document.querySelector(".main-textbox");
@@ -179,18 +179,18 @@
     const flashMessage = document.getElementById('flashMessage').value;
 
     function run() {
-        redditDisplay.style.display = redditRatio.checked ? 'flex' : 'none';
+        redditDisplay.style.display = redditRadio.checked ? 'flex' : 'none';
     }
 
 
     document.addEventListener('DOMContentLoaded', function() {
 
-        redditRatio.addEventListener('change', function() {
+        redditRadio.addEventListener('change', function() {
             updateVisibility();
         });
 
         function updateVisibility() {
-            if (redditRatio.checked) {
+            if (redditRadio.checked) {
                 subreddit.style.visibility = 'visible';
                 redditTitle.style.visibility = 'visible';
                 subreddit.required = true;
@@ -202,15 +202,27 @@
                 redditTitle.required = false;
             }
         }
-
+        
+     	// Perform form validation logic here
         function validateForm() {
-            var isValid = true;
-            // Perform your validation logic here
-            if (!redditRatio.checked && !twitterRadio.checked && !mastodonRatio.checked && !tumblrRatio.checked) {
+            if (!redditRadio.checked && !twitterRadio.checked && !mastodonRadio.checked && !tumblrRadio.checked) {
                 displayToast("Please check a social media to post!", 'red');
-                isValid = false;
-            }
-            return isValid;
+                return false;
+            } else if (twitterRadio.checked && mainTextBox.value.length > 280){
+            	displayToast("To post to Twitter, your post needs to be 280 characters or less!", 'red');
+            	return false;
+            } else if (mastodonRadio.checked && mainTextBox.value.length > 500){
+            	displayToast("To post to Mastodon, your post needs to be 500 characters or less!", 'red');
+            	return false;
+            } /*
+            } else if (tumblrRadio.checked && mainTextBox.value.length > 4096){
+            	displayToast("To post to Tumblr, your post needs to be 4,096 characters or less!", 'red');
+            	return false;
+            } else if (redditRadio.checked && mainTextBox.value.length > 40000){
+            	displayToast("To post to Reddit, your post needs to be 40,000 characters or less!", 'red');
+            	return false;
+            }*/
+            return true;
         }
 
         function displayToast(message, color) {
@@ -229,7 +241,7 @@
             }
         });
 
-        if (!redditRatio.hasAttribute('disabled') || !tumblrRatio.hasAttribute('disabled') || !twitterRadio.hasAttribute('disabled') || !mastodonRatio.hasAttribute('disabled')) {
+        if (!redditRadio.hasAttribute('disabled') || !tumblrRadio.hasAttribute('disabled') || !twitterRadio.hasAttribute('disabled') || !mastodonRadio.hasAttribute('disabled')) {
             beforeValidationText.style.display = "none";
             postBox.style.display = "block";
             afterValidationText.style.display = "block";
