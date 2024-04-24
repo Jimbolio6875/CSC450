@@ -210,7 +210,7 @@ public class SocialMediaPostingController {
                 } else {
                     userId = (Integer) session.getAttribute("userId");
                     String redditAccessToken = redditAccessTokenTuple.get(0, String.class);
-                    String fullName = redditPostsService.postToReddit(redditAccessToken, subreddit, title, message);
+                    String fullName = redditPostsService.postToReddit(redditAccessToken, subreddit, title, message, session);
                     if (fullName == null || fullName.isEmpty() || fullName.equals("No ID found")) {
                         modelAndView.setViewName("error");
                         modelAndView.addObject("message", "Failed to post your message to Reddit: Invalid Subreddit.");
@@ -218,6 +218,7 @@ public class SocialMediaPostingController {
                         redditSuccess = false;
                     } else {
                         redditPostsService.updateContent(redditAccessToken, subreddit, title, message, fullName, userId);
+                        session.setAttribute("recentPostId", fullName);  // Stored in HTTP session
                         redditPostsService.cleanTable(userId);
                         statusMessage.append("Successfully posted to Reddit. ");
 

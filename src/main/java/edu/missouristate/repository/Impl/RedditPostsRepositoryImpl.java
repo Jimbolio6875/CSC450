@@ -61,6 +61,7 @@ public class RedditPostsRepositoryImpl extends QuerydslRepositorySupport impleme
         return from(redditPostsTable).select(redditPostsTable.postId).where(redditPostsTable.postId.isNotNull().and(redditPostsTable.centralLogin.centralLoginId.eq(userId))).fetch();
     }
 
+
     @Override
     public void cleanTable(Integer userId) {
         delete(redditPostsTable)
@@ -75,5 +76,21 @@ public class RedditPostsRepositoryImpl extends QuerydslRepositorySupport impleme
                 .and(redditPostsTable.centralLogin.centralLoginId.eq(userId))).fetchCount();
 
         return tokenAmount > 0;
+    }
+
+    @Override
+    public boolean isPostReady(String postId) {
+        long counter = from(redditPostsTable).where(redditPostsTable.postId.eq(postId).and(redditPostsTable.author.isNull())).fetchCount();
+
+        if (counter > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
+    public List<String> getAllRedditPostIdsByUserIdWithNonNullAuthor(Integer userId) {
+        return from(redditPostsTable).select(redditPostsTable.postId).where(redditPostsTable.centralLogin.centralLoginId.eq(userId).and(redditPostsTable.author.isNotNull())).fetch();
     }
 }

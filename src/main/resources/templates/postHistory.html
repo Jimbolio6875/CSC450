@@ -67,27 +67,27 @@
                 <div class="container">
                     <div class="row socials-list">
                         <div class="col-6 col-md-3 d-flex flex-column align-items-center">
-	                        <label>
-		                        <input id="twitterCheckBox" name="twitterCheckBox" type="checkbox" checked="true">
-	                        </label>
+                            <label>
+                                <input checked="true" id="twitterCheckBox" name="twitterCheckBox" type="checkbox">
+                            </label>
                             <img src="/resources/Socials/twitter.jpg">
                         </div>
                         <div class="col-6 col-md-3 d-flex flex-column align-items-center">
-                        	<label>
-		                        <input id="tumblrCheckBox" name="tumblrCheckBox" type="checkbox" checked="true">
-	                        </label>
+                            <label>
+                                <input checked="true" id="tumblrCheckBox" name="tumblrCheckBox" type="checkbox">
+                            </label>
                             <img src="/resources/Socials/tumblr.jpg">
                         </div>
                         <div class="col-6 col-md-3 d-flex flex-column align-items-center">
-                        	<label>
-		                        <input id="redditCheckBox" name="redditCheckBox" type="checkbox" checked="true">
-	                        </label>
+                            <label>
+                                <input checked="true" id="redditCheckBox" name="redditCheckBox" type="checkbox">
+                            </label>
                             <img src="/resources/Socials/reddit.png">
                         </div>
                         <div class="col-6 col-md-3 d-flex flex-column align-items-center">
-                        	<label>
-		                        <input id="mastodonCheckBox" name="mastodonCheckBox" type="checkbox" checked="true">
-	                        </label>
+                            <label>
+                                <input checked="true" id="mastodonCheckBox" name="mastodonCheckBox" type="checkbox">
+                            </label>
                             <img src="/resources/Socials/mastodon.png">
                         </div>
                     </div>
@@ -222,6 +222,9 @@
                     </div>
                 </div>
             </div>
+            <div id="postIdContainer" th:data-postid="${session.recentPostId}"></div>
+            <input id="flashMessage" th:value="${message}" type="hidden"/>
+            <div class="toast" id="toast"></div>
         </div>
     </div>
 </div>
@@ -252,7 +255,50 @@
     const mastodonCheckBox = document.querySelector("#mastodonCheckBox");
 
     window.addEventListener("DOMContentLoaded", () => {
+        const postIdElement = document.getElementById('postIdContainer');
+        const postId = postIdElement.getAttribute('data-postid');
 
+        // Uses localstorage to keep track of postId
+        let previousPostId = localStorage.getItem('previousPostId');
+
+        console.log("Old postId: " + previousPostId);
+        console.log("New postId: " + postId);
+
+        // checks if the postIds, if they don't match that means it's a post that hasn't been fetched before
+        // uses the Polling method
+        if (previousPostId !== postId) {
+            console.log("New post detected, starting polling.");
+            localStorage.setItem('previousPostId', postId);
+            displayToast("Getting Reddit post", "green", 5000);
+            const pollingInterval = setInterval(pollPostStatus, 5000);
+
+            function pollPostStatus() {
+                fetch(`/post-status/${postId}`)
+                    .then(response => response.text())
+                    .then(status => {
+                        console.log('Current post status:', status);
+                        if (status === "ready") {
+                            displayToast("Reddit post Ready", "green", 10000);
+                            clearInterval(pollingInterval);
+                        }
+                    })
+                    .catch(error => console.error('Failed to fetch post status:', error));
+            }
+        } else {
+            console.log("No new post to poll.");
+        }
+
+        function displayToast(message, color, duration) {
+            let toastDuration = duration === null ? 6000 : duration;
+            toast.innerText = message;
+            toast.className = "toast show";
+            toast.style.background = color;
+            setTimeout(function () {
+                toast.className = toast.className.replace("show", "");
+            }, toastDuration);
+        }
+
+        console.log('Post ID from session:', postId);
         for (let i = 0; i < listToCheck.length; i++) {
 
             if (listToCheck[i].children.length > 0) {
@@ -267,8 +313,8 @@
                     mastodonDisplay.style.display = 'block';
                 } else if (classElement.includes("Tumblr") && tumblrCheckBox.checked) {
                     tumblrDisplay.style.display = 'block';
-                } else if (classElement.includes("Reddit") && redditCheckBox.checked){
-                	redditDisplay.style.display = 'block';
+                } else if (classElement.includes("Reddit") && redditCheckBox.checked) {
+                    redditDisplay.style.display = 'block';
                 }
 
             }
@@ -279,35 +325,35 @@
         } else {
             displayText.textContent = afterHistory;
         }
-        
-        twitterCheckBox.addEventListener('change', function() {
-       	  if (this.checked && checkTwitter.children.length > 0) {
-       			twitterDisplay.style.display = 'block';
-       		  } else {
-       			twitterDisplay.style.display = 'none';
-       		  }
-       	});
-        tumblrCheckBox.addEventListener('change', function() {
-         	  if (this.checked && checkTumblr.children.length > 0) {
-         			tumblrDisplay.style.display = 'block';
-         		  } else {
-         			tumblrDisplay.style.display = 'none';
-         		  }
-         	});
-        mastodonCheckBox.addEventListener('change', function() {
-         	  if (this.checked && checkMastodon.children.length > 0) {
-         			mastodonDisplay.style.display = 'block';
-         		  } else {
-         			mastodonDisplay.style.display = 'none';
-         		  }
-         	});
-        redditCheckBox.addEventListener('change', function() {
-       	  if (this.checked && checkReddit.children.length > 0) {
-       			redditDisplay.style.display = 'block';
-       		  } else {
-       			redditDisplay.style.display = 'none';
-       		  }
-       	});
+
+        twitterCheckBox.addEventListener('change', function () {
+            if (this.checked && checkTwitter.children.length > 0) {
+                twitterDisplay.style.display = 'block';
+            } else {
+                twitterDisplay.style.display = 'none';
+            }
+        });
+        tumblrCheckBox.addEventListener('change', function () {
+            if (this.checked && checkTumblr.children.length > 0) {
+                tumblrDisplay.style.display = 'block';
+            } else {
+                tumblrDisplay.style.display = 'none';
+            }
+        });
+        mastodonCheckBox.addEventListener('change', function () {
+            if (this.checked && checkMastodon.children.length > 0) {
+                mastodonDisplay.style.display = 'block';
+            } else {
+                mastodonDisplay.style.display = 'none';
+            }
+        });
+        redditCheckBox.addEventListener('change', function () {
+            if (this.checked && checkReddit.children.length > 0) {
+                redditDisplay.style.display = 'block';
+            } else {
+                redditDisplay.style.display = 'none';
+            }
+        });
     })
 
 
@@ -319,6 +365,29 @@
         padding: 0;
         margin: 0;
     }
+
+    .toast {
+        visibility: hidden;
+        min-width: 250px;
+        margin-left: -125px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        bottom: 30px;
+        font-size: 17px;
+        transition: visibility 0s, opacity 0.5s linear;
+    }
+
+    .toast.show {
+        visibility: visible;
+        opacity: 1;
+    }
+
 
     .first-tweet:first-child {
         margin-top: 28px;
@@ -337,7 +406,7 @@
         color: #1da1f3;
         font-size: 32px;
     }
-    
+
     input[type="checkbox"] {
         transform: scale(2);
     }

@@ -3,20 +3,26 @@ package edu.missouristate.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.Tuple;
+import edu.missouristate.controller.RedditController;
 import edu.missouristate.domain.CentralLogin;
 import edu.missouristate.domain.RedditPosts;
 import edu.missouristate.domain.reddit.RedditResponse;
 import edu.missouristate.repository.RedditPostsRepository;
 import edu.missouristate.service.RedditPostsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import javax.persistence.EntityManager;
+import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.time.Duration;
@@ -34,8 +40,10 @@ import java.util.stream.StreamSupport;
 @Service
 public class RedditPostsServiceImpl implements RedditPostsService {
 
+    private static final Logger log = LoggerFactory.getLogger(RedditController.class);
     private final RedditPostsRepository redditPostsRepository;
     private final WebClient webClient;
+
     @Autowired
     EntityManager entityManager;
     @Value("${python.path}")
@@ -47,8 +55,12 @@ public class RedditPostsServiceImpl implements RedditPostsService {
         this.webClient = webClient;
     }
 
+    @Override
+    public boolean isPostReady(String postId) {
+        return redditPostsRepository.isPostReady(postId);
+    }
 
-    public String postToReddit(String accessToken, String subreddit, String title, String text) {
+    public String postToReddit(String accessToken, String subreddit, String title, String text, HttpSession session) {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(
                     pythonPath,
@@ -62,18 +74,30 @@ public class RedditPostsServiceImpl implements RedditPostsService {
 
             int exitCode = process.waitFor();
             if (exitCode == 0) {
-                // Assuming the script output needs parsing to extract the postId
                 String jsonExtract = extractJsonPart(scriptOutput);
-                String fullname = extractPostIdFromJson(jsonExtract); // Implement this method based on your script's output format
+                String fullname = extractPostIdFromJson(jsonExtract);
                 if (fullname != null && !fullname.isEmpty()) {
+                    fetchDelayedRedditPosts(fullname);
                     return fullname;
                 }
             }
         } catch (Exception e) {
-            // Consider logging the exception
+            //
         }
         return null;
     }
+
+
+    @Async
+    public void fetchDelayedRedditPosts(String fullname) {
+        Mono.delay(Duration.ofSeconds(10))
+                .then(Mono.defer(() -> fetchAndSaveRedditPost(fullname)))
+                .subscribe(
+                        post -> log.info("Reddit post saved: {}", post),
+                        error -> log.error("Error fetching and saving Reddit post: {}", fullname, error)
+                );
+    }
+
 
     public String extractJsonPart(String fullResponse) {
         String jsonPart = "";
@@ -101,7 +125,6 @@ public class RedditPostsServiceImpl implements RedditPostsService {
             return "No ID found";
         }
     }
-
 
     @Override
     public Mono<RedditPosts> fetchAndSaveRedditPost(String fullName) {
@@ -134,9 +157,33 @@ public class RedditPostsServiceImpl implements RedditPostsService {
                 });
     }
 
+
     @Override
     public List<RedditPosts> getAllRedditPosts() {
         return (List<RedditPosts>) redditPostsRepository.findAll();
+    }
+
+    @Async
+    public void checkPostStatusAndUpdateEmitter(SseEmitter emitter, String postId) {
+        try {
+            boolean isPostReady = false;
+
+            while (!isPostReady) {
+                isPostReady = redditPostsRepository.isPostReady(postId);
+                emitter.send(SseEmitter.event().name("status").data(isPostReady ? "ready" : "not ready"));
+
+                if (!isPostReady) {
+                    Thread.sleep(5000); // Wait before checking again
+                } else {
+                    emitter.complete(); // Complete the emitter when the post is ready
+                }
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // Proper handling of InterruptedException
+            emitter.completeWithError(e); // Complete the emitter with error
+        } catch (Exception e) {
+            emitter.completeWithError(e); // Handle other exceptions
+        }
     }
 
 
@@ -148,9 +195,10 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     }
 
     @Override
-    public List<RedditPosts> fetchRedditPostDetails(List<String> postIds) {
+    public List<RedditPosts> fetchRedditPostDetails(List<String> postId) {
         List<RedditPosts> posts = new ArrayList<>();
-        for (String id : postIds) {
+
+        for (String id : postId) {
             String url = "https://www.reddit.com/by_id/" + "t3_" + id + ".json";
             RedditResponse response = webClient.get().uri(url)
                     .retrieve()
@@ -203,6 +251,11 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     @Override
     public List<String> getAllRedditPostIdsWhereNotNullAndSameUserid(Integer userId) {
         return redditPostsRepository.getAllRedditPostIdsWhereNotNullAndSameUserid(userId);
+    }
+
+    @Override
+    public List<String> getAllRedditPostIdsByUserIdWithNonNullAuthor(Integer userId) {
+        return redditPostsRepository.getAllRedditPostIdsByUserIdWithNonNullAuthor(userId);
     }
 
     @Override

@@ -8,9 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -188,12 +190,6 @@ public class RedditController {
             return modelAndView;
         }
 
-        Integer userId = 1; // Placeholder, adjust this according to your application's logic
-
-        // Save the SocialMediaAccount information when you have it
-//        socialMediaAccountService.saveSocialMediaAccount(userId, "Reddit", accessToken.trim());
-
-
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(pythonPath, "scripts/RedditPythonScripts/reddit_submit_post.py", accessToken, subreddit, title, text);
             processBuilder.redirectErrorStream(true);
@@ -211,20 +207,17 @@ public class RedditController {
             String jsonExtract = extractJsonPart(result);
             String fullname = extractPostIdFromJson(jsonExtract);
 
-            System.out.println("STOP");
 
             redditPostsService.fetchAndSaveRedditPost(fullname).subscribe(
                     post -> log.info("Reddit post saved: {}", post),
                     error -> log.error("Error fetching and saving Reddit post {}", fullname, error)
             );
 
-
         } catch (Exception e) {
             log.error("Failed to submit post", e);
             modelAndView.setViewName("error");
             modelAndView.addObject("message", "Failed to submit post: " + e.getMessage());
         }
-
         return modelAndView;
     }
 
@@ -297,6 +290,12 @@ public class RedditController {
         } else {
             return "No ID found";
         }
+    }
+
+    @GetMapping("/post-status/{postId}")
+    public ResponseEntity<String> checkPostStatus(@PathVariable String postId) {
+        boolean isReady = redditPostsService.isPostReady(postId);
+        return ResponseEntity.ok(isReady ? "ready" : "not ready");
     }
 
 

@@ -22,4 +22,8 @@ public interface RedditPostsRepositoryCustom {
     void cleanTable(Integer userId);
 
     boolean hasToken(Integer userId);
+
+    boolean isPostReady(String postId);
+
+    List<String> getAllRedditPostIdsByUserIdWithNonNullAuthor(Integer userId);
 }

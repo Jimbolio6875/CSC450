@@ -39,8 +39,14 @@ public class PostHistoryController {
 
         Integer userId = (Integer) session.getAttribute("userId");
 
-        List<String> redditPostIds = redditPostsService.getAllRedditPostIdsWhereNotNullAndSameUserid(userId);
+        // This guy you get from the repository
+        // List<String> redditPostIds = redditPostsService.getAllRedditPostIdsWhereNotNullAndSameUserid(userId);
+
+        List<String> redditPostIds = redditPostsService.getAllRedditPostIdsByUserIdWithNonNullAuthor(userId);
+
+        // Gets the existing list of posts that have fetches
         List<RedditPosts> redditPosts = redditPostsService.fetchRedditPostDetails(redditPostIds);
+
 
         List<Twitter> tweets = twitterService.getAllTweetsWhereCreationIsNotNullAndSameUserid(userId);
 
