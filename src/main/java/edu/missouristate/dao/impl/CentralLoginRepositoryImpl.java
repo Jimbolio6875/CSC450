@@ -52,6 +52,7 @@ public class CentralLoginRepositoryImpl extends QuerydslRepositorySupport implem
     	CentralLogin user = from(centralLoginTable)
     			.where(centralLoginTable.username.eq(username))
     			.fetchOne();
+    	//TODO: Account for null
     	return user.getPassword();
     }
 }

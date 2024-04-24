@@ -18,7 +18,7 @@ public class Mastodon implements Serializable {
     private String accessToken;
     @Column(name = "user_id", columnDefinition = "VARCHAR(255)")
     private String userId;
-    @Column(name = "content", columnDefinition = "VARCHAR(255)")
+    @Column(name = "content", columnDefinition = "VARCHAR(512)")
     private String content;
     @Column(name = "post_url", columnDefinition = "VARCHAR(255)")
     private String postUrl;

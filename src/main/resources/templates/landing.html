@@ -214,14 +214,13 @@
             } else if (mastodonRadio.checked && mainTextBox.value.length > 500){
             	displayToast("To post to Mastodon, your post needs to be 500 characters or less!", 'red');
             	return false;
-            } /*
-            } else if (tumblrRadio.checked && mainTextBox.value.length > 4096){
-            	displayToast("To post to Tumblr, your post needs to be 4,096 characters or less!", 'red');
+            } else if (tumblrRadio.checked && mainTextBox.value.length > 4096000){
+            	displayToast("To post to Tumblr, your post needs to be 4,096,000 characters or less!", 'red');
             	return false;
             } else if (redditRadio.checked && mainTextBox.value.length > 40000){
             	displayToast("To post to Reddit, your post needs to be 40,000 characters or less!", 'red');
             	return false;
-            }*/
+            }
             return true;
         }
 
