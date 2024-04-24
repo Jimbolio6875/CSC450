@@ -33,7 +33,7 @@ public class CentralLoginRepositoryImpl extends QuerydslRepositorySupport implem
                 .fetch();
         if (results.size() != 1) {
             response.setLoggedIn(false);
-            response.setMessage("Username not found");
+            response.setMessage("Username not found.");
             response.setMessageType("danger");
             return response;
         } else {
@@ -52,7 +52,11 @@ public class CentralLoginRepositoryImpl extends QuerydslRepositorySupport implem
     	CentralLogin user = from(centralLoginTable)
     			.where(centralLoginTable.username.eq(username))
     			.fetchOne();
-    	//TODO: Account for null
+    	
+    	//if user is null, their password is too
+    	if (user == null){
+    		return null;
+    	}
     	return user.getPassword();
     }
 }

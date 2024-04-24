@@ -55,10 +55,25 @@ public class CentralLoginService {
     }
 
     public LoginResponse login(CentralLogin login) {
+    	LoginResponse response;
     	String hashedPassword = loginRepo.getHashedPasswordByUsername(login.getUsername());
-    	if (pwEncoder.matches(login.getPassword(), hashedPassword));
-        LoginResponse response = loginRepo.authenticate(login.getUsername(), hashedPassword);
-        return response;
+    	
+    	if (hashedPassword == null) {
+    		response = new LoginResponse();
+    		response.setLoggedIn(false);
+            response.setMessage("User not found");
+            response.setMessageType("danger");
+            return response;
+    	} else if (pwEncoder.matches(login.getPassword(), hashedPassword)) {
+    		response = loginRepo.authenticate(login.getUsername(), hashedPassword);
+            return response;
+    	} else {
+    		response = new LoginResponse();
+    		response.setLoggedIn(false);
+            response.setMessage("Incorrect password provided");
+            response.setMessageType("danger");
+            return response;
+    	}
     }
 
     public CentralLogin getUserById(Integer userId) {
