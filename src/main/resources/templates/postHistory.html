@@ -281,28 +281,28 @@
         }
         
         twitterCheckBox.addEventListener('change', function() {
-       	  if (this.checked) {
+       	  if (this.checked && checkTwitter.children.length > 0) {
        			twitterDisplay.style.display = 'block';
        		  } else {
        			twitterDisplay.style.display = 'none';
        		  }
        	});
         tumblrCheckBox.addEventListener('change', function() {
-         	  if (this.checked) {
+         	  if (this.checked && checkTumblr.children.length > 0) {
          			tumblrDisplay.style.display = 'block';
          		  } else {
          			tumblrDisplay.style.display = 'none';
          		  }
          	});
         mastodonCheckBox.addEventListener('change', function() {
-         	  if (this.checked) {
+         	  if (this.checked && checkMastodon.children.length > 0) {
          			mastodonDisplay.style.display = 'block';
          		  } else {
          			mastodonDisplay.style.display = 'none';
          		  }
          	});
         redditCheckBox.addEventListener('change', function() {
-       	  if (this.checked) {
+       	  if (this.checked && checkReddit.children.length > 0) {
        			redditDisplay.style.display = 'block';
        		  } else {
        			redditDisplay.style.display = 'none';
