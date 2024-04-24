@@ -1,7 +1,21 @@
+use login;
 DROP TABLE IF EXISTS mastodon;
 DROP TABLE IF EXISTS tumblr;
 DROP TABLE IF EXISTS twitter;
 DROP TABLE IF EXISTS reddit_posts;
+DROP TABLE IF EXISTS `central_login`;
+DROP TABLE IF EXISTS `social_media_accounts`;
+DROP TABLE IF EXISTS spring_session_attributes;
+DROP TABLE IF EXISTS spring_session;
+
+CREATE TABLE `central_login` (
+`central_login_id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(32) NOT NULL,
+  `password` varchar(256) NOT NULL,
+  `first_name` varchar(32) NOT NULL,
+  `last_name` varchar(32) NOT NULL,
+  PRIMARY KEY (`central_login_id`)
+);
 
 CREATE TABLE mastodon
 (
@@ -61,5 +75,3 @@ CREATE TABLE reddit_posts
     central_login_id INT,
     FOREIGN KEY (central_login_id) REFERENCES central_login (central_login_id)
 );
-
-

@@ -131,17 +131,14 @@ public class CentralLoginController {
             session.setAttribute("firstName", loginResponse.getFirstName());
             session.setAttribute("lastName", loginResponse.getLastName());
             session.setAttribute("userId", loginResponse.getUserId());
-//            model.addAttribute("hasTwitterToken", twitterService.hasToken());
             return loginResponse;
         } else {
             session.setAttribute("message", loginResponse.getMessage());
             session.setAttribute("messageType", loginResponse.getMessageType());
-//            model.addAttribute("hasTwitterToken", twitterService.hasToken());
             return loginResponse;
         }
     }
 
-    //TODO: Change this to POST
     @GetMapping("/signOut")
     public String signOut(HttpSession session) {
         session.invalidate();
