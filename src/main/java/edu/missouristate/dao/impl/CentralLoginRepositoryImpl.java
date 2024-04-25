@@ -24,21 +24,23 @@ public class CentralLoginRepositoryImpl extends QuerydslRepositorySupport implem
                 .fetch();
     }
 
-    //TODO: use password hashing, account  for variable results
     public LoginResponse authenticate(String username, String password) {
         List<CentralLogin> results = new ArrayList<CentralLogin>();
         LoginResponse response = new LoginResponse();
+       
+        //retrieve result by user and hashed password (which is checked in the service method against provided plaintext)
         results = from(centralLoginTable)
                 .where(centralLoginTable.username.eq(username).and(centralLoginTable.password.eq(password)))
                 .fetch();
         if (results.size() != 1) {
+        	//valid, guaranteed correct user not found if results not 1
             response.setLoggedIn(false);
             response.setMessage("Username not found.");
             response.setMessageType("danger");
             return response;
         } else {
+        	//return single user if found
             CentralLogin login = results.get(0);
-
             response.setLoggedIn(true);
             response.setFirstName(login.getFirstName());
             response.setLastName(login.getLastName());

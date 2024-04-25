@@ -22,7 +22,6 @@
         </div>
 
         <div class="col-md-6 d-flex align-items-center justify-content-center">
-            <p id="messageBox"></p>
             <form id="register-form">
                 <div class="top">
                     <a th:href="@{/}">
@@ -30,6 +29,9 @@
                     </a>
                     <header>Register</header>
                 </div>
+                <div class = "d-flex align-items-center justify-content-center">
+        			<p id="messageBox"></p>
+        		</div>
                 <div class="two-forms">
                     <div class="mb-3">
                         <input type="text" id="firstNameInput" class="form-control" placeholder="First Name">
@@ -45,12 +47,6 @@
                 </div>
                 <div class="mb-3">
                     <input type="password" class="form-control" id="passwordInput" placeholder="Password">
-                </div>
-                <div class="two-col">
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" id="login-check">
-                        <label class="login-check" for="login-check">Remember Me</label>
-                    </div>
                 </div>
                 <button type="submit" class="submit" id="submitBtn">Register</button>
             </form>
@@ -70,43 +66,57 @@
         const messageBox = document.getElementById("messageBox");
 
         loginBtn.addEventListener("click", function(e){
-            try {
-                e.preventDefault(); // Prevent Form From Submitting "normally"
-                let data = {};
-                data.username = usernameInput.value;
-                data.password = passwordInput.value;
-                data.firstName = firstNameInput.value;
-                data.lastName = lastNameInput.value;
+        	e.preventDefault(); // Prevent Form From Submitting "normally"
+        	if (!validatePassword(passwordInput.value)){
+        		messageBox.innerText = "Password must be at least 8 characters and have at \n least one number and upper/lowercase letter";
+        	}
+        	else{
+        		try {
+                	
+                    
+                    let data = {};
+                    data.username = usernameInput.value;
+                    data.password = passwordInput.value;
+                    data.firstName = firstNameInput.value;
+                    data.lastName = lastNameInput.value;
 
-                // Make AJAX call to the server along with a message
-                fetch(/*[[@{/register}]]*/, {
-                    method: "POST",
-                    body: JSON.stringify(data),
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                }).then(function(response) {
-                    if (response.ok) {
-                        let res = response.json();
-                        return res;
-                    }
-                }).then(function(response) {
-                    console.log(response);
-                    console.log(response.messageType);
-                    if (response.messageType === "danger"){
-                        messageBox.innerText = response.message;
-                    }
-                    else{
-                        window.location.replace(/*[[@{/landing}]]*/);
-                    }
-                }).catch(function(error) {
+                    // Make AJAX call to the server along with a message
+                    fetch(/*[[@{/register}]]*/, {
+                        method: "POST",
+                        body: JSON.stringify(data),
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    }).then(function(response) {
+                        if (response.ok) {
+                            let res = response.json();
+                            return res;
+                        }
+                    }).then(function(response) {
+                        console.log(response);
+                        console.log(response.messageType);
+                        if (response.messageType === "danger"){
+                            messageBox.innerText = response.message;
+                        }
+                        else{
+                            window.location.replace(/*[[@{/landing}]]*/);
+                        }
+                    }).catch(function(error) {
 
-                });
-            } catch (err) {
-                console.log("error");
-            }
+                    });
+                } catch (err) {
+                    console.log("error");
+                }
+        	}
+            
 
         });
+        
+        function validatePassword(str)
+        {
+            var regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+            return regex.test(str);
+        }
         /*]]>*/
     </script>
 </body>

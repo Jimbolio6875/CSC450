@@ -69,7 +69,6 @@ public class CentralLoginController {
         }
     }
 
-    //TODO: secure, actually check userId
     @GetMapping("/landing")
     public String getLandingPage(HttpSession session, Model model) {
         if (session.getAttribute("username") == null || session.getAttribute("username").equals("")) {
@@ -109,14 +108,13 @@ public class CentralLoginController {
     @ResponseBody
     @PostMapping("/register")
     public GenericResponse register(@RequestBody CentralLogin login, HttpSession session) {
-        boolean registered = centralLoginService.register(login);
-        GenericResponse response = new GenericResponse();
-        if (registered) {
-            response.setMessage("Registration success");
-            response.setMessageType("success");
-            return response;
-        } else {
-            response.setMessage("Registration failed. Please select a new username");
+    	try {
+    		GenericResponse registered = centralLoginService.register(login);
+            return registered;
+    	}
+        catch(Exception e) {
+        	GenericResponse response = new GenericResponse();
+        	response.setMessage("Registration failed.");
             response.setMessageType("danger");
             return response;
         }

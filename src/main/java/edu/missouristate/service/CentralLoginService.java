@@ -1,14 +1,16 @@
 package edu.missouristate.service;
 
-import edu.missouristate.dao.CentralLoginRepository;
-import edu.missouristate.domain.CentralLogin;
-import edu.missouristate.dto.LoginResponse;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import edu.missouristate.dao.CentralLoginRepository;
+import edu.missouristate.domain.CentralLogin;
+import edu.missouristate.dto.GenericResponse;
+import edu.missouristate.dto.LoginResponse;
 
 @Service
 public class CentralLoginService {
@@ -19,14 +21,12 @@ public class CentralLoginService {
     Argon2PasswordEncoder pwEncoder = new Argon2PasswordEncoder(32,64,2,15*1024,2);
     
     @Transactional
-    // edit this to return success value, I'm just throwing this together rn
-    // also edit this to hash password and then save
     public CentralLogin saveCentralLogin(CentralLogin centralLogin) {
     	//hash password
     	String encodedPassword = pwEncoder.encode(centralLogin.getPassword());
-    	System.out.println("Password length" + encodedPassword.length());
-    	System.out.println("Password hash: " + encodedPassword);
-    	System.out.println("Raw and hashed password match: " + pwEncoder.matches(centralLogin.getPassword(), encodedPassword));
+//    	System.out.println("Password length" + encodedPassword.length());
+//    	System.out.println("Password hash: " + encodedPassword);
+//    	System.out.println("Raw and hashed password match: " + pwEncoder.matches(centralLogin.getPassword(), encodedPassword));
     	centralLogin.setPassword(encodedPassword);
     	
         CentralLogin savedLogin = loginRepo.save(centralLogin);
@@ -42,15 +42,34 @@ public class CentralLoginService {
         return false;
     }
 
-    //TODO: validate password server side
     @Transactional
-    public boolean register(CentralLogin login) {
-        if (usernameExists(login.getUsername())) {
-            return false;
+    public GenericResponse register(CentralLogin login) {
+    	GenericResponse response = new GenericResponse();
+    	
+    	//store in local variable so we can calculate once and use in conditional for response message
+    	boolean usernameExists = usernameExists(login.getUsername());
+        if (usernameExists || login.getUsername().length() == 0 || login.getPassword().length() == 0) {
+        	//invalid username/pw provided, send fail response
+        	response.setMessage(usernameExists ? "Username already exists." : "Registration failed.");
+            response.setMessageType("danger");
+            return response;
+        } else if(!login.getPassword().matches("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$")) {
+        	response.setMessage("Invalid Password");
+            response.setMessageType("danger");
+            return response;
         } else {
-        	
+        	//valid username/pw provided, now try to save and return response
             CentralLogin loginResult = saveCentralLogin(login);
-            return loginResult != null;
+            if (loginResult == null) {
+            	//save failed, send fail response
+            	response.setMessage("Registration failed.");
+                response.setMessageType("danger");
+                return response;
+            }
+            //result not null, send success
+            response.setMessage("Registration success");
+            response.setMessageType("success");
+            return response;
         }
     }
 
