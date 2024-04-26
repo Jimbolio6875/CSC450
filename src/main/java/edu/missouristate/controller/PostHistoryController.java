@@ -36,7 +36,6 @@ public class PostHistoryController {
     @GetMapping("/postHistory")
     public ModelAndView getPostHistory(HttpSession session) throws IOException, ExecutionException, InterruptedException {
         ModelAndView modelAndView = new ModelAndView("postHistory");
-
         Integer userId = (Integer) session.getAttribute("userId");
 
         // This guy you get from the repository

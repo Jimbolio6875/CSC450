@@ -260,6 +260,7 @@
 
         // Uses localstorage to keep track of postId
         let previousPostId = localStorage.getItem('previousPostId');
+        let pollingInterval;
 
         console.log("Old postId: " + previousPostId);
         console.log("New postId: " + postId);
@@ -269,8 +270,18 @@
         if (previousPostId !== postId) {
             console.log("New post detected, starting polling.");
             localStorage.setItem('previousPostId', postId);
-            displayToast("Getting Reddit post", "green", 5000);
-            const pollingInterval = setInterval(pollPostStatus, 5000);
+
+            // Start by seeing it's already in there to avoid telling user
+            // need a way to check immediately
+            pollPostStatusWithoutDuration().then(alreadyLoaded => {
+                if (alreadyLoaded) {
+                    console.log("No need for toast, already loaded");
+                } else {
+                    displayToast("Getting Reddit post", "green", 5000);
+                    pollingInterval = setInterval(pollPostStatus, 5000);
+                }
+            });
+
 
             function pollPostStatus() {
                 fetch(`/post-status/${postId}`)
@@ -284,6 +295,20 @@
                     })
                     .catch(error => console.error('Failed to fetch post status:', error));
             }
+
+            function pollPostStatusWithoutDuration() {
+                return fetch(`/post-status/${postId}`)
+                    .then(response => response.text())
+                    .then(status => {
+                        console.log('Current post status:', status);
+                        return status === "ready";
+                    })
+                    .catch(error => {
+                        console.log('Failed to fetch:', error);
+                        return false;
+                    });
+            }
+
         } else {
             console.log("No new post to poll.");
         }

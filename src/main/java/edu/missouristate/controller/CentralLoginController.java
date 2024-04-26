@@ -104,7 +104,6 @@ public class CentralLoginController {
     }
 
 
-    
     @ResponseBody
     @PostMapping("/register")
     public GenericResponse register(@RequestBody CentralLogin login, HttpSession session) {
@@ -143,4 +142,20 @@ public class CentralLoginController {
         return "redirect:/";
     }
 
+//    @RequestMapping("/error")
+//    public String handleError(HttpServletRequest request) {
+//        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+//
+//        if (status != null) {
+//            int statusCode = Integer.parseInt(status.toString());
+//
+//            // You can add more handling logic based on the status code
+//            if (statusCode == HttpStatus.NOT_FOUND.value()) {
+//                return "error-404"; // custom 404 page
+//            } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+//                return "error-500"; // custom 500 page
+//            }
+//        }
+//        return "error"; // general error page
+//    }
 }
