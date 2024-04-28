@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.EntityManager;
@@ -215,16 +216,27 @@ public class MastodonServiceImpl implements MastodonService {
 
             for (Mastodon mastodonPost : mastodonPosts) {
 
-                ResponseEntity<String> response = restTemplate.getForEntity("https://mastodon.social/api/v1/statuses/" + mastodonPost.getPostId(), String.class);
-                System.out.println(response.getBody());
+                try {
 
-                JSONObject object = new JSONObject(response.getBody());
+                    ResponseEntity<String> response = restTemplate.getForEntity("https://mastodon.social/api/v1/statuses/" + mastodonPost.getPostId(), String.class);
+                    System.out.println(response.getBody());
 
-                System.out.println(object.getInt("favourites_count"));
+                    JSONObject object = new JSONObject(response.getBody());
 
-                mastodonRepository.updateByPostId(mastodonPost.getPostId(), object.getInt("favourites_count"));
+                    System.out.println(object.getInt("favourites_count"));
 
-//                mastodonRepository.save(());
+                    mastodonRepository.updateByPostId(mastodonPost.getPostId(), object.getInt("favourites_count"));
+
+                } catch (HttpClientErrorException httpError) {
+
+                    if (httpError.getStatusCode() == HttpStatus.NOT_FOUND) {
+                        mastodonRepository.updateDeletedPost(mastodonPost.getPostId(), "[deleted]");
+                    }
+
+                }
+
+
+
             }
 
         } catch (Exception e) {

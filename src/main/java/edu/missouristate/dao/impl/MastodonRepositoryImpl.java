@@ -91,6 +91,14 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
                 .execute();
     }
 
+    @Override
+    public void updateDeletedPost(String postId, String str) {
+        update(mastodonTable)
+                .where(mastodonTable.postId.eq(postId))
+                .set(mastodonTable.content, str)
+                .execute();
+    }
+
 //    @Override
 //    public List<String> getPostContent() {
 //        return from(mastodonTable)

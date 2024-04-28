@@ -15,6 +15,8 @@ public class MastodonController {
     @Autowired
     private MastodonService mastodonService;
 
+    // moved to SocialMediaPostingController
+
 //    private static final String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"; // will prob need to change
 
 

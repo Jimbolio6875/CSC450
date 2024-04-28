@@ -19,6 +19,8 @@ public class TumblrController {
         this.tumblrService = tumblrService;
     }
 
+    // moved to SocialMediaPostingController
+
 //    @GetMapping("/tumblr/start-oauth")
 //    public String startOAuthProcess(RedirectAttributes redirectAttributes) {
 //        String authorizationUrl = tumblrService.getAuthorizationUrl();
