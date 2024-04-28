@@ -108,10 +108,10 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
     }
 
     @Override
-    public void updateByPostId(String postId, Integer noteCount) {
+    public void updateByPostId(String postId, Integer noteCount, String content) {
         update(tumblrTable)
                 .where(tumblrTable.postId.eq(postId))
-                .set(tumblrTable.noteCount, noteCount)
+                .set(tumblrTable.noteCount, noteCount).set(tumblrTable.content, content)
                 .execute();
     }
 

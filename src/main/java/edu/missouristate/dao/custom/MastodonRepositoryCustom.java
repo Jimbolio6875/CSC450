@@ -24,7 +24,7 @@ public interface MastodonRepositoryCustom {
 
     boolean hasToken(Integer userId);
 
-    void updateByPostId(String postId, int favouritesCount);
+    void updateByPostId(String postId, int favouritesCount, String content);
 
     void updateDeletedPost(String postId, String str);
 }

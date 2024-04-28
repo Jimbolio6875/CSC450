@@ -84,10 +84,10 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
     }
 
     @Override
-    public void updateByPostId(String postId, int favouritesCount) {
+    public void updateByPostId(String postId, int favouritesCount, String content) {
         update(mastodonTable)
                 .where(mastodonTable.postId.eq(postId))
-                .set(mastodonTable.favouriteCount, favouritesCount)
+                .set(mastodonTable.favouriteCount, favouritesCount).set(mastodonTable.content, content)
                 .execute();
     }
 

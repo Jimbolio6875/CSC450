@@ -337,6 +337,8 @@ public class TumblrServiceImpl implements TumblrService {
         return tumblrRepository.hasToken(userId);
     }
 
+    // update content and note count of all user's tumblr posts
+    // check if post has been deleted
     @Override
     public void updateAllPosts(List<Tumblr> tumblrPosts) {
 
@@ -357,8 +359,9 @@ public class TumblrServiceImpl implements TumblrService {
                     JSONObject object = new JSONObject(response.getBody());
 
                     Integer noteCount = object.getJSONObject("response").getJSONArray("posts").getJSONObject(0).getInt("note_count");
+                    String content = object.getJSONObject("response").getJSONArray("posts").getJSONObject(0).getString("body");
 
-                    tumblrRepository.updateByPostId(tumblrPost.getPostId(), noteCount);
+                    tumblrRepository.updateByPostId(tumblrPost.getPostId(), noteCount, content);
 
                 } catch (HttpClientErrorException httpError) {
 

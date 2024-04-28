@@ -204,6 +204,8 @@ public class MastodonServiceImpl implements MastodonService {
         }
     }
 
+    // update content and note count of all user's tumblr posts
+    // check if post has been deleted
     @Transactional
     @Override
     public void updateAllPosts(HttpSession session, List<Mastodon> mastodonPosts) {
@@ -224,8 +226,9 @@ public class MastodonServiceImpl implements MastodonService {
                     JSONObject object = new JSONObject(response.getBody());
 
                     System.out.println(object.getInt("favourites_count"));
+                    System.out.println(object.getString("content"));
 
-                    mastodonRepository.updateByPostId(mastodonPost.getPostId(), object.getInt("favourites_count"));
+                    mastodonRepository.updateByPostId(mastodonPost.getPostId(), object.getInt("favourites_count"), object.getString("content"));
 
                 } catch (HttpClientErrorException httpError) {
 
