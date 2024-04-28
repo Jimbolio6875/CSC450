@@ -24,7 +24,6 @@ import java.util.List;
 @Controller
 public class SocialMediaPostingController {
 
-    // userInfo needed for tumblr usage
     String userInfo;
 
     @Autowired
@@ -61,8 +60,6 @@ public class SocialMediaPostingController {
     }
 
     // gets mastodon posts for post history page
-    // todo same thing with tumblr it doesn't update correctly
-    // todo should rename the mapping if we fix all bugs because it's not accurate anymore
     @RequestMapping("/post-message")
     public ModelAndView showPostMessageForm(HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("landing");
@@ -99,8 +96,6 @@ public class SocialMediaPostingController {
     }
 
     // after authentication redirect to post message endpoint which updates posts and gets posts for post history
-    // todo update feature for tumblr doesn't work meaning if you like something on the site it won't update on post history yet
-    // todo should be easy to fix
     @GetMapping("/tumblr/oauth-callback")
     public String oauthCallback(@RequestParam("oauth_verifier") String oauthVerifier, HttpSession session) throws Exception {
         String userInfo = tumblrService.getUserInfo(oauthVerifier, session);

@@ -26,4 +26,6 @@ public interface TumblrRepositoryCustom {
     boolean hasToken(Integer userId);
 
     void updateByPostId(String postId, Integer noteCount);
+
+    void updateDeletedPost(String postId, String str);
 }

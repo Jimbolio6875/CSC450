@@ -115,5 +115,13 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
                 .execute();
     }
 
+    @Override
+    public void updateDeletedPost(String postId, String str) {
+        update(tumblrTable)
+                .where(tumblrTable.postId.eq(postId))
+                .set(tumblrTable.content, str)
+                .execute();
+    }
+
 
 }
