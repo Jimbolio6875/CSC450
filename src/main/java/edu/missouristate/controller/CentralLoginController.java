@@ -32,17 +32,20 @@ public class CentralLoginController {
     TumblrService tumblrService;
 
 
+    // Home/index mapping
     @GetMapping(value = {"/", "/home"})
     public String getIndex() {
         return "home";
     }
 
+    // Takes users to page that shows what social media sites our app supports
     @GetMapping("/socials")
     public String getSocial() {
         return "socials";
     }
 
-
+    // This method directs users to the login page if they do not have a current session,
+    // or to the landing page if they do.
     @GetMapping("/login")
     public String getLoginPage(HttpSession session, Model model) {
         Integer userId = (Integer) session.getAttribute("userId");  // Retrieve userId from the session
@@ -60,6 +63,8 @@ public class CentralLoginController {
     }
 
 
+    // This method directs users to the register page if they do not have a current session,
+    // or to the landing page if they do.
     @GetMapping("/register")
     public String getRegisterPage(HttpSession session) {
         if (session.getAttribute("username") == null || session.getAttribute("username").equals("")) {
@@ -69,6 +74,8 @@ public class CentralLoginController {
         }
     }
 
+    // This method allows users with a valid user id
+    // and username stored in cookie to access landing page.
     @GetMapping("/landing")
     public String getLandingPage(HttpSession session, Model model) {
         if (session.getAttribute("username") == null || session.getAttribute("username").equals("")) {
@@ -104,6 +111,8 @@ public class CentralLoginController {
     }
 
 
+    // This method directs users to the service method that 
+    // registers a new SMM account with provided credentials
     @ResponseBody
     @PostMapping("/register")
     public GenericResponse register(@RequestBody CentralLogin login, HttpSession session) {
@@ -119,6 +128,7 @@ public class CentralLoginController {
         }
     }
 
+    // Accepts posted user credentials and authenticates/denies users
     @ResponseBody
     @PostMapping("/login")
     public LoginResponse login(@RequestBody CentralLogin login, HttpSession session, Model model) {
@@ -136,26 +146,11 @@ public class CentralLoginController {
         }
     }
 
+    // Ends the user session and takes them back to the base website landing page
     @GetMapping("/signOut")
     public String signOut(HttpSession session) {
         session.invalidate();
         return "redirect:/";
     }
 
-//    @RequestMapping("/error")
-//    public String handleError(HttpServletRequest request) {
-//        Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
-//
-//        if (status != null) {
-//            int statusCode = Integer.parseInt(status.toString());
-//
-//            // You can add more handling logic based on the status code
-//            if (statusCode == HttpStatus.NOT_FOUND.value()) {
-//                return "error-404"; // custom 404 page
-//            } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-//                return "error-500"; // custom 500 page
-//            }
-//        }
-//        return "error"; // general error page
-//    }
 }

@@ -20,13 +20,11 @@ public class CentralLoginService {
 
     Argon2PasswordEncoder pwEncoder = new Argon2PasswordEncoder(32,64,2,15*1024,2);
     
+    // Saves a central login after hashing provided password
     @Transactional
     public CentralLogin saveCentralLogin(CentralLogin centralLogin) {
     	//hash password
     	String encodedPassword = pwEncoder.encode(centralLogin.getPassword());
-//    	System.out.println("Password length" + encodedPassword.length());
-//    	System.out.println("Password hash: " + encodedPassword);
-//    	System.out.println("Raw and hashed password match: " + pwEncoder.matches(centralLogin.getPassword(), encodedPassword));
     	centralLogin.setPassword(encodedPassword);
     	
         CentralLogin savedLogin = loginRepo.save(centralLogin);
@@ -34,6 +32,7 @@ public class CentralLoginService {
         return savedLogin;
     }
 
+    // Checks if username already exists in DB
     public boolean usernameExists(String username) {
         List<CentralLogin> users = loginRepo.findUsername(username);
         if (users.size() >= 1) {
@@ -42,6 +41,7 @@ public class CentralLoginService {
         return false;
     }
 
+    // Creates new user from provided credentials from "register" page
     @Transactional
     public GenericResponse register(CentralLogin login) {
     	GenericResponse response = new GenericResponse();
@@ -72,7 +72,8 @@ public class CentralLoginService {
             return response;
         }
     }
-
+    
+    // Compares provided credentials to the DB and authenticates/denies user based on result.
     public LoginResponse login(CentralLogin login) {
     	LoginResponse response;
     	String hashedPassword = loginRepo.getHashedPasswordByUsername(login.getUsername());
