@@ -87,7 +87,8 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
 
     @Override
     public List<Tumblr> getAllPostsWhereCreationIsNotNullAndSameUserid(Integer userId) {
-        return from(tumblrTable).where(tumblrTable.postId.isNotNull().and(tumblrTable.centralLogin.centralLoginId.eq(userId)))
+        return from(tumblrTable).where(tumblrTable.postId.isNotNull()
+                        .and(tumblrTable.centralLogin.centralLoginId.eq(userId).and(tumblrTable.content.ne("[deleted]"))))
                 .fetch();
     }
 

@@ -91,6 +91,10 @@ public class RedditPostsRepositoryImpl extends QuerydslRepositorySupport impleme
 
     @Override
     public List<String> getAllRedditPostIdsByUserIdWithNonNullAuthor(Integer userId) {
-        return from(redditPostsTable).select(redditPostsTable.postId).where(redditPostsTable.centralLogin.centralLoginId.eq(userId).and(redditPostsTable.author.isNotNull())).fetch();
+        return from(redditPostsTable).select(redditPostsTable.postId)
+                .where(redditPostsTable.centralLogin.centralLoginId.eq(userId)
+                        .and(redditPostsTable.author.isNotNull())
+                        .and(redditPostsTable.author.ne("[deleted]")))
+                .fetch();
     }
 }
