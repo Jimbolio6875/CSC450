@@ -238,8 +238,6 @@ public class MastodonServiceImpl implements MastodonService {
 
                 }
 
-
-
             }
 
         } catch (Exception e) {
