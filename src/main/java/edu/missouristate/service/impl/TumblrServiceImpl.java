@@ -350,7 +350,9 @@ public class TumblrServiceImpl implements TumblrService {
 
                 try {
 
-                    String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts?api_key=" + consumerKey + "&id=" + tumblrPost.getPostId();
+//                    String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts?api_key=" + consumerKey + "&id=" + tumblrPost.getPostId();
+
+                    String url = "https://api.tumblr.com/v2/blog/" + tumblrPost.getBlogIdentifier() + "/posts?api_key=" + consumerKey + "&id=" + tumblrPost.getPostId();
 
                     ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
