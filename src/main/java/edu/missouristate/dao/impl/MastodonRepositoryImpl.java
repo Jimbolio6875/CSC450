@@ -52,7 +52,9 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
     @Override
     public List<Mastodon> getAllMasterpostsWherePostIsNotNullAndSameUserId(Integer userId) {
         return from(mastodonTable)
-                .where(mastodonTable.postId.isNotNull().and(mastodonTable.centralLogin.centralLoginId.eq(userId)))
+                .where(mastodonTable.postId.isNotNull()
+                        .and(mastodonTable.centralLogin.centralLoginId.eq(userId)
+                                .and(mastodonTable.content.ne("[deleted]"))))
                 .fetch();
     }
 
