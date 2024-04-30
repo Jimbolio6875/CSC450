@@ -63,6 +63,7 @@ public class TumblrServiceImpl implements TumblrService {
     @Value("${tumblr.callbackUrl}")
     private String callbackUrl;
 
+
     private OAuth10aService getOauthService() {
         if (this.oauthService == null) {
             this.oauthService = new ServiceBuilder(consumerKey)
@@ -73,7 +74,10 @@ public class TumblrServiceImpl implements TumblrService {
         return this.oauthService;
     }
 
-
+    /**
+     * uses consumer key, consumer secret and callback url to initialize an oauthService
+     * @return tumblr authorization url
+     */
     @Override
     public String getAuthorizationUrl() {
         oauthService = new ServiceBuilder(consumerKey)
@@ -89,6 +93,12 @@ public class TumblrServiceImpl implements TumblrService {
         }
     }
 
+    /**
+     * uses oauthVerifier and current session to get current user's connected tumblr account info
+     * @param oauthVerifier oauthVerifier from tumblr oauth callback
+     * @param session current user session
+     * @return tumblr response body
+     */
     @Override
     public String getUserInfo(String oauthVerifier, HttpSession session) {
         try {
@@ -110,20 +120,16 @@ public class TumblrServiceImpl implements TumblrService {
             System.out.println(blogUrl);
             blogIdentifier = blogUrl.substring(blogUrl.lastIndexOf('/') + 1);
 
-            // Get user ID from session
             Integer userId = (Integer) session.getAttribute("userId");
             if (userId == null) {
-                return "redirect:/login";  // Handle missing userId
+                return "redirect:/login";
             }
 
-            // Fetch the CentralLogin using userId
             CentralLogin user = centralLoginService.getUserById(userId);
             if (user == null) {
-                return "redirect:/login";  // Handle user not found
+                return "redirect:/login";
             }
 
-
-            // Save or update the Tumblr credentials for the user
             Tumblr tumblrCredentials = new Tumblr();
             tumblrCredentials.setAccessToken(accessToken.getToken());
             tumblrCredentials.setTokenSecret(accessToken.getTokenSecret());
@@ -138,29 +144,15 @@ public class TumblrServiceImpl implements TumblrService {
         }
     }
 
-    private Date getPostDate(String postId) throws IOException, ExecutionException, InterruptedException {
-
-        String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts?api_key=" + consumerKey + "&id=" + postId;
-
-        OAuthRequest request = new OAuthRequest(Verb.GET, url);
-        request.addBodyParameter("type", "text");
-//        request.addBodyParameter("body", postContent);
-        oauthService.signRequest(accessToken, request);
-
-        Response response = oauthService.execute(request);
-        JSONObject jsonResponse = new JSONObject(response.getBody());
-        String dateString = jsonResponse.getJSONObject("response").getJSONArray("posts").getJSONObject(0).getString("date");
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z", Locale.ENGLISH);
-
-        ZonedDateTime dateTime = ZonedDateTime.parse(dateString, formatter);
-
-        return Date.from(dateTime.toInstant());
-    }
-
+    /**
+     * posts to user's tumblr blog
+     * @param postContent content to be posted to blog
+     * @return postId if post was successful
+     * @throws Exception if POST response wasn't a 201 throw exception
+     */
     @Override
     public String postToBlog(String postContent) throws Exception {
-        // Fetch the latest Tumblr credentials from the repository
+
         Tuple tumblrUser = tumblrRepository.getLatestUser();
         if (tumblrUser == null) {
             throw new IllegalStateException("No Tumblr credentials available");
@@ -170,7 +162,6 @@ public class TumblrServiceImpl implements TumblrService {
         String tokenSecretValue = tumblrUser.get(1, String.class);
         String blogIdentifierValue = tumblrUser.get(2, String.class);
 
-        // Ensure the OAuth service is initialized
         OAuth10aService service = getOauthService();
         OAuth1AccessToken accessToken = new OAuth1AccessToken(accessTokenValue, tokenSecretValue);
 
@@ -178,7 +169,7 @@ public class TumblrServiceImpl implements TumblrService {
         OAuthRequest request = new OAuthRequest(Verb.POST, postUrl);
         request.addBodyParameter("type", "text");
         request.addBodyParameter("body", postContent);
-        service.signRequest(accessToken, request); // Sign the request with the accessToken
+        service.signRequest(accessToken, request);
 
         Response response = service.execute(request);
 
@@ -186,28 +177,17 @@ public class TumblrServiceImpl implements TumblrService {
             JSONObject jsonResponse = new JSONObject(response.getBody());
             String postId = jsonResponse.getJSONObject("response").getString("id_string");
 
-            // Save post information in the database
-//            Tumblr post = new Tumblr();
-//            post.setPostId(postId);
-//            post.setContent(postContent);
-//            post.setBlogIdentifier(blogIdentifierValue);
-//            post.setPostUrl("https://www.tumblr.com/blog/view/" + blogIdentifierValue + "/" + postId);
-//            post.setNoteCount(0);
-//            // Use LocalDateTime.now() to set the current timestamp
-//            post.setDate(Timestamp.valueOf(LocalDateTime.now()));
-//            post.setAccessToken(accessTokenValue); // Ensure accessToken is set
-//            post.setTokenSecret(tokenSecretValue); // Ensure tokenSecret is set
-//            tumblrRepository.save(post);
-
-            return postId; // Return the postId if the post was successfully created
+            return postId;
         } else {
-            // Log or throw an exception with response details for debugging
             throw new RuntimeException("Failed to post to Tumblr: " + response.getCode() + " - " + response.getBody());
         }
     }
 
-
-    // In TumblrService.java
+    /**
+     * gets post by currently logged-in user's id
+     * @param userId login id
+     * @return list of tumblr posts
+     */
     @Override
     public List<Tumblr> getPostsByBlog(Integer userId) {
         try {
@@ -217,7 +197,12 @@ public class TumblrServiceImpl implements TumblrService {
         }
     }
 
-
+    /**
+     * update tumblr posts in database based on tumblr JSON changes (new notes (likes), edits, deletion)
+     * @throws IOException
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
     @Override
     public void updatePosts() throws IOException, ExecutionException, InterruptedException {
 
@@ -234,7 +219,6 @@ public class TumblrServiceImpl implements TumblrService {
 
         OAuthRequest request = new OAuthRequest(Verb.GET, url);
         request.addBodyParameter("type", "text");
-//        request.addBodyParameter("body", postContent);
         oauthService.signRequest(accessToken, request);
 
         Response response = oauthService.execute(request);
@@ -271,17 +255,28 @@ public class TumblrServiceImpl implements TumblrService {
         }
     }
 
+    /**
+     * gets latest user
+     * @return
+     */
     @Override
     public Tuple getLatestUser() {
         return tumblrRepository.getLatestUser();
     }
 
+    /**
+     * checks if user has existing access token in database, if they do then update. else create new tumblr instance
+     * @param accessToken user access token
+     * @param tokenSecret user token secret
+     * @param blogIdentifier user blog identifier
+     * @param postId post's id
+     * @param message message to be set in update or new creation
+     * @param userId login id
+     */
     @Override
     public void updateOrCreateTumblrPost(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message, Integer userId) {
 
         Tumblr exists = tumblrRepository.findExistingPostByTokenAndNoTextAndCentralLoginId(accessToken, userId);
-
-        //post.setPostUrl("https://www.tumblr.com/blog/view/" + blogIdentifierValue + "/" + postId);
 
         if (exists != null) {
             exists.setContent(message);
@@ -312,33 +307,39 @@ public class TumblrServiceImpl implements TumblrService {
 
     }
 
-    @Override
-    public List<Tumblr> getAllPosts() {
-        return (List<Tumblr>) tumblrRepository.findAll();
-    }
-
+    /**
+     * gets posts that have not been deleted from tumblr
+     * @param userId login id
+     * @return list of existing tumblr posts
+     */
     @Override
     public List<Tumblr> getAllPostsWhereCreationIsNotNullAndSameUserid(Integer userId) {
         return tumblrRepository.getAllPostsWhereCreationIsNotNullAndSameUserid(userId);
     }
 
+    /**
+     * delete entries in tumblr repo for posts that no longer exist
+     * @param userId login id
+     */
     @Override
     public void cleanTable(Integer userId) {
         tumblrRepository.cleanTable(userId);
     }
 
-    @Override
-    public Tumblr findExistingPostByTokenAndNoTextAndCentralLoginId(String accessToken, Integer centralLoginId) {
-        return tumblrRepository.findExistingPostByTokenAndNoTextAndCentralLoginId(accessToken, centralLoginId);
-    }
-
+    /**
+     * check if user has access tumblr access token in database or not
+     * @param userId login id
+     * @return bool
+     */
     @Override
     public boolean hasToken(Integer userId) {
         return tumblrRepository.hasToken(userId);
     }
 
-    // update content and note count of all user's tumblr posts
-    // check if post has been deleted
+    /**
+     * update content and note count of user's posts and check if post has been deleted
+     * @param tumblrPosts list of user's tumblr posts
+     */
     @Override
     public void updateAllPosts(List<Tumblr> tumblrPosts) {
 
@@ -349,8 +350,6 @@ public class TumblrServiceImpl implements TumblrService {
             for (Tumblr tumblrPost : tumblrPosts) {
 
                 try {
-
-//                    String url = "https://api.tumblr.com/v2/blog/" + blogIdentifier + "/posts?api_key=" + consumerKey + "&id=" + tumblrPost.getPostId();
 
                     String url = "https://api.tumblr.com/v2/blog/" + tumblrPost.getBlogIdentifier() + "/posts?api_key=" + consumerKey + "&id=" + tumblrPost.getPostId();
 

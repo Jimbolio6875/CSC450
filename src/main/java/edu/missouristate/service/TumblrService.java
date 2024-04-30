@@ -23,17 +23,11 @@ public interface TumblrService {
 
     void updateOrCreateTumblrPost(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message, Integer userId);
 
-    List<Tumblr> getAllPosts();
-
     List<Tumblr> getAllPostsWhereCreationIsNotNullAndSameUserid(Integer userId);
 
     void cleanTable(Integer userId);
 
-    Tumblr findExistingPostByTokenAndNoTextAndCentralLoginId(String accessToken, Integer centralLoginId);
-
     boolean hasToken(Integer userId);
-
-//    void updateContent(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message, Integer userId);
 
     void updateAllPosts(List<Tumblr> tumblrPosts);
 }
