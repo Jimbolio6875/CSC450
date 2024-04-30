@@ -57,6 +57,10 @@ public class CentralLoginService {
         	response.setMessage("Invalid Password");
             response.setMessageType("danger");
             return response;
+        } else if (login.getFirstName().isBlank() || login.getLastName().isBlank()){
+        	response.setMessage("Please enter first and last name");
+            response.setMessageType("danger");
+            return response;
         } else {
         	//valid username/pw provided, now try to save and return response
             CentralLogin loginResult = saveCentralLogin(login);
