@@ -20,6 +20,12 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
         super(Tumblr.class);
     }
 
+    /**
+     *
+     * @param accessToken
+     * @param centralLoginId
+     * @return
+     */
     @Override
     public Tumblr findExistingPostByTokenAndNoTextAndCentralLoginId(String accessToken, Integer centralLoginId) {
         return from(tumblrTable)

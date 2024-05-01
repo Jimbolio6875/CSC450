@@ -19,6 +19,11 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
         super(Mastodon.class);
     }
 
+    /**
+     * gets mastodon posts by user id
+     * @param userId login id
+     * @return list of mastodon posts
+     */
     @Override
     public List<Mastodon> getPostsByUserId(String userId) {
         return from(mastodonTable)
@@ -27,28 +32,21 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
                 .fetch();
     }
 
+    /**
+     * get latest access token
+     * @return tuple of latest access token
+     */
     @Override
     public Tuple getLatestAccessToken() {
         return from(mastodonTable).select(mastodonTable.accessToken, mastodonTable.id.max())
                 .groupBy(mastodonTable.accessToken).fetchOne();
     }
 
-    @Override
-    public void updateWherePostIdIsNull(String accessToken, String id, String userId, String content, String url, Integer favourites) {
-
-        int mostRecentId = Objects.requireNonNull(getQuerydsl()).createQuery().select(mastodonTable.id.max())
-                .from(mastodonTable).fetchOne();
-
-        update(mastodonTable).where(mastodonTable.id.eq(mostRecentId))
-                .set(mastodonTable.accessToken, accessToken)
-                .set(mastodonTable.postId, id)
-                .set(mastodonTable.userId, userId)
-                .set(mastodonTable.content, content)
-                .set(mastodonTable.postUrl, url)
-                .set(mastodonTable.favouriteCount, favourites)
-                .execute();
-    }
-
+    /**
+     * get posts that have not been deleted
+     * @param userId login id
+     * @return list of tumblr posts
+     */
     @Override
     public List<Mastodon> getAllMasterpostsWherePostIsNotNullAndSameUserId(Integer userId) {
         return from(mastodonTable)
@@ -58,6 +56,10 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
                 .fetch();
     }
 
+    /**
+     * gets rid of posts that have been deleted
+     * @param userId login id
+     */
     @Override
     public void cleanTable(Integer userId) {
         delete(mastodonTable)
@@ -66,6 +68,11 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
                 .execute();
     }
 
+    /**
+     * check if user has tumblr access token
+     * @param userId login id
+     * @return bool
+     */
     @Override
     public boolean hasToken(Integer userId) {
         long fetchCountAmount = from(mastodonTable)
@@ -85,6 +92,12 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
                 .fetchOne();
     }
 
+    /**
+     * update post given note count and content
+     * @param postId post's id
+     * @param favouritesCount new note count (if liked or disliked)
+     * @param content new content (if edited)
+     */
     @Override
     public void updateByPostId(String postId, int favouritesCount, String content) {
         update(mastodonTable)
@@ -93,6 +106,11 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
                 .execute();
     }
 
+    /**
+     * update post content to [deleted]
+     * @param postId post's id
+     * @param str always [deleted]
+     */
     @Override
     public void updateDeletedPost(String postId, String str) {
         update(mastodonTable)
