@@ -66,6 +66,7 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * uses consumer key, consumer secret and callback url to initialize an oauthService
+     *
      * @return OAuth10aService used for signing request
      */
     private OAuth10aService getOauthService() {
@@ -80,6 +81,7 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * uses consumer key, consumer secret and callback url to initialize an oauthService
+     *
      * @return tumblr authorization url
      */
     @Override
@@ -99,8 +101,9 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * uses oauthVerifier and current session to get current user's connected tumblr account info
+     *
      * @param oauthVerifier oauthVerifier from tumblr oauth callback
-     * @param session current user session
+     * @param session       current user session
      * @return tumblr response body
      */
     @Override
@@ -150,6 +153,7 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * posts to user's tumblr blog
+     *
      * @param postContent content to be posted to blog
      * @return postId if post was successful
      * @throws Exception if POST response wasn't a 201 throw exception
@@ -189,6 +193,7 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * gets post by currently logged-in user's id
+     *
      * @param userId login id
      * @return list of tumblr posts
      */
@@ -203,6 +208,7 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * update tumblr posts in database based on tumblr JSON changes (new notes (likes), edits, deletion)
+     *
      * @throws IOException
      * @throws ExecutionException
      * @throws InterruptedException
@@ -261,7 +267,8 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * gets latest user
-     * @return
+     *
+     * @return tuple
      */
     @Override
     public Tuple getLatestUser() {
@@ -270,12 +277,13 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * checks if user has existing access token in database, if they do then update. else create new tumblr instance
-     * @param accessToken user access token
-     * @param tokenSecret user token secret
+     *
+     * @param accessToken    user access token
+     * @param tokenSecret    user token secret
      * @param blogIdentifier user blog identifier
-     * @param postId post's id
-     * @param message message to be set in update or new creation
-     * @param userId login id
+     * @param postId         post's id
+     * @param message        message to be set in update or new creation
+     * @param userId         login id
      */
     @Override
     public void updateOrCreateTumblrPost(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message, Integer userId) {
@@ -313,6 +321,7 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * gets posts that have not been deleted from tumblr
+     *
      * @param userId login id
      * @return list of existing tumblr posts
      */
@@ -323,6 +332,7 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * delete entries in tumblr repo for posts that no longer exist
+     *
      * @param userId login id
      */
     @Override
@@ -332,6 +342,7 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * check if user has access tumblr access token in database or not
+     *
      * @param userId login id
      * @return bool
      */
@@ -342,6 +353,7 @@ public class TumblrServiceImpl implements TumblrService {
 
     /**
      * update content and note count of user's posts and check if post has been deleted
+     *
      * @param tumblrPosts list of user's tumblr posts
      */
     @Override

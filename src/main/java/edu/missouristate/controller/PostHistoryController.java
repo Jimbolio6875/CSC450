@@ -33,29 +33,30 @@ public class PostHistoryController {
     @Autowired
     TwitterService twitterService;
 
-    // gets list of posts of user and displays them on post history page
+    /**
+     * Retrieves and displays posts from various social media platforms for a specific user.
+     * Fetches posts from Reddit, Twitter, Mastodon, and Tumblr based on user ID stored in the session.
+     * Updates the posts for Mastodon and Tumblr before displaying
+     *
+     * @param session HTTP session containing the user ID
+     * @return ModelAndView with posts data for the post history page
+     * @throws IOException          If an I/O error occurs
+     * @throws ExecutionException   If a computation error occurs
+     * @throws InterruptedException If the operation is interrupted
+     */
     @GetMapping("/postHistory")
     public ModelAndView getPostHistory(HttpSession session) throws IOException, ExecutionException, InterruptedException {
         ModelAndView modelAndView = new ModelAndView("postHistory");
         Integer userId = (Integer) session.getAttribute("userId");
-
-        // This guy you get from the repository
-        // List<String> redditPostIds = redditPostsService.getAllRedditPostIdsWhereNotNullAndSameUserid(userId);
-
         List<String> redditPostIds = redditPostsService.getAllRedditPostIdsByUserIdWithNonNullAuthor(userId);
 
         // Gets the existing list of posts that have fetches
         List<RedditPosts> redditPosts = redditPostsService.fetchRedditPostDetails(redditPostIds);
-
-
         List<Twitter> tweets = twitterService.getAllTweetsWhereCreationIsNotNullAndSameUserid(userId);
-
         List<Mastodon> mastodonPosts = mastodonService.getAllMasterpostsWherePostIsNotNullAndSameUserId(userId);
         mastodonService.updateAllPosts(session, mastodonPosts);
-
         List<Tumblr> tumblrPosts = tumblrService.getAllPostsWhereCreationIsNotNullAndSameUserid(userId);
         tumblrService.updateAllPosts(tumblrPosts);
-
         modelAndView.addObject("redditPosts", redditPosts);
         modelAndView.addObject("tweets", tweets);
         modelAndView.addObject("mastodonPosts", mastodonPosts);

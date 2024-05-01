@@ -14,6 +14,12 @@ import org.springframework.web.servlet.view.JstlView;
 @EnableWebMvc
 @ComponentScan("edu.missouristate")
 public class WebMVCConfig implements WebMvcConfigurer {
+
+    /**
+     * Sets up a ViewResolver for JSPs, configuring the path and file extension used to locate views
+     *
+     * @return Configured ViewResolver for JSP files
+     */
     @Bean(name = "Views")
     public ViewResolver viewResolver() {
         InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
@@ -23,6 +29,11 @@ public class WebMVCConfig implements WebMvcConfigurer {
         return viewResolver;
     }
 
+    /**
+     * Adds handlers for serving static resources with caching from the specified location
+     *
+     * @param registry ResourceHandlerRegistry to configure
+     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/resources/**").addResourceLocations("/resources/").setCachePeriod(31555926);

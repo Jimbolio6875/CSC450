@@ -55,11 +55,27 @@ public class RedditPostsServiceImpl implements RedditPostsService {
         this.webClient = webClient;
     }
 
+    /**
+     * Checks if a post is ready for viewing or processing based on its ID
+     *
+     * @param postId The ID of the post to check
+     * @return true if the post is ready, false otherwise
+     */
     @Override
     public boolean isPostReady(String postId) {
         return redditPostsRepository.isPostReady(postId);
     }
 
+    /**
+     * Submits a post to Reddit and returns the unique identifier if successful
+     *
+     * @param accessToken Access token for Reddit API
+     * @param subreddit   Target subreddit for the post
+     * @param title       Title of the post
+     * @param text        Content of the post
+     * @param session     HTTP session for context
+     * @return Unique identifier of the Reddit post, or null if unsuccessful
+     */
     public String postToReddit(String accessToken, String subreddit, String title, String text, HttpSession session) {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(
@@ -88,6 +104,11 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     }
 
 
+    /**
+     * Asynchronously fetches post details after a delay to ensure data availability
+     *
+     * @param fullname Unique identifier of the Reddit post
+     */
     @Async
     public void fetchDelayedRedditPosts(String fullname) {
         Mono.delay(Duration.ofSeconds(10))
@@ -99,6 +120,12 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     }
 
 
+    /**
+     * Extracts the JSON part from a mixed content response
+     *
+     * @param fullResponse Response containing both JSON and other outputs
+     * @return JSON part of the response
+     */
     public String extractJsonPart(String fullResponse) {
         String jsonPart = "";
 
@@ -113,6 +140,12 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     }
 
 
+    /**
+     * Extracts a Reddit post ID from a JSON string using regex
+     *
+     * @param jsonResponse JSON string containing the post ID
+     * @return Extracted post ID or a default message if not found
+     */
     private String extractPostIdFromJson(String jsonResponse) {
         String regexPattern = "comments/([a-zA-Z0-9]+)";
         Pattern pattern = Pattern.compile(regexPattern);
@@ -126,6 +159,12 @@ public class RedditPostsServiceImpl implements RedditPostsService {
         }
     }
 
+    /**
+     * Retrieves and saves a Reddit post by its identifier
+     *
+     * @param fullName Unique identifier of the Reddit post
+     * @return Mono of RedditPosts, or empty Mono on error
+     */
     @Override
     public Mono<RedditPosts> fetchAndSaveRedditPost(String fullName) {
         String fullId = fullName.startsWith("t3_") ? fullName : "t3_" + fullName;
@@ -158,11 +197,22 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     }
 
 
+    /**
+     * Retrieves all Reddit posts stored in the repository
+     *
+     * @return List of all RedditPosts entities
+     */
     @Override
     public List<RedditPosts> getAllRedditPosts() {
         return (List<RedditPosts>) redditPostsRepository.findAll();
     }
 
+    /**
+     * Updates the client continuously about the status of a post using SSE
+     *
+     * @param emitter SseEmitter to send status updates
+     * @param postId  ID of the post being checked
+     */
     @Async
     public void checkPostStatusAndUpdateEmitter(SseEmitter emitter, String postId) {
         try {
@@ -173,20 +223,30 @@ public class RedditPostsServiceImpl implements RedditPostsService {
                 emitter.send(SseEmitter.event().name("status").data(isPostReady ? "ready" : "not ready"));
 
                 if (!isPostReady) {
-                    Thread.sleep(5000); // Wait before checking again
+                    // Wait before checking again
+                    Thread.sleep(5000);
                 } else {
-                    emitter.complete(); // Complete the emitter when the post is ready
+                    // Complete the emitter when the post is ready
+                    emitter.complete();
                 }
             }
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // Proper handling of InterruptedException
-            emitter.completeWithError(e); // Complete the emitter with error
+            // Proper handling of InterruptedException
+            Thread.currentThread().interrupt();
+            // Complete the emitter with error
+            emitter.completeWithError(e);
         } catch (Exception e) {
-            emitter.completeWithError(e); // Handle other exceptions
+            // Handle other exceptions
+            emitter.completeWithError(e);
         }
     }
 
 
+    /**
+     * Retrieves all unique identifiers of Reddit posts from the repository
+     *
+     * @return List of all Reddit post IDs
+     */
     @Override
     public List<String> getAllRedditPostIds() {
         return StreamSupport.stream(redditPostsRepository.findAll().spliterator(), false)
@@ -194,6 +254,12 @@ public class RedditPostsServiceImpl implements RedditPostsService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Fetches details of Reddit posts by their IDs and converts them into entities
+     *
+     * @param postId List of Reddit post IDs
+     * @return List of RedditPosts entities
+     */
     @Override
     public List<RedditPosts> fetchRedditPostDetails(List<String> postId) {
         List<RedditPosts> posts = new ArrayList<>();
@@ -210,16 +276,36 @@ public class RedditPostsServiceImpl implements RedditPostsService {
         return posts;
     }
 
+    /**
+     * Retrieves the most recent user-related tuple from the repository
+     *
+     * @return The latest user as a Tuple object
+     */
     @Override
     public Tuple getLatestUser() {
         return redditPostsRepository.getLatestUser();
     }
 
+    /**
+     * Updates the post ID in records where it is null with the provided post ID
+     *
+     * @param postId The post ID to use for updating records
+     */
     @Override
     public void updatePostIdWhereNull(String postId) {
         redditPostsRepository.updatePostIdWhereNull(postId);
     }
 
+    /**
+     * Checks if user has existing access token in database, if they do then update. Else create new reddit instance
+     *
+     * @param redditAccessToken Access token for Reddit API
+     * @param subreddit         Target subreddit for the post
+     * @param title             Title of the post
+     * @param message           Content of the post
+     * @param fullName          Unique identifier of the post
+     * @param userId            User ID associated with the post
+     */
     @Override
     public void updateContent(String redditAccessToken, String subreddit, String title, String message, String fullName, Integer userId) {
 
@@ -248,26 +334,55 @@ public class RedditPostsServiceImpl implements RedditPostsService {
 
     }
 
+    /**
+     * Retrieves all post IDs associated with a given user ID where the post IDs are not null
+     *
+     * @param userId The user ID to search against
+     * @return List of post IDs
+     */
     @Override
     public List<String> getAllRedditPostIdsWhereNotNullAndSameUserid(Integer userId) {
         return redditPostsRepository.getAllRedditPostIdsWhereNotNullAndSameUserid(userId);
     }
 
+    /**
+     * Retrieves all post IDs by a specific user with non-null authors
+     *
+     * @param userId The user ID to filter posts by
+     * @return List of post IDs
+     */
     @Override
     public List<String> getAllRedditPostIdsByUserIdWithNonNullAuthor(Integer userId) {
         return redditPostsRepository.getAllRedditPostIdsByUserIdWithNonNullAuthor(userId);
     }
 
+    /**
+     * Cleans up database entries for a specific user ID
+     *
+     * @param userId The user ID for which to clean database entries
+     */
     @Override
     public void cleanTable(Integer userId) {
         redditPostsRepository.cleanTable(userId);
     }
 
+    /**
+     * Checks if a user has a stored access token
+     *
+     * @param userId The user ID to check for a stored token
+     * @return true if a token exists, false otherwise
+     */
     @Override
     public boolean hasToken(Integer userId) {
         return redditPostsRepository.hasToken(userId);
     }
 
+    /**
+     * Transforms a Reddit API response into a RedditPosts entity and saves it
+     *
+     * @param response The Reddit API response to transform
+     * @return Mono of RedditPosts or empty Mono on error
+     */
     @Override
     public Mono<RedditPosts> transformAndSaveRedditPost(RedditResponse response) {
         try {
@@ -280,6 +395,13 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     }
 
     // This function transforms the API response to the RedditPosts entity
+
+    /**
+     * Converts a Reddit API response into a RedditPosts entity
+     *
+     * @param response The Reddit API response to convert
+     * @return RedditPosts entity
+     */
     @Override
     public RedditPosts transformToRedditPosts(RedditResponse response) {
         String postId = response.getData().getChildren().get(0).getData().getId();
@@ -315,6 +437,12 @@ public class RedditPostsServiceImpl implements RedditPostsService {
     }
 
 
+    /**
+     * Saves a RedditPosts entity to the repository
+     *
+     * @param post The RedditPosts entity to save
+     * @return The saved RedditPosts entity
+     */
     @Override
     public RedditPosts saveRedditPost(RedditPosts post) {
         return redditPostsRepository.save(post);

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 
 @Repository
 public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements TumblrRepositoryCustom {
@@ -22,7 +21,8 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
 
     /**
      * check if content is null for existing userId and accessToken
-     * @param accessToken mastodon access token
+     *
+     * @param accessToken    mastodon access token
      * @param centralLoginId login id
      * @return Tumblr object
      */
@@ -38,6 +38,7 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
 
     /**
      * updates tumblr post content and note count
+     *
      * @param post tumblr post
      */
     @Transactional
@@ -52,6 +53,7 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
 
     /**
      * gets latest user
+     *
      * @return latest user
      */
     @Override
@@ -65,6 +67,7 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
 
     /**
      * get posts that have not been deleted
+     *
      * @param userId login id
      * @return list of tumblr posts
      */
@@ -77,6 +80,7 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
 
     /**
      * gets rid of posts that have been deleted
+     *
      * @param userId login id
      */
     @Override
@@ -87,6 +91,7 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
 
     /**
      * check if user has tumblr access token
+     *
      * @param userId login id
      * @return bool
      */
@@ -102,9 +107,10 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
 
     /**
      * update post given note count and content
-     * @param postId post's id
+     *
+     * @param postId    post's id
      * @param noteCount new note count (if liked or disliked)
-     * @param content new content (if edited)
+     * @param content   new content (if edited)
      */
     @Override
     public void updateByPostId(String postId, Integer noteCount, String content) {
@@ -116,8 +122,9 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
 
     /**
      * update post content to [deleted]
+     *
      * @param postId post's id
-     * @param str always [deleted]
+     * @param str    always [deleted]
      */
     @Override
     public void updateDeletedPost(String postId, String str) {

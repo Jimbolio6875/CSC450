@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Objects;
 
 @Repository
 public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements MastodonRepositoryCustom {
@@ -21,6 +20,7 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 
     /**
      * gets mastodon posts by user id
+     *
      * @param userId login id
      * @return list of mastodon posts
      */
@@ -34,6 +34,7 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 
     /**
      * get latest access token
+     *
      * @return tuple of latest access token
      */
     @Override
@@ -44,6 +45,7 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 
     /**
      * get posts that have not been deleted
+     *
      * @param userId login id
      * @return list of tumblr posts
      */
@@ -58,6 +60,7 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 
     /**
      * gets rid of posts that have been deleted
+     *
      * @param userId login id
      */
     @Override
@@ -70,6 +73,7 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 
     /**
      * check if user has tumblr access token
+     *
      * @param userId login id
      * @return bool
      */
@@ -85,8 +89,9 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 
     /**
      * check if content is null for existing userId and accessToken
+     *
      * @param accessToken mastodon access token
-     * @param userId login id
+     * @param userId      login id
      * @return Mastodon object
      */
     @Override
@@ -100,9 +105,10 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 
     /**
      * update post given note count and content
-     * @param postId post's id
+     *
+     * @param postId          post's id
      * @param favouritesCount new note count (if liked or disliked)
-     * @param content new content (if edited)
+     * @param content         new content (if edited)
      */
     @Override
     public void updateByPostId(String postId, int favouritesCount, String content) {
@@ -114,8 +120,9 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 
     /**
      * update post content to [deleted]
+     *
      * @param postId post's id
-     * @param str always [deleted]
+     * @param str    always [deleted]
      */
     @Override
     public void updateDeletedPost(String postId, String str) {

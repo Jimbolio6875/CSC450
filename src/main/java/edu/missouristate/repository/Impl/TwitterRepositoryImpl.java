@@ -19,11 +19,11 @@ public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements 
         super(Twitter.class);
     }
 
-//    @Override
-//    public Tuple getLatestUser() {
-//        return from(twitterTable).select(twitterTable.accessToken, twitterTable.accessTokenSecret).orderBy(twitterTable.id.desc()).fetchOne();
-//    }
-
+    /**
+     * Retrieves the latest Twitter access token and secret for the most recently added Twitter account
+     *
+     * @return Tuple containing the access token and secret
+     */
     @Override
     public Tuple getLatestUser() {
         return from(twitterTable)
@@ -33,6 +33,13 @@ public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements 
                 .fetchOne();
     }
 
+    /**
+     * Updates the text and creation date of a tweet based on the given access token
+     *
+     * @param accessToken The access token associated with the Twitter account
+     * @param message     The new tweet text to set
+     * @param date        The creation date to set for the tweet
+     */
     @Override
     public void updateTextWithAccessToken(String accessToken, String message, LocalDateTime date) {
         update(twitterTable)
@@ -42,6 +49,12 @@ public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements 
                 .execute();
     }
 
+    /**
+     * Finds an existing Twitter post by access token where the tweet text is null
+     *
+     * @param accessToken The access token associated with the Twitter account
+     * @return The Twitter post or null if no matching post is found
+     */
     @Override
     public Twitter findExistingPostByTokenAndNoText(String accessToken) {
         return from(twitterTable)
@@ -51,12 +64,23 @@ public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements 
                 .fetchOne();
     }
 
+    /**
+     * Retrieves all tweets that have a non-null creation date and are associated with the specified user ID
+     *
+     * @param userId The user ID to filter the tweets
+     * @return List of Twitter posts
+     */
     @Override
     public List<Twitter> getAllTweetsWhereCreationIsNotNullAndSameUserid(Integer userId) {
         return from(twitterTable).where(twitterTable.creationDate.isNotNull()
                 .and(twitterTable.centralLogin.centralLoginId.eq(userId))).fetch();
     }
 
+    /**
+     * Deletes entries from the Twitter table where the creation date is null for a specific user
+     *
+     * @param userId The user ID associated with the cleanup operation
+     */
     @Override
     public void cleanTable(Integer userId) {
         delete(twitterTable).where(twitterTable.creationDate.isNull()
@@ -64,6 +88,12 @@ public class TwitterRepositoryImpl extends QuerydslRepositorySupport implements 
                 .execute();
     }
 
+    /**
+     * Checks if there are any stored access tokens for a specific user in the Twitter table
+     *
+     * @param userId The user ID to check
+     * @return true if at least one token exists, otherwise false
+     */
     @Override
     public boolean hasToken(Integer userId) {
 

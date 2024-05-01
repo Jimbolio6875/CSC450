@@ -19,6 +19,12 @@ public class SocialMediaAccountController {
         this.service = service;
     }
 
+    /**
+     * Saves a new social media account and returns the saved entity or an error if unsuccessful
+     *
+     * @param account The social media account to save
+     * @return ResponseEntity with the saved account or a bad request status
+     */
     @PostMapping("/socialMediaAccounts")
     public ResponseEntity<SocialMediaAccount> addSocialMediaAccount(@RequestBody SocialMediaAccount account) {
         try {

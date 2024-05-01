@@ -41,6 +41,14 @@ public class TwitterController {
     @Value("${python.path}")
     private String pythonPath;
 
+    /**
+     * Posts a tweet using the stored Twitter credentials from the user's session.
+     * It uses a Python script to interact with the Twitter API
+     *
+     * @param tweetText The content of the tweet to post
+     * @param session   The HTTP session containing Twitter credentials
+     * @return ModelAndView for displaying the result or error message
+     */
     @PostMapping("/tweet")
     public ModelAndView postTweet(@RequestParam String tweetText, HttpSession session) {
         ModelAndView modelAndView = new ModelAndView();
@@ -73,7 +81,6 @@ public class TwitterController {
                 Twitter newTweet = new Twitter();
 
                 newTweet.setCreationDate(LocalDateTime.now());
-//                newTweet.setTweetId(postId);
                 newTweet.setTweetText(textTweet);
                 newTweet.setAccessToken(accessToken);
                 newTweet.setAccessTokenSecret(accessTokenSecret);
@@ -99,6 +106,13 @@ public class TwitterController {
     }
 
 
+    /**
+     * Exchanges a provided PIN for Twitter access tokens using a Python script
+     *
+     * @param pin     The PIN received from Twitter after user authorization
+     * @param session The HTTP session to store the exchanged access tokens
+     * @return A redirection string to the tweet posting form or error page
+     */
     @PostMapping("/submit-pin")
     public String submitPin(@RequestParam("pin") String pin, HttpSession session) {
         try {
@@ -120,15 +134,30 @@ public class TwitterController {
         }
     }
 
+    /**
+     * Displays the form for posting a tweet if the user has an access token in session
+     *
+     * @param session The HTTP session to check for existing access token
+     * @return The name of the view for posting a tweet or a redirection command
+     */
     @GetMapping("/post-tweet")
     public String showTweetForm(HttpSession session) {
         if (session.getAttribute("access_token") != null) {
             return "post-tweet";
         } else {
-            return "redirect:/"; // <--- Might need to change later
+            return "redirect:/";
         }
     }
 
+    /**
+     * Handles the OAuth callback from Twitter, exchanging the OAuth verifier for access tokens.
+     * Stores the new tokens in session and associates them with the user's account
+     *
+     * @param oauthToken    The OAuth token received from Twitter
+     * @param oauthVerifier The OAuth verifier received from Twitter
+     * @param session       The HTTP session to store tokens and user information
+     * @return A redirection command based on the result of token exchange
+     */
     @GetMapping("/oauth-callback")
     public String oauthCallback(@RequestParam("oauth_token") String oauthToken, @RequestParam("oauth_verifier") String oauthVerifier, HttpSession session) {
         try {
@@ -201,6 +230,13 @@ public class TwitterController {
     }
 
 
+    /**
+     * Initiates the Twitter authentication process by generating an authorization URL using a Python script.
+     * It retrieves and stores request tokens in the user's session before redirecting to Twitter's auth URL
+     *
+     * @param session The HTTP session to store the request tokens
+     * @return ModelAndView with redirection to Twitter's auth URL or an error page
+     */
     @GetMapping("/start-auth")
     public ModelAndView startAuth(HttpSession session) {
         try {
@@ -209,7 +245,8 @@ public class TwitterController {
             Process process = processBuilder.start();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String authUrl = reader.readLine(); // Read the authorization URL directly
+            // Reads the authorization URL directly
+            String authUrl = reader.readLine();
             String tokensLine = reader.readLine();
             String[] tokens = tokensLine.split(",");
 

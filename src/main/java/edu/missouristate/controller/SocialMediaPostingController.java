@@ -44,13 +44,23 @@ public class SocialMediaPostingController {
 
     //    ---------------------------MASTODON--------------------------------
 
-    // when mastodon icon clicked redirect to auth url
+    /**
+     * Redirects to the Mastodon authorization URL to initiate OAuth authentication
+     *
+     * @return A RedirectView to the Mastodon OAuth URL
+     */
     @GetMapping("/mastodon/auth")
     public RedirectView startMastodonAuth() {
         return new RedirectView(mastodonService.getAuthorizationUrl());
     }
 
-    // after auth redirect to post message after setting session access token
+    /**
+     * Handles the callback from Mastodon OAuth, sets the access token in the session, and redirects to login
+     *
+     * @param code    The authorization code returned by Mastodon
+     * @param session The HTTP session to store the access token
+     * @return A redirect string to the login page
+     */
     @GetMapping("/callback")
     public String handleCallback(@RequestParam("code") String code, HttpSession session) {
 
@@ -59,7 +69,12 @@ public class SocialMediaPostingController {
         return "redirect:/login";
     }
 
-    // gets mastodon posts for post history page
+    /**
+     * Displays the post message form with the user's Mastodon posts, retrieved using the session's access token
+     *
+     * @param session The HTTP session containing the Mastodon access token
+     * @return ModelAndView for displaying Mastodon posts or error messages
+     */
     @RequestMapping("/post-message")
     public ModelAndView showPostMessageForm(HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("landing");
@@ -88,14 +103,26 @@ public class SocialMediaPostingController {
 
 //    -----------------------TUMBLR--------------------------
 
-    // when tumblr icon clicked redirect to auth url
+    /**
+     * Redirects to the Tumblr OAuth URL to start the authentication process
+     *
+     * @param redirectAttributes Attributes for the redirect scenario
+     * @return A redirect string to the Tumblr OAuth URL
+     */
     @GetMapping("/tumblr/start-oauth")
     public String startOAuthProcess(RedirectAttributes redirectAttributes) {
         String authorizationUrl = tumblrService.getAuthorizationUrl();
         return "redirect:" + authorizationUrl;
     }
 
-    // after authentication redirect to post message endpoint which updates posts and gets posts for post history
+    /**
+     * Handles the OAuth callback from Tumblr, retrieves user info, updates session and posts, and redirects to the landing page
+     *
+     * @param oauthVerifier The OAuth verifier returned by Tumblr
+     * @param session       The HTTP session to store user info and post update flags
+     * @return A redirect string to the landing page
+     * @throws Exception on failure to retrieve or update user info or posts
+     */
     @GetMapping("/tumblr/oauth-callback")
     public String oauthCallback(@RequestParam("oauth_verifier") String oauthVerifier, HttpSession session) throws Exception {
         String userInfo = tumblrService.getUserInfo(oauthVerifier, session);
@@ -107,19 +134,25 @@ public class SocialMediaPostingController {
         return "redirect:/landing";
     }
 
+    /**
+     * Displays a page for creating posts on Tumblr, retrieves and shows posts if user ID is found in session
+     *
+     * @param session The HTTP session containing the user's ID and other info
+     * @return ModelAndView for the Tumblr post creation page or redirects if user ID is not found
+     */
     @RequestMapping("/tumblr/post-message")
     public ModelAndView showPostCreationPage(HttpSession session) {
         ModelAndView modelAndView = new ModelAndView("landing");
-        Integer userId = (Integer) session.getAttribute("userId");  // Get user ID from session
+        Integer userId = (Integer) session.getAttribute("userId");
 
         if (userId == null) {
-            modelAndView.setViewName("redirect:/login");  // Redirect to login if userID is not found
+            modelAndView.setViewName("redirect:/login");
             return modelAndView;
         }
 
         try {
-            tumblrService.updatePosts();  // Assuming updatePosts method also needs to be user-specific eventually
-            List<Tumblr> userPosts = tumblrService.getPostsByBlog(userId);  // Pass userId to the method
+            tumblrService.updatePosts();
+            List<Tumblr> userPosts = tumblrService.getPostsByBlog(userId);
             modelAndView.addObject("posts", userPosts);
         } catch (Exception e) {
             modelAndView.addObject("error", "Failed to get posts: " + e.getMessage());
@@ -133,7 +166,23 @@ public class SocialMediaPostingController {
 
 //    -----------------------POST MESSAGE TO ALL SITES--------------------------
 
-    // handles submits for every social media site
+    /**
+     * Submits a message to selected social media platforms as specified by user.
+     * Handles posting to Mastodon, Tumblr, Twitter, and Reddit based on the provided selections and available tokens.
+     * Reports the outcome of each post attempt and redirects to the landing page with a status message
+     *
+     * @param message       Message to be posted
+     * @param subreddit     Target subreddit for Reddit
+     * @param title         Title for Reddit posts
+     * @param twitter       Include Twitter in the post
+     * @param tumblr        Include Tumblr in the post
+     * @param reddit        Include Reddit in the post
+     * @param mastodon      Include Mastodon in the post
+     * @param session       HTTP session for user and token data
+     * @param redirectAttrs Attributes for redirection
+     * @param userId        User ID of the poster
+     * @return ModelAndView for redirection with status message
+     */
     @PostMapping("/submit-post")
     public ModelAndView submitPost(@RequestParam("message") String message,
                                    @RequestParam("subreddit") String subreddit,
