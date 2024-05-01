@@ -33,6 +33,7 @@ public class PostHistoryController {
     @Autowired
     TwitterService twitterService;
 
+    // gets list of posts of user and displays them on post history page
     @GetMapping("/postHistory")
     public ModelAndView getPostHistory(HttpSession session) throws IOException, ExecutionException, InterruptedException {
         ModelAndView modelAndView = new ModelAndView("postHistory");

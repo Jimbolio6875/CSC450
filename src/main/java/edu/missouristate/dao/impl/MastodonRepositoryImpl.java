@@ -100,22 +100,4 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
                 .set(mastodonTable.content, str)
                 .execute();
     }
-
-//    @Override
-//    public List<String> getPostContent() {
-//        return from(mastodonTable)
-//                .select(mastodonTable.content)
-//                .limit(50)
-//                .fetch();
-//    }
-//
-//    @Override
-//    public List<Integer> getPostFavourites() {
-//        return from(mastodonTable)
-//                .select(mastodonTable.favouriteCount)
-//                .limit(50)
-//                .fetch();
-//    }
-
-
 }

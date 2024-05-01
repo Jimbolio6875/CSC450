@@ -64,6 +64,10 @@ public class TumblrServiceImpl implements TumblrService {
     private String callbackUrl;
 
 
+    /**
+     * uses consumer key, consumer secret and callback url to initialize an oauthService
+     * @return OAuth10aService used for signing request
+     */
     private OAuth10aService getOauthService() {
         if (this.oauthService == null) {
             this.oauthService = new ServiceBuilder(consumerKey)

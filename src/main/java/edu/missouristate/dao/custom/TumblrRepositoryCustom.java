@@ -9,15 +9,9 @@ public interface TumblrRepositoryCustom {
 
     Tumblr findExistingPostByTokenAndNoTextAndCentralLoginId(String accessToken, Integer centralLoginId);
 
-    List<Tumblr> getPostsByBlogIdentifier(String blog);
-
     void updatePost(Tumblr post);
 
     Tuple getLatestUser();
-
-    void updateWherePostIdIsNull(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message);
-
-    Tumblr findExistingPostByTokenAndNoText(String accessToken);
 
     List<Tumblr> getAllPostsWhereCreationIsNotNullAndSameUserid(Integer userId);
 

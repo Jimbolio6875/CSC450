@@ -17,17 +17,13 @@ public interface MastodonService {
 
     MastodonPostDTO postMessageToMastodon(String message, String accessToken);
 
-    void savePost(Mastodon post);
 
     List<Mastodon> getPostsByUserId(String userId);
 
     Tuple getLatestAccessToken();
 
-    Mastodon findExistingPostByTokenAndNoText(String accessToken, Integer userId);
 
     void updateOrCreateMastodonPost(String mastroAccessToken, String message, Integer userId, MastodonPostDTO mastodonPostDTO);
-
-    List<Mastodon> getAllPosts();
 
     List<Mastodon> getAllMasterpostsWherePostIsNotNullAndSameUserId(Integer userId);
 

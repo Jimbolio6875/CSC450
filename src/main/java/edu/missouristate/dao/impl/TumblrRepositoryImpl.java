@@ -30,16 +30,10 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
                 .fetchOne();
     }
 
-
-    @Override
-    public List<Tumblr> getPostsByBlogIdentifier(String blog) {
-        return from(tumblrTable)
-                .where(tumblrTable.blogIdentifier.eq(blog))
-                .limit(20)
-                .orderBy(tumblrTable.date.desc())
-                .fetch();
-    }
-
+    /**
+     * updates tumblr post content and note count
+     * @param post tumblr post
+     */
     @Transactional
     @Override
     public void updatePost(Tumblr post) {
@@ -50,7 +44,10 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
                 .execute();
     }
 
-
+    /**
+     * gets latest user
+     * @return latest user
+     */
     @Override
     public Tuple getLatestUser() {
         return from(tumblrTable)
@@ -60,31 +57,11 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
                 .fetchOne();
     }
 
-    @Override
-    public void updateWherePostIdIsNull(String accessToken, String tokenSecret, String blogIdentifier, String postId, String message) {
-
-        int mostRecentId = Objects.requireNonNull(getQuerydsl()).createQuery().select(tumblrTable.id.max())
-                .from(tumblrTable).fetchOne();
-
-        update(tumblrTable).where(tumblrTable.id.eq(mostRecentId))
-                .set(tumblrTable.accessToken, accessToken)
-                .set(tumblrTable.tokenSecret, tokenSecret)
-                .set(tumblrTable.blogIdentifier, blogIdentifier)
-                .set(tumblrTable.postId, postId)
-                .set(tumblrTable.content, message)
-                .execute();
-
-    }
-
-    @Override
-    public Tumblr findExistingPostByTokenAndNoText(String accessToken) {
-        return from(tumblrTable)
-                .where(tumblrTable.accessToken.eq(accessToken).and(tumblrTable.content.isNull()))
-                .orderBy(tumblrTable.id.desc())
-                .limit(1)
-                .fetchOne();
-    }
-
+    /**
+     * get posts that have not been deleted
+     * @param userId login id
+     * @return list of tumblr posts
+     */
     @Override
     public List<Tumblr> getAllPostsWhereCreationIsNotNullAndSameUserid(Integer userId) {
         return from(tumblrTable).where(tumblrTable.postId.isNotNull()
@@ -92,12 +69,21 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
                 .fetch();
     }
 
+    /**
+     * gets rid of posts that have been deleted
+     * @param userId login id
+     */
     @Override
     public void cleanTable(Integer userId) {
         delete(tumblrTable).where(tumblrTable.postId.isNull()
                 .and(tumblrTable.centralLogin.centralLoginId.eq(userId))).execute();
     }
 
+    /**
+     * check if user has tumblr access token
+     * @param userId login id
+     * @return bool
+     */
     @Override
     public boolean hasToken(Integer userId) {
         long count = from(tumblrTable)
@@ -108,6 +94,12 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
         return count > 0;
     }
 
+    /**
+     * update post given note count and content
+     * @param postId post's id
+     * @param noteCount new note count (if liked or disliked)
+     * @param content new content (if edited)
+     */
     @Override
     public void updateByPostId(String postId, Integer noteCount, String content) {
         update(tumblrTable)
@@ -116,6 +108,11 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
                 .execute();
     }
 
+    /**
+     * update post content to [deleted]
+     * @param postId post's id
+     * @param str always [deleted]
+     */
     @Override
     public void updateDeletedPost(String postId, String str) {
         update(tumblrTable)

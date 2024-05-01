@@ -41,8 +41,13 @@ public class MastodonServiceImpl implements MastodonService {
     @Value("${mastodon.clientSecret}")
     private String CLIENT_SECRET;
 
+    /**
+     * get access token using auth code and current session
+     * @param authorizationCode user's Mastodon authorization code
+     * @param session current http session
+     * @return Mastodon access token
+     */
     @Override
-    // set client_id/secret/auth to get token
     public String getAccessToken(String authorizationCode, HttpSession session) {
         RestTemplate restTemplate = new RestTemplate();
         String tokenEndpoint = "https://mastodon.social/oauth/token";
@@ -84,7 +89,10 @@ public class MastodonServiceImpl implements MastodonService {
         }
     }
 
-    // gets auth url for user
+    /**
+     * gets mastodon authorization url using client id, redirect uri and scope
+     * @return auth url
+     */
     @Override
     public String getAuthorizationUrl() {
 
@@ -95,7 +103,11 @@ public class MastodonServiceImpl implements MastodonService {
                 "&scope=" + URLEncoder.encode(SCOPE, StandardCharsets.UTF_8);
     }
 
-    // gets user id using access token
+    /**
+     * uses access token to get mastodon user id
+     * @param accessToken user access token
+     * @return mastodon user id
+     */
     @Override
     public String getUserId(String accessToken) {
         RestTemplate restTemplate = new RestTemplate();
@@ -117,6 +129,12 @@ public class MastodonServiceImpl implements MastodonService {
         }
     }
 
+    /**
+     * posts message to mastodon using message and access token and creates post DTO
+     * @param message message to be posted
+     * @param accessToken mastodon access token
+     * @return post DTO containing all info about the post
+     */
     @Override
     // post message and add message attributes to database
     public MastodonPostDTO postMessageToMastodon(String message, String accessToken) {
@@ -131,53 +149,51 @@ public class MastodonServiceImpl implements MastodonService {
         HttpEntity<String> request = new HttpEntity<>(postParams, headers);
 
         ResponseEntity<String> response = restTemplate.postForEntity("https://mastodon.social/api/v1/statuses", request, String.class);
-        System.out.println(response.getBody());
 
         if (response.getStatusCode() == HttpStatus.OK) {
 
             JSONObject postObject = new JSONObject(response.getBody());
             JSONObject userObject = postObject.getJSONObject("account");
 
-//            System.out.println(postObject);
             String id = postObject.getString("id");
             String userId = userObject.getString("id");
             String content = postObject.getString("content");
             String url = postObject.getString("url");
-            Integer favourites = postObject.getInt("favourites_count");
+            int favourites = postObject.getInt("favourites_count");
 
             return new MastodonPostDTO(id, userId, content, url, favourites);
-//            System.out.println(id.concat(" ").concat(content).concat(" ").concat(url).concat(" ").concat(String.valueOf(favourites)));
         } else {
-
             return null;
         }
 
-
-//        throw new RuntimeException("Failed to post to Mastodon, response code: " + response.getStatusCode());
-
-
     }
 
-    @Override
-    public void savePost(Mastodon post) {
-        mastodonRepository.save(post);
-    }
-
+    /**
+     * gets mastodon posts by login user id
+     * @param userId login id
+     * @return list of mastodon posts
+     */
     @Override
     public List<Mastodon> getPostsByUserId(String userId) {
         return mastodonRepository.getPostsByUserId(userId);
     }
 
+    /**
+     * gets latest mastodon access token
+     * @return tuple of latest access token
+     */
     @Override
     public Tuple getLatestAccessToken() {
         return mastodonRepository.getLatestAccessToken();
     }
 
-    @Override
-    public Mastodon findExistingPostByTokenAndNoText(String accessToken, Integer userId) {
-        return mastodonRepository.findExistingPostByTokenAndNoText(accessToken, userId);
-    }
-
+    /**
+     * checks if user has existing access token in database, if they do then update. else create new mastodon instance
+     * @param mastodonAccessToken mastodon access token
+     * @param message message to be set to update or new creation
+     * @param userId login id
+     * @param mastodonPostDTO DTO containing data about post
+     */
     @Override
     public void updateOrCreateMastodonPost(String mastodonAccessToken, String message, Integer userId, MastodonPostDTO mastodonPostDTO) {
         CentralLogin user = entityManager.getReference(CentralLogin.class, userId);
@@ -204,15 +220,16 @@ public class MastodonServiceImpl implements MastodonService {
         }
     }
 
-    // update content and note count of all user's tumblr posts
-    // check if post has been deleted
+    /**
+     * updates mastodon posts by post id (updates likes, edits, deletion)
+     * @param session not being used, too scared to remove it
+     * @param mastodonPosts list of user mastodon posts
+     */
     @Transactional
     @Override
     public void updateAllPosts(HttpSession session, List<Mastodon> mastodonPosts) {
 
         RestTemplate restTemplate = new RestTemplate();
-
-//        String accessToken = (String) session.getAttribute("accessToken");
 
         try {
 
@@ -243,26 +260,32 @@ public class MastodonServiceImpl implements MastodonService {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-
-
     }
 
-
-    @Override
-    public List<Mastodon> getAllPosts() {
-        return (List<Mastodon>) mastodonRepository.findAll();
-    }
-
+    /**
+     * gets mastodon posts that haven't been deleted
+     * @param userId login id
+     * @return list of mastodon posts
+     */
     @Override
     public List<Mastodon> getAllMasterpostsWherePostIsNotNullAndSameUserId(Integer userId) {
         return mastodonRepository.getAllMasterpostsWherePostIsNotNullAndSameUserId(userId);
     }
 
+    /**
+     * gets rid of posts that have been deleted
+     * @param userId login id
+     */
     @Override
     public void cleanTable(Integer userId) {
         mastodonRepository.cleanTable(userId);
     }
 
+    /**
+     * checks if user has token
+     * @param userId login id
+     * @return bool
+     */
     @Override
     public boolean hasToken(Integer userId) {
         return mastodonRepository.hasToken(userId);
