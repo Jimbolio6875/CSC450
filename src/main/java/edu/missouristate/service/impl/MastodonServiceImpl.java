@@ -136,7 +136,6 @@ public class MastodonServiceImpl implements MastodonService {
      * @return post DTO containing all info about the post
      */
     @Override
-    // post message and add message attributes to database
     public MastodonPostDTO postMessageToMastodon(String message, String accessToken) {
 
         RestTemplate restTemplate = new RestTemplate();

@@ -21,10 +21,10 @@ public class TumblrRepositoryImpl extends QuerydslRepositorySupport implements T
     }
 
     /**
-     *
-     * @param accessToken
-     * @param centralLoginId
-     * @return
+     * check if content is null for existing userId and accessToken
+     * @param accessToken mastodon access token
+     * @param centralLoginId login id
+     * @return Tumblr object
      */
     @Override
     public Tumblr findExistingPostByTokenAndNoTextAndCentralLoginId(String accessToken, Integer centralLoginId) {

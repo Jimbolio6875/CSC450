@@ -83,6 +83,12 @@ public class MastodonRepositoryImpl extends QuerydslRepositorySupport implements
 
     }
 
+    /**
+     * check if content is null for existing userId and accessToken
+     * @param accessToken mastodon access token
+     * @param userId login id
+     * @return Mastodon object
+     */
     @Override
     public Mastodon findExistingPostByTokenAndNoText(String accessToken, Integer userId) {
         return from(mastodonTable)
