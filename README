@@ -1,3 +1,9 @@
+To clone the repository, you can use the Command Prompt or clone from the IntelliJ IDE:
+
+1) Make sure you have Git installed on your computer. Open the Command Prompt and cd to where you want the project to be cloned, then run "git clone https://github.com/Jimbolio6875/CSC450.git".
+After cloning, open your preferred IDE and open the cloned project. (In IntelliJ, you can quickly clone a project by going to "File", "New", "Project from Version Control", and then pasting
+"https://github.com/Jimbolio6875/CSC450.git" in the url without the quotes).
+
 Do the following below, run on your IDE:
 
 1) Ensure the latest version of Python is installed, preferably 3.10.11 or later. If Python version is later than 3.4,
@@ -15,6 +21,8 @@ Do the following below, run on your IDE:
    the "spring.datasource.url" is the correct path for your MySQL server. The port 3306 should be the default port
    for a new MySQL installation so it should be correct by default.
 
-6) Run a Maven update for the project. You can do this in Eclipse by right clicking the project and running "Maven->Update Project"
+6) Run a Maven update for the project. You can do this in Eclipse by right clicking the project and running "Maven->Update Project".
+If you are using IntelliJ, click the "m" on the right side of the IDE, and then click the reload icon. If you hover over the correct one, it should say "Reload all Maven Projects".
+Finally, click the folder reload symbol, which should be directly to the right of the previous icon you clicked. When you hover over it, it should say "Generate Sources and Update Folders For All Projects"
 
-7) Run the Project in your IDE and connect to the server in your browser. 
+7) Run the Project in your IDE and connect to the server in your browser. The default url should be "localhost:8080".
