@@ -1,5 +1,20 @@
 Do the following below, run on your IDE:
 
-pip install -r requirements.txt
+1) Ensure the latest version of Python is installed, preferably 3.10.11 or later. If Python version is later than 3.4,
+   you should also have pip installed automatically. You can check Python version by running "python --version" from
+   the command line.
 
-Also, look into "src/main/resources/application.properties" and change the python path
+2) From this project directory, run "pip install -r requirements.txt" from the command line
+
+3) Install MySQL and MySQL Workbench.
+
+4) From MySQL Workbench, copy, paste, and run the files "DBSetup.sql" and then "SocialMediaDB.sql"
+   in "{project directory}/src/main/db"
+   
+5) Edit "src/main/resources/application.properties" and change the Python path to your own Python path, and ensure that
+   the "spring.datasource.url" is the correct path for your MySQL server. The port 3306 should be the default port
+   for a new MySQL installation so it should be correct by default.
+
+6) Run a Maven update for the project. You can do this in Eclipse by right clicking the project and running "Maven->Update Project"
+
+7) Run the Project in your IDE and connect to the server in your browser. 
