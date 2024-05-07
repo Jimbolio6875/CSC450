@@ -14,8 +14,8 @@ Do the following below, run on your IDE:
 
 3) Install MySQL and MySQL Workbench. Create a local MySQL connection if you do not have one already in Workbench, then connect to it
 
-4) From MySQL Workbench, copy, paste, and run the files "DBSetup.sql" and then "SocialMediaDB.sql"
-   in "{project directory}/src/main/db"
+4) In MySQL Workbench, copy, paste, and run the files "DBSetup.sql" and then "SocialMediaDB.sql"
+   from "{project directory}/src/main/db"
    
 5) Edit "src/main/resources/application.properties" and change the Python path to your own Python path, and ensure that
    the "spring.datasource.url" is the correct path for your MySQL server. The port 3306 should be the default port
